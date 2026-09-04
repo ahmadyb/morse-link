@@ -58,6 +58,19 @@ jobs:
           cp app/build/outputs/apk/release/app-release.apk app/release/morse-link.apk
           ls -la app/release
 
+      - name: Diagnose resource failure
+        if: failure()
+        run: |
+          AAPT=$(ls "$ANDROID_HOME"/build-tools/*/aapt2 2>/dev/null | head -1)
+          echo "aapt2: $AAPT"
+          mkdir -p /tmp/resout
+          for d in app/src/main/res core/core-ui/src/main/res core/core-data/src/main/res                    core/core-media/src/main/res core/core-transfer/src/main/res core/core-network/src/main/res                    feature/feature-dashboard/src/main/res feature/feature-send/src/main/res                    feature/feature-receive/src/main/res feature/feature-transfer-ui/src/main/res                    feature/feature-filemanager/src/main/res feature/feature-webshare/src/main/res                    feature/feature-settings/src/main/res; do
+            if [ -d "$d" ]; then
+              echo "=== $d"
+              "$AAPT" compile --dir "$d" -o /tmp/resout 2>&1 | tail -12
+            fi
+          done
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
