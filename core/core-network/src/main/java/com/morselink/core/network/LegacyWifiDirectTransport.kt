@@ -36,6 +36,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.File
+import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
 import java.net.ServerSocket
@@ -77,6 +78,24 @@ class LegacyWifiDirectTransport @Inject constructor(
 
     override fun isAvailable(context: Context): Boolean =
         context.packageManager.hasSystemFeature(android.content.pm.PackageManager.FEATURE_WIFI_DIRECT)
+
+    /**
+     * Wi-Fi Direct never puts the peer's IP on [android.net.wifi.p2p.WifiP2pDevice] —
+     * the group owner address is only handed out through [WifiP2pManager.requestConnectionInfo],
+     * and only once the group has actually formed. Best-effort: resolves to null while
+     * the group is still negotiating.
+     */
+    private fun resolveOwnerAddress(
+        wifiManager: WifiP2pManager,
+        p2pChannel: WifiP2pManager.Channel,
+        onResult: (String?) -> Unit,
+    ) {
+        runCatching {
+            wifiManager.requestConnectionInfo(p2pChannel) { info ->
+                onResult(info?.groupOwnerAddress?.hostAddress)
+            }
+        }.onFailure { onResult(null) }
+    }
 
     @Volatile
     private var lastGroupOwner: String? = null
@@ -133,17 +152,22 @@ class LegacyWifiDirectTransport @Inject constructor(
                 if (intent.action == WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION) {
                     runCatching {
                         wifiManager.requestGroupInfo(p2pChannel) { group ->
-                            if (group?.owner != null && !connection.isCompleted) {
-                                lastGroupOwner = group.owner.hostAddress
+                            val owner = group?.owner
+                            if (owner != null && !connection.isCompleted) {
                                 weAreOwner = group.isGroupOwner
-                                connection.complete(
-                                    DiscoveredPeer(
-                                        id = group.owner.deviceAddress ?: "owner",
-                                        name = group.owner.deviceName ?: "Wi-Fi Direct peer",
-                                        transport = TransportType.LEGACY_WIFI_DIRECT,
-                                        address = group.owner.hostAddress,
-                                    )
-                                )
+                                resolveOwnerAddress(wifiManager, p2pChannel) { host ->
+                                    lastGroupOwner = host
+                                    if (!connection.isCompleted) {
+                                        connection.complete(
+                                            DiscoveredPeer(
+                                                id = owner.deviceAddress ?: "owner",
+                                                name = owner.deviceName ?: "Wi-Fi Direct peer",
+                                                transport = TransportType.LEGACY_WIFI_DIRECT,
+                                                address = host,
+                                            )
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -180,12 +204,17 @@ class LegacyWifiDirectTransport @Inject constructor(
                     runCatching {
                         wifiManager.requestGroupInfo(p2pChannel) { group ->
                             if (group?.owner != null && !deferred.isCompleted) {
-                                deferred.complete(
-                                    GroupHandle(
-                                        ownerIp = group.owner.hostAddress ?: "",
-                                        isOwner = group.isGroupOwner,
-                                    )
-                                )
+                                val isOwner = group.isGroupOwner
+                                resolveOwnerAddress(wifiManager, p2pChannel) { host ->
+                                    if (!deferred.isCompleted) {
+                                        deferred.complete(
+                                            GroupHandle(
+                                                ownerIp = host ?: "",
+                                                isOwner = isOwner,
+                                            )
+                                        )
+                                    }
+                                }
                             }
                         }
                     }

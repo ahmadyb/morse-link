@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.morselink.core.ui.Format
+import com.morselink.core.transfer.model.TransferDirection
 import com.morselink.core.transfer.model.TransferProgress
 import com.morselink.core.transfer.model.TransferStatus
 import com.morselink.feature.transfer.databinding.ItemTransferBinding
