@@ -51,5 +51,13 @@ android {
 }
 
 dependencies {
-    // Zero third-party dependencies: MorseLink is built on the Android framework only.
+    // No runtime dependencies: MorseLink uses the Android framework only.
+    testImplementation 'junit:junit:4.13.2'
+}
+
+tasks.withType(Test).configureEach {
+    testLogging {
+        events "passed", "failed", "skipped"
+        exceptionFormat "full"
+    }
 }

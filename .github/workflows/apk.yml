@@ -34,12 +34,12 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Assemble release
+      - name: Test and assemble release
         id: assemble
         run: |
           chmod +x ./gradlew
           set +e
-          ./gradlew assembleRelease --no-daemon --stacktrace > build.log 2>&1
+          ./gradlew testReleaseUnitTest assembleRelease --no-daemon --stacktrace > build.log 2>&1
           code=$?
           set -e
           tail -n 300 build.log
