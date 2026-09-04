@@ -5,6 +5,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import android.net.Uri
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.morselink.core.data.prefs.ThemeMode
@@ -97,7 +98,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
             }
         }
         binding.rowWebshare.root.setOnClickListener {
-            findNavController().navigate(R.id.action_settings_to_webshare)
+            findNavController().navigate(Uri.parse("morselink://webshare"))
         }
         binding.rowPrivacy.root.setOnClickListener {
             MaterialAlertDialogBuilder(requireContext())

@@ -4,9 +4,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.morselink.app.service.ConnectionService
 import com.morselink.core.data.prefs.SettingsStore
 import com.morselink.core.network.NetworkUtils
+import com.morselink.core.network.SessionServiceController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -26,7 +26,7 @@ class WebShareViewModel @Inject constructor(
     private val nsd: NsdAdvertiser,
     private val network: NetworkUtils,
     private val settings: SettingsStore,
-    private val serviceStarter: ConnectionServiceStarter,
+    private val serviceStarter: SessionServiceController,
 ) : ViewModel() {
 
     private var controller: HotspotController = hotspotFactory.create()

@@ -27,6 +27,7 @@
         android:label="Send"
         tools:layout="@layout/fragment_send"
         xmlns:tools="http://schemas.android.com/tools">
+        <deepLink app:uri="morselink://send" />
         <action
             android:id="@+id/action_send_to_transfer"
             app:destination="@id/nav_transfer" />
@@ -38,6 +39,7 @@
         android:label="Receive"
         tools:layout="@layout/fragment_receive"
         xmlns:tools="http://schemas.android.com/tools">
+        <deepLink app:uri="morselink://receive" />
         <action
             android:id="@+id/action_receive_to_transfer"
             app:destination="@id/nav_transfer" />
@@ -49,6 +51,7 @@
         android:label="Transfer"
         tools:layout="@layout/fragment_transfer"
         xmlns:tools="http://schemas.android.com/tools" />
+        <deepLink app:uri="morselink://transfer" />
 
     <fragment
         android:id="@+id/nav_files"
@@ -81,4 +84,5 @@
         android:label="WebShare"
         tools:layout="@layout/fragment_webshare"
         xmlns:tools="http://schemas.android.com/tools" />
+        <deepLink app:uri="morselink://webshare" />
 </navigation>

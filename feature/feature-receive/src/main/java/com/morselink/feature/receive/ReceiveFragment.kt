@@ -9,6 +9,7 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import android.net.Uri
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.morselink.core.ui.Dialogs
@@ -35,7 +36,7 @@ class ReceiveFragment : Fragment(R.layout.fragment_receive) {
             binding.hint.text = status
         }
         viewModel.connected.observe(viewLifecycleOwner) { connected ->
-            if (connected) findNavController().navigate(R.id.action_receive_to_transfer)
+            if (connected) findNavController().navigate(Uri.parse("morselink://transfer"))
         }
 
         startCameraWithPermissionCheck()

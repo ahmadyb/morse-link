@@ -20,7 +20,6 @@ import com.morselink.core.transfer.model.TransferDirection
 import com.morselink.core.transfer.model.TransferProgress
 import com.morselink.core.transfer.model.TransferableFile
 import com.morselink.core.transfer.model.TransportType
-import com.morselink.core.ui.DeviceTier
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -45,7 +44,6 @@ import java.net.Socket
 import java.nio.ByteBuffer
 import java.nio.channels.Channels
 import java.nio.channels.FileChannel
-import java.nio.file.StandardOpenOption
 import java.util.concurrent.ConcurrentLinkedQueue
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -288,7 +286,7 @@ class LegacyWifiDirectTransport @Inject constructor(
             socketChannel: java.nio.channels.SocketChannel,
         ) {
             val retransmitQueue = ConcurrentLinkedQueue<Int>()
-            val channel = FileChannel.open(source.toPath(), StandardOpenOption.READ)
+            val channel = FileInputStream(source).channel
             channel.use { fileChannel ->
                 var position = startOffset
                 val total = source.length()
@@ -574,6 +572,7 @@ class LegacyWifiDirectTransport @Inject constructor(
         private const val CONNECT_ATTEMPTS = 6
 
         /** §7 — concurrent chunk handlers scale with the device tier. */
-        fun recommendedThreads(): Int = DeviceTier.chunkThreads()
+        fun recommendedThreads(): Int =
+            Runtime.getRuntime().availableProcessors().coerceIn(2, 4)
     }
 }

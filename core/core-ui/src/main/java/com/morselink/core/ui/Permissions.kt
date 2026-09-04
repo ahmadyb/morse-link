@@ -1,4 +1,4 @@
-package com.morselink.app
+package com.morselink.core.ui
 
 import android.Manifest
 import android.app.Activity
@@ -11,7 +11,6 @@ import android.os.Environment
 import android.provider.Settings
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.morselink.core.ui.Dialogs
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton

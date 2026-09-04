@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import android.net.Uri
 import androidx.navigation.fragment.findNavController
 import com.morselink.core.ui.DeviceTier
 import com.morselink.core.ui.RadarView
@@ -13,6 +14,12 @@ import dagger.hilt.android.AndroidEntryPoint
 /** §14.1 — identity, radar, two actions. Nothing else. */
 @AndroidEntryPoint
 class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
+
+    companion object {
+        const val NAV_SEND = "morselink://send"
+        const val NAV_RECEIVE = "morselink://receive"
+        const val NAV_WEBSHARE = "morselink://webshare"
+    }
 
     private val viewModel: DashboardViewModel by viewModels()
 
@@ -42,13 +49,13 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
         }
 
         binding.btnSend.setOnClickListener {
-            findNavController().navigate(R.id.action_dashboard_to_send)
+            findNavController().navigate(Uri.parse(NAV_SEND))
         }
         binding.btnReceive.setOnClickListener {
-            findNavController().navigate(R.id.action_dashboard_to_receive)
+            findNavController().navigate(Uri.parse(NAV_RECEIVE))
         }
         binding.btnWebshare.setOnClickListener {
-            findNavController().navigate(R.id.action_dashboard_to_webshare)
+            findNavController().navigate(Uri.parse(NAV_WEBSHARE))
         }
     }
 

@@ -8,6 +8,7 @@ import android.widget.Spinner
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import android.net.Uri
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -97,7 +98,7 @@ class SendFragment : Fragment(R.layout.fragment_send) {
                 binding.btnSend.setText(R.string.send_no_selection)
                 return@setOnClickListener
             }
-            findNavController().navigate(R.id.action_send_to_transfer)
+            findNavController().navigate(Uri.parse("morselink://transfer"))
         }
 
         viewModel.consumeExternalFiles()

@@ -10,6 +10,7 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.morselink.app.databinding.ActivityMainBinding
 import com.morselink.core.transfer.model.TransferableFile
+import com.morselink.core.ui.Permissions
 import com.morselink.feature.send.SendArgs
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -65,9 +66,7 @@ class MainActivity : AppCompatActivity() {
     /** Files shared from another app land straight in the Send flow. */
     private fun handleIncomingIntent(intent: Intent?) {
         val action = intent?.action
-        if (action != Intent.ACTION_SEND || action != Intent.ACTION_SEND_MULTIPLE) {
-            if (action != Intent.ACTION_SEND && action != Intent.ACTION_SEND_MULTIPLE) return
-        }
+        if (action != Intent.ACTION_SEND && action != Intent.ACTION_SEND_MULTIPLE) return
         val uris: List<android.net.Uri> = when (action) {
             Intent.ACTION_SEND -> {
                 val uri = if (Build.VERSION.SDK_INT >= 33) {

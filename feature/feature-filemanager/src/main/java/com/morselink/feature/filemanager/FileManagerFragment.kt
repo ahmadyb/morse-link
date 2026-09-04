@@ -14,7 +14,7 @@ import com.morselink.core.media.SmartCategory
 import com.morselink.core.ui.Dialogs
 import com.morselink.core.ui.Format
 import com.morselink.feature.filemanager.databinding.FragmentFileManagerBinding
-import com.morselink.app.Permissions
+import com.morselink.core.ui.Permissions
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 import javax.inject.Inject
