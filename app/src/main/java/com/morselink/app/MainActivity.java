@@ -183,22 +183,22 @@ public class MainActivity extends Activity implements Transmitter.Callback {
         final Button stop = root.findViewById(R.id.codec_stop);
         Button sos = root.findViewById(R.id.codec_sos);
 
-        codecText.addTextChangedListener(new SimpleWatcher(() -> {
+        codecText.addTextChangedListener((SimpleWatcher) () -> {
             if (syncing) {
                 return;
             }
             syncing = true;
             codecMorse.setText(MorseCodec.pretty(MorseCodec.encode(codecText.getText())));
             syncing = false;
-        }));
-        codecMorse.addTextChangedListener(new SimpleWatcher(() -> {
+        });
+        codecMorse.addTextChangedListener((SimpleWatcher) () -> {
             if (syncing) {
                 return;
             }
             syncing = true;
             codecText.setText(MorseCodec.decode(codecMorse.getText()));
             syncing = false;
-        }));
+        });
 
         copyText.setOnClickListener(v -> copyToClipboard("text",
                 codecText.getText().toString().toUpperCase()));
@@ -248,24 +248,24 @@ public class MainActivity extends Activity implements Transmitter.Callback {
         sendStop = root.findViewById(R.id.send_stop);
         sendLoop = root.findViewById(R.id.send_loop);
 
-        speedBar.setOnSeekBarChangeListener(new SimpleSeek(progress -> {
+        speedBar.setOnSeekBarChangeListener((SimpleSeek) progress -> {
             int wpm = MIN_WPM + progress;
             speedValue.setText(getString(R.string.wpm_value, wpm));
             prefs.wpm(wpm);
-        }));
-        toneBar.setOnSeekBarChangeListener(new SimpleSeek(progress -> {
+        });
+        toneBar.setOnSeekBarChangeListener((SimpleSeek) progress -> {
             int hz = MIN_TONE + progress;
             toneValue.setText(getString(R.string.hz_value, hz));
             prefs.tone(hz);
-        }));
+        });
 
         ToggleButton[] channels = {chTorch, chSound, chScreen, chVibrate};
         for (ToggleButton channel : channels) {
             channel.setOnCheckedChangeListener((buttonView, isChecked) -> prefs.channels(channelMask()));
         }
         sendLoop.setOnCheckedChangeListener((buttonView, isChecked) -> prefs.loop(isChecked));
-        sendMessage.addTextChangedListener(new SimpleWatcher(() ->
-                prefs.message(sendMessage.getText().toString())));
+        sendMessage.addTextChangedListener((SimpleWatcher) () ->
+                prefs.message(sendMessage.getText().toString()));
 
         sendStart.setOnClickListener(v -> startTransmit());
         sendStop.setOnClickListener(v -> stopTransmit());
@@ -427,15 +427,15 @@ public class MainActivity extends Activity implements Transmitter.Callback {
         recvStatus = root.findViewById(R.id.recv_status);
         recvLevel = root.findViewById(R.id.recv_level);
 
-        recvFreqBar.setOnSeekBarChangeListener(new SimpleSeek(progress -> {
+        recvFreqBar.setOnSeekBarChangeListener((SimpleSeek) progress -> {
             int hz = MIN_RX_FREQ + progress;
             recvFreqValue.setText(getString(R.string.hz_value, hz));
             prefs.recvFreq(hz);
-        }));
-        recvGainBar.setOnSeekBarChangeListener(new SimpleSeek(progress -> {
+        });
+        recvGainBar.setOnSeekBarChangeListener((SimpleSeek) progress -> {
             recvGainValue.setText(progress + "%");
             prefs.recvGain(progress);
-        }));
+        });
 
         recvStart.setOnClickListener(v -> startListening());
         recvStop.setOnClickListener(v -> stopListening());
@@ -574,7 +574,11 @@ public class MainActivity extends Activity implements Transmitter.Callback {
             quizOptions.addView(button);
         }
         quizFeedback.setText("");
-        playQuizTone();
+        // Only play straight away when the quiz is actually on screen, so opening
+        // the app on a remembered tab never beeps out of nowhere.
+        if (flipper.getDisplayedChild() == TAB_LEARN && learnFlipper.getDisplayedChild() == 1) {
+            playQuizTone();
+        }
     }
 
     private void answer(char choice, Button button) {

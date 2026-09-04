@@ -164,6 +164,7 @@ public final class Transmitter {
         stop();
         final Plan plan = plan(text, wpm);
         if (plan.events.isEmpty()) {
+            notifyStopped();
             return;
         }
         running = true;

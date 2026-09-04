@@ -65,7 +65,7 @@
 
     <style name="ChannelToggle" parent="ActionButton">
         <item name="android:background">@drawable/bg_toggle</item>
-        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textColor">@color/toggle_text</item>
     </style>
 
     <style name="NavButton">
