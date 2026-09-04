@@ -36,8 +36,8 @@ android {
 
 dependencies {
     implementation(libs.bundles.androidx.base)
-    implementation(projects.core.coreData)
-    implementation(projects.core.coreMedia)
+    implementation(project(":core:core-data"))
+    implementation(project(":core:core-media"))
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 }

@@ -22,8 +22,7 @@ class SettingsViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
 
-    val settingsFlow: LiveData<UserSettings> = settings.settings.asLiveData()
-    val settings: LiveData<UserSettings> get() = settingsFlow
+    val state: LiveData<UserSettings> = settings.settings.asLiveData()
 
     private var latest: UserSettings = UserSettings()
 

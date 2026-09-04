@@ -25,7 +25,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         val binding = FragmentSettingsBinding.bind(view)
         this.binding = binding
 
-        viewModel.settings.observe(viewLifecycleOwner) { settings ->
+        viewModel.state.observe(viewLifecycleOwner) { settings ->
             binding.rowDeviceName.title.text = getString(R.string.settings_device_name)
             binding.rowDeviceName.value.text = settings.deviceName
 

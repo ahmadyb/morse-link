@@ -36,7 +36,7 @@ android {
 
 dependencies {
     implementation(libs.bundles.androidx.base)
-    implementation(projects.core.coreUi)
+    implementation(project(":core:core-ui"))
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.glide)

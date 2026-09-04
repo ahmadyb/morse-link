@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.Spinner
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -65,7 +64,13 @@ class SendFragment : Fragment(R.layout.fragment_send) {
         )
         binding.sortSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                viewModel.setSort(position.fromSortIndex())
+                viewModel.setSort(
+                when (position) {
+                    1 -> com.morselink.core.media.SortOrder.SIZE
+                    2 -> com.morselink.core.media.SortOrder.NAME
+                    else -> com.morselink.core.media.SortOrder.DATE
+                }
+            )
             }
             override fun onNothingSelected(parent: AdapterView<*>?) = Unit
         }
@@ -144,11 +149,3 @@ class SendFragment : Fragment(R.layout.fragment_send) {
         super.onDestroyView()
     }
 }
-
-private fun Int.fromSortIndex(): com.morselink.core.media.SortOrder = when (this) {
-    1 -> com.morselink.core.media.SortOrder.SIZE
-    2 -> com.morselink.core.media.SortOrder.NAME
-    else -> com.morselink.core.media.SortOrder.DATE
-}
-
-private fun Spinner.configure() = Unit

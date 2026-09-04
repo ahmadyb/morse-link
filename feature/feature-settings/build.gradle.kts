@@ -37,9 +37,9 @@ android {
 dependencies {
     implementation(libs.bundles.androidx.base)
     implementation(libs.bundles.androidx.ui)
-    implementation(projects.core.coreUi)
-    implementation(projects.core.coreData)
-    implementation(projects.core.coreMedia)
+    implementation(project(":core:core-ui"))
+    implementation(project(":core:core-data"))
+    implementation(project(":core:core-media"))
     implementation(libs.androidx.navigation.fragment)
     implementation(libs.androidx.work)
     implementation(libs.glide)

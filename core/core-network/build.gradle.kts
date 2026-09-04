@@ -36,7 +36,7 @@ android {
 
 dependencies {
     implementation(libs.bundles.androidx.base)
-    implementation(projects.core.coreTransfer)
+    implementation(project(":core:core-transfer"))
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.play.services.nearby)

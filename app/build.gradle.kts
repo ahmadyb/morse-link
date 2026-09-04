@@ -19,7 +19,7 @@ android {
 
     signingConfigs {
         // Demo keystore committed with the project so the APK stays installable.
-        release {
+        create("release") {
             storeFile = file("../keystore/morse-link.jks")
             storePassword = "morselink"
             keyAlias = "morselink"
@@ -76,17 +76,17 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 
-    implementation(projects.core.coreUi)
-    implementation(projects.core.coreData)
-    implementation(projects.core.coreMedia)
-    implementation(projects.core.coreTransfer)
-    implementation(projects.core.coreNetwork)
+    implementation(project(":core:core-ui"))
+    implementation(project(":core:core-data"))
+    implementation(project(":core:core-media"))
+    implementation(project(":core:core-transfer"))
+    implementation(project(":core:core-network"))
 
-    implementation(projects.feature.featureDashboard)
-    implementation(projects.feature.featureSend)
-    implementation(projects.feature.featureReceive)
-    implementation(projects.feature.featureTransferUi)
-    implementation(projects.feature.featureFilemanager)
-    implementation(projects.feature.featureWebshare)
-    implementation(projects.feature.featureSettings)
+    implementation(project(":feature:feature-dashboard"))
+    implementation(project(":feature:feature-send"))
+    implementation(project(":feature:feature-receive"))
+    implementation(project(":feature:feature-transfer-ui"))
+    implementation(project(":feature:feature-filemanager"))
+    implementation(project(":feature:feature-webshare"))
+    implementation(project(":feature:feature-settings"))
 }

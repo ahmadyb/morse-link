@@ -37,9 +37,9 @@ android {
 dependencies {
     implementation(libs.bundles.androidx.base)
     implementation(libs.bundles.androidx.ui)
-    implementation(projects.core.coreUi)
-    implementation(projects.core.coreNetwork)
-    implementation(projects.core.coreTransfer)
+    implementation(project(":core:core-ui"))
+    implementation(project(":core:core-network"))
+    implementation(project(":core:core-transfer"))
     implementation(libs.androidx.navigation.fragment)
     implementation(libs.camerax.core)
     implementation(libs.camerax.camera2)
