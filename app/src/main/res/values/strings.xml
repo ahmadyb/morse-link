@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MorseLink</string>
+    <string name="app_tagline">Code · Send · Receive</string>
+
+    <string name="tab_codec">Codec</string>
+    <string name="tab_send">Send</string>
+    <string name="tab_receive">Receive</string>
+    <string name="tab_learn">Learn</string>
+
+    <string name="codec_text_hint">Type text to encode…</string>
+    <string name="codec_morse_hint">Morse appears here — or type . - / to decode</string>
+    <string name="codec_text_label">Text</string>
+    <string name="codec_morse_label">Morse</string>
+    <string name="copy_morse">Copy morse</string>
+    <string name="copy_text">Copy text</string>
+    <string name="share">Share</string>
+    <string name="clear">Clear</string>
+    <string name="swap">Swap</string>
+
+    <string name="send_message_hint">Message to transmit…</string>
+    <string name="send_channels">Output</string>
+    <string name="channel_torch">Torch</string>
+    <string name="channel_sound">Sound</string>
+    <string name="channel_screen">Screen</string>
+    <string name="channel_vibrate">Vibrate</string>
+    <string name="send_speed">Speed</string>
+    <string name="send_tone">Tone</string>
+    <string name="transmit">Transmit</string>
+    <string name="stop">Stop</string>
+    <string name="sos">SOS</string>
+    <string name="loop">Repeat</string>
+    <string name="send_status_idle">Ready</string>
+    <string name="wpm_value">%1$d WPM</string>
+    <string name="hz_value">%1$d Hz</string>
+
+    <string name="receive_hint">Hold the device near a Morse tone. Works best with a clear, steady beep in a quiet room.</string>
+    <string name="listen_start">Start listening</string>
+    <string name="listen_stop">Stop listening</string>
+    <string name="receive_freq">Tone</string>
+    <string name="receive_gain">Sensitivity</string>
+    <string name="receive_morse_label">Detected morse</string>
+    <string name="receive_text_label">Decoded text</string>
+    <string name="receive_idle">Microphone off</string>
+
+    <string name="learn_chart">Chart</string>
+    <string name="learn_quiz">Quiz</string>
+    <string name="quiz_prompt">What did you hear?</string>
+    <string name="quiz_play_again">Replay</string>
+    <string name="quiz_next">Next</string>
+    <string name="quiz_score">Score %1$d · Best streak %2$d</string>
+    <string name="quiz_correct">Correct!</string>
+    <string name="quiz_wrong">It was %1$s</string>
+    <string name="learn_play_chart">Play</string>
+
+    <string name="about_title">About MorseLink</string>
+    <string name="about_message">MorseLink %1$s\n\nEncode and decode Morse code, transmit it with the torch, speaker, screen or vibration, and decode tones picked up by the microphone.\n\nBuilt with the Android framework only — no third-party libraries.</string>
+    <string name="about_ok">Nice</string>
+
+    <string name="perm_camera_needed">Camera permission is required to control the torch.</string>
+    <string name="perm_audio_needed">Microphone permission is required to listen for Morse tones.</string>
+    <string name="no_torch">This device has no torch — pick another output.</string>
+    <string name="pick_output">Pick at least one output.</string>
+    <string name="empty_message">Type something to transmit.</string>
+    <string name="copied">Copied to clipboard</string>
+    <string name="message_trimmed">Message trimmed to 60 seconds.</string>
+    <string name="torch_unavailable">Torch unavailable: %1$s</string>
+    <string name="mic_error">Microphone error: %1$s</string>
+</resources>

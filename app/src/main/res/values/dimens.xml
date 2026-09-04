@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="gap">12dp</dimen>
+    <dimen name="gap_small">8dp</dimen>
+    <dimen name="gap_large">18dp</dimen>
+    <dimen name="radius">14dp</dimen>
+    <dimen name="card_padding">14dp</dimen>
+</resources>
