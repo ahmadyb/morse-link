@@ -16,6 +16,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 import java.io.FileInputStream
+import java.io.FileOutputStream
 import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -33,6 +34,10 @@ class WebShareServer @Inject constructor(
 ) : NanoHTTPD(PORT) {
 
     private val entries = LinkedHashMap<String, Entry>()
+
+    /** Invoked when a browser asks the server to stop, so the view model can
+     *  also release the hotspot and the foreground service. */
+    var onStopRequest: (() -> Unit)? = null
 
     data class Entry(val path: String, val name: String, val size: Long, val mime: String)
 
@@ -176,6 +181,69 @@ class WebShareServer @Inject constructor(
         (context.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
             android.content.res.Configuration.UI_MODE_NIGHT_YES
 
+    // ------------------------------------------------------------- file actions
+
+    private fun errorJson(message: String): String =
+        JSONObject().apply {
+            put("ok", false)
+            put("error", message)
+        }.toString()
+
+    private fun renameFile(session: IHTTPSession): String {
+        val path = session.parms["path"] ?: return errorJson("Missing path")
+        val name = session.parms["name"]?.trim().orEmpty()
+        if (name.isEmpty()) return errorJson("Missing new name")
+        val file = File(path)
+        if (!file.exists()) return errorJson("That file no longer exists")
+        return runBlocking {
+            runCatching { fileOps.rename(file, name) }.fold(
+                onSuccess = { renamed ->
+                    JSONObject().apply {
+                        put("ok", true)
+                        put("name", renamed.name)
+                        put("path", renamed.absolutePath)
+                    }.toString()
+                },
+                onFailure = { errorJson(it.message ?: "Rename failed") },
+            )
+        }
+    }
+
+    private fun deleteFile(session: IHTTPSession): String {
+        val path = session.parms["path"] ?: return errorJson("Missing path")
+        val file = File(path)
+        if (!file.exists()) return errorJson("That file no longer exists")
+        val item = FileItem(
+            path = file.absolutePath,
+            name = file.name,
+            isDirectory = file.isDirectory,
+            sizeBytes = file.length(),
+            lastModified = file.lastModified(),
+            mimeType = null,
+            childCount = 0,
+        )
+        return runBlocking {
+            runCatching { fileOps.delete(item) }.fold(
+                onSuccess = { JSONObject().apply { put("ok", true) }.toString() },
+                onFailure = { errorJson(it.message ?: "Delete failed") },
+            )
+        }
+    }
+
+    /**
+     * Answers first, then tears the server down: stopping inside [serve] would
+     * kill the socket before the response is flushed. [onStopRequest] lets the
+     * view model drop the hotspot and the foreground service too.
+     */
+    private fun stopSession(): String {
+        Thread {
+            runCatching { Thread.sleep(250) }
+            runCatching { stopServer() }
+            runCatching { onStopRequest?.invoke() }
+        }.apply { isDaemon = true }.start()
+        return JSONObject().apply { put("ok", true) }.toString()
+    }
+
     // ------------------------------------------------------------------ download
 
     private fun download(session: IHTTPSession): Response {
@@ -222,7 +290,7 @@ class WebShareServer @Inject constructor(
         val contentType = session.headers["content-type"]
             ?: session.headers["Content-Type"]
             ?: return json(errorJson("Expected multipart/form-data"))
-        val boundary = Regex("boundary=([^;\s]+)").find(contentType)
+        val boundary = Regex("""boundary=([^;\s]+)""").find(contentType)
             ?.groupValues?.get(1)?.trim('"')
             ?: return json(errorJson("Missing multipart boundary"))
 
@@ -235,9 +303,9 @@ class WebShareServer @Inject constructor(
             readUntilBoundary(pushback, marker)   // skip the preamble
             while (true) {
                 val partHeaders = readHeaders(pushback) ?: break
-                val name = Regex("filename\*?=\"([^\"]*)\"").find(partHeaders)
+                val name = Regex("""filename\*?="([^"]*)""").find(partHeaders)
                     ?.groupValues?.get(1)
-                    ?: Regex("filename\*?=([^;\r\n]+)").find(partHeaders)
+                    ?: Regex("""filename\*?=([^;\r\n]+)""").find(partHeaders)
                         ?.groupValues?.get(1)?.trim()?.trim('"')
                 val target = if (name.isNullOrBlank()) null else File(directory, sanitize(name))
                 if (target == null) {
