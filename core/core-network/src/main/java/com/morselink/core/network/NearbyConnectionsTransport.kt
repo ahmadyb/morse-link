@@ -17,7 +17,6 @@ import com.google.android.gms.nearby.connection.PayloadCallback
 import com.google.android.gms.nearby.connection.PayloadTransferUpdate
 import com.google.android.gms.nearby.connection.Strategy
 import com.google.android.gms.tasks.Tasks
-import com.morselink.core.media.FileOps
 import com.morselink.core.transfer.engine.TransferEngine
 import com.morselink.core.transfer.model.IncomingFileEvent
 import com.morselink.core.transfer.model.TransferDirection
@@ -55,7 +54,6 @@ import kotlin.coroutines.resumeWithException
 class NearbyConnectionsTransport @Inject constructor(
     @ApplicationContext private val context: Context,
     private val engine: TransferEngine,
-    private val fileOps: FileOps,
 ) : TransportProvider {
 
     override val id: TransportType = TransportType.NEARBY_CONNECTIONS
@@ -186,7 +184,7 @@ class NearbyConnectionsTransport @Inject constructor(
                 PayloadTransferUpdate.Status.SUCCESS -> {
                     val staged = incomingFiles.remove(update.payloadId) ?: return
                     scope.launch {
-                        val directory = fileOps.defaultDownloadDirectory()
+                        val directory = defaultDownloadDirectory(context)
                         val target = File(directory, staged.name)
                         runCatching { staged.copyTo(target, overwrite = true); staged.delete() }
                         engine.complete(

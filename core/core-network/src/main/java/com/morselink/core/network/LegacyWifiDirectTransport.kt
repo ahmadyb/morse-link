@@ -11,7 +11,6 @@ import android.net.wifi.p2p.WifiP2pManager
 import android.os.Build
 import android.os.Looper
 import androidx.core.content.ContextCompat
-import com.morselink.core.media.FileOps
 import com.morselink.core.transfer.engine.TransferEngine
 import com.morselink.core.transfer.legacy.ChunkProtocol
 import com.morselink.core.transfer.legacy.LegacyPorts
@@ -60,7 +59,6 @@ import kotlin.math.min
 class LegacyWifiDirectTransport @Inject constructor(
     @ApplicationContext private val context: Context,
     private val engine: TransferEngine,
-    private val fileOps: FileOps,
 ) : TransportProvider {
 
     override val id: TransportType = TransportType.LEGACY_WIFI_DIRECT
@@ -356,7 +354,7 @@ class LegacyWifiDirectTransport @Inject constructor(
             val controlIn = DataInputStream(control.getInputStream())
             val metadata = ChunkProtocol.parseMetadata(controlIn.readUtfLine())
                 ?: return@withContext
-            val directory = fileOps.defaultDownloadDirectory()
+            val directory = defaultDownloadDirectory(context)
             for (meta in metadata.files) {
                 val target = File(directory, meta.name)
                 val part = File(directory, meta.name + ".part")
