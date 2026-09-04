@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/nav_connect">
+
+    <fragment
+        android:id="@+id/nav_connect"
+        android:name="com.morselink.feature.dashboard.DashboardFragment"
+        android:label="@string/tab_connect"
+        tools:layout="@layout/fragment_dashboard"
+        xmlns:tools="http://schemas.android.com/tools">
+        <action
+            android:id="@+id/action_dashboard_to_send"
+            app:destination="@id/nav_send" />
+        <action
+            android:id="@+id/action_dashboard_to_receive"
+            app:destination="@id/nav_receive" />
+        <action
+            android:id="@+id/action_dashboard_to_webshare"
+            app:destination="@id/nav_webshare" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_send"
+        android:name="com.morselink.feature.send.SendFragment"
+        android:label="Send"
+        tools:layout="@layout/fragment_send"
+        xmlns:tools="http://schemas.android.com/tools">
+        <action
+            android:id="@+id/action_send_to_transfer"
+            app:destination="@id/nav_transfer" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_receive"
+        android:name="com.morselink.feature.receive.ReceiveFragment"
+        android:label="Receive"
+        tools:layout="@layout/fragment_receive"
+        xmlns:tools="http://schemas.android.com/tools">
+        <action
+            android:id="@+id/action_receive_to_transfer"
+            app:destination="@id/nav_transfer" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_transfer"
+        android:name="com.morselink.feature.transfer.TransferFragment"
+        android:label="Transfer"
+        tools:layout="@layout/fragment_transfer"
+        xmlns:tools="http://schemas.android.com/tools" />
+
+    <fragment
+        android:id="@+id/nav_files"
+        android:name="com.morselink.feature.filemanager.FileManagerFragment"
+        android:label="@string/tab_files"
+        tools:layout="@layout/fragment_file_manager"
+        xmlns:tools="http://schemas.android.com/tools" />
+
+    <fragment
+        android:id="@+id/nav_history"
+        android:name="com.morselink.feature.settings.HistoryFragment"
+        android:label="@string/tab_history"
+        tools:layout="@layout/fragment_history"
+        xmlns:tools="http://schemas.android.com/tools" />
+
+    <fragment
+        android:id="@+id/nav_settings"
+        android:name="com.morselink.feature.settings.SettingsFragment"
+        android:label="@string/tab_settings"
+        tools:layout="@layout/fragment_settings"
+        xmlns:tools="http://schemas.android.com/tools">
+        <action
+            android:id="@+id/action_settings_to_webshare"
+            app:destination="@id/nav_webshare" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_webshare"
+        android:name="com.morselink.feature.webshare.WebShareFragment"
+        android:label="WebShare"
+        tools:layout="@layout/fragment_webshare"
+        xmlns:tools="http://schemas.android.com/tools" />
+</navigation>

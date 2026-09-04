@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Morselink</string>
+
+    <string name="tab_connect">Connect</string>
+    <string name="tab_files">Files</string>
+    <string name="tab_history">History</string>
+    <string name="tab_settings">Settings</string>
+
+    <string name="action_send">Send</string>
+    <string name="action_receive">Receive</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_retry">Retry</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_rename">Rename</string>
+    <string name="action_move">Move</string>
+    <string name="action_copy">Copy</string>
+    <string name="action_compress">Compress</string>
+    <string name="action_properties">Properties</string>
+    <string name="action_share">Share</string>
+    <string name="action_open">Open</string>
+    <string name="action_install">Install</string>
+    <string name="action_search">Search</string>
+    <string name="action_select_all">Select all</string>
+    <string name="action_clear">Clear</string>
+    <string name="action_done">Done</string>
+    <string name="action_next">Next</string>
+    <string name="action_back">Back</string>
+    <string name="action_ok">OK</string>
+    <string name="action_save">Save</string>
+    <string name="action_refresh">Refresh</string>
+    <string name="action_close">Close</string>
+    <string name="action_more">More</string>
+
+    <string name="category_photos">Photos</string>
+    <string name="category_videos">Videos</string>
+    <string name="category_music">Music</string>
+    <string name="category_apps">Apps</string>
+    <string name="category_files">Files</string>
+    <string name="category_documents">Documents</string>
+
+    <string name="empty_generic">Nothing here yet</string>
+    <string name="loading">Loading…</string>
+
+    <string name="size_bytes">%1$s B</string>
+    <string name="selected_count">%1$d selected</string>
+    <string name="item_count">%1$d items</string>
+</resources>

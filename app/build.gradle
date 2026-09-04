@@ -1,63 +1,92 @@
 plugins {
-    id 'com.android.application'
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
 }
 
 android {
-    namespace 'com.morselink.app'
-    compileSdk 35
+    namespace = "com.morselink.app"
+    compileSdk = 35
 
     defaultConfig {
-        applicationId "com.morselink.app"
-        minSdk 26
-        targetSdk 35
-        versionCode 1
-        versionName "1.0.0"
-        resourceConfigurations += ["en"]
+        applicationId = "com.morselink.app"
+        minSdk = 21
+        targetSdk = 35
+        versionCode = 1
+        versionName = "1.0.0"
     }
 
     signingConfigs {
-        // Demo keystore committed with the project so the APK is signed
-        // (and therefore installable) for anyone who clones the repo.
+        // Demo keystore committed with the project so the APK stays installable.
         release {
-            storeFile file("../keystore/morse-link.jks")
-            storePassword "morselink"
-            keyAlias "morselink"
-            keyPassword "morselink"
+            storeFile = file("../keystore/morse-link.jks")
+            storePassword = "morselink"
+            keyAlias = "morselink"
+            keyPassword = "morselink"
         }
     }
 
     buildTypes {
         release {
-            minifyEnabled false
-            shrinkResources false
-            signingConfig signingConfigs.release
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
         }
         debug {
-            applicationIdSuffix ".debug"
-            versionNameSuffix "-debug"
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
         }
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+
+    buildFeatures {
+        viewBinding = true
+    }
+
+    packaging {
+        resources {
+            excludes += setOf("META-INF/DEPENDENCIES", "META-INF/LICENSE", "META-INF/LICENSE.txt",
+                "META-INF/NOTICE", "META-INF/NOTICE.txt", "META-INF/INDEX.LIST")
+        }
     }
 
     lint {
-        abortOnError false
-        checkReleaseBuilds false
+        abortOnError = false
+        checkReleaseBuilds = false
     }
 }
 
 dependencies {
-    // No runtime dependencies: MorseLink uses the Android framework only.
-    testImplementation 'junit:junit:4.13.2'
-}
+    implementation(libs.bundles.androidx.base)
+    implementation(libs.bundles.androidx.ui)
+    implementation(libs.androidx.navigation.fragment)
+    implementation(libs.androidx.navigation.ui)
+    implementation(libs.androidx.work)
+    implementation(libs.androidx.hilt.work)
+    implementation(libs.material)
 
-tasks.withType(Test).configureEach {
-    testLogging {
-        events "passed", "failed", "skipped"
-        exceptionFormat "full"
-    }
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+
+    implementation(projects.core.coreUi)
+    implementation(projects.core.coreData)
+    implementation(projects.core.coreMedia)
+    implementation(projects.core.coreTransfer)
+    implementation(projects.core.coreNetwork)
+
+    implementation(projects.feature.featureDashboard)
+    implementation(projects.feature.featureSend)
+    implementation(projects.feature.featureReceive)
+    implementation(projects.feature.featureTransferUi)
+    implementation(projects.feature.featureFilemanager)
+    implementation(projects.feature.featureWebshare)
+    implementation(projects.feature.featureSettings)
 }

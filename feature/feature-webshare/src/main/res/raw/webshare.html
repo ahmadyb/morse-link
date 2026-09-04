@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Morselink — WebShare</title>
+<style>
+:root {
+  --primary: #1FA36B;
+  --primary-dark: #167A50;
+  --bg: #121212;
+  --surface: #1E1E1E;
+  --surface-hover: #262626;
+  --text-primary: #FFFFFF;
+  --text-secondary: #A0A0A0;
+  --border: #2A2A2A;
+  --sending: #2D9CDB;
+  --error: #E5484D;
+  --radius-card: 10px;
+  --radius-pill: 20px;
+  --sidebar: 72px;
+}
+body.light {
+  --bg: #FAFAFA;
+  --surface: #FFFFFF;
+  --surface-hover: #F2F2F2;
+  --text-primary: #1A1A1A;
+  --text-secondary: #6B6B6B;
+  --border: #E0E0E0;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  display: flex;
+  min-height: 100vh;
+}
+button, input { font-family: inherit; }
+
+/* ---------- sidebar ---------- */
+#sidebar {
+  width: var(--sidebar);
+  min-width: var(--sidebar);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 0;
+  gap: 4px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+.brand {
+  width: 40px; height: 40px; border-radius: 12px;
+  background: var(--primary); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 18px; margin-bottom: 12px;
+}
+.nav-icon {
+  width: 48px; height: 44px; border: 0; background: transparent;
+  border-left: 3px solid transparent;
+  color: var(--text-secondary); cursor: pointer; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+}
+.nav-icon:hover { background: var(--surface-hover); color: var(--text-primary); }
+.nav-icon.active { color: var(--primary); background: rgba(31,163,107,.15); border-left: 3px solid var(--primary); }
+.nav-icon svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; }
+
+/* ---------- main ---------- */
+#main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+#topbar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px; background: var(--surface);
+  border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 5;
+}
+.upload-btn {
+  background: var(--primary); color: #fff; border: 0; border-radius: var(--radius-pill);
+  padding: 8px 20px; font-weight: 600; cursor: pointer;
+}
+.upload-btn:hover { background: var(--primary-dark); }
+.icon-btn {
+  width: 36px; height: 36px; border: 0; background: transparent; cursor: pointer;
+  color: var(--text-secondary); border-radius: 10px; display: flex; align-items: center; justify-content: center;
+}
+.icon-btn:hover { background: var(--surface-hover); color: var(--text-primary); }
+.icon-btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.7; }
+.icon-btn.danger:hover { color: var(--error); }
+#search {
+  flex: 1; max-width: 320px; background: var(--surface-hover); border: 1px solid var(--border);
+  color: var(--text-primary); border-radius: var(--radius-pill); padding: 8px 14px;
+}
+.spacer { flex: 1; }
+#status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); display: inline-block; margin-right: 6px; }
+
+#content { flex: 1; padding: 16px; overflow: auto; }
+h2.section { font-size: 15px; font-weight: 600; margin: 18px 0 10px; }
+.muted { color: var(--text-secondary); font-size: 12px; }
+
+/* ---------- home ---------- */
+.home-grid { display: flex; gap: 32px; flex-wrap: wrap; align-items: center; }
+.dropzone {
+  width: 240px; min-height: 300px; border: 2px dashed var(--border); border-radius: 18px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 24px; color: var(--text-secondary); cursor: pointer;
+}
+.dropzone.drag { border-color: var(--primary); color: var(--primary); }
+.dropzone svg { width: 76px; height: 120px; fill: none; stroke: currentColor; stroke-width: 3; margin-bottom: 12px; }
+.device-name { font-size: 28px; font-weight: 600; margin: 0 0 4px; }
+.counters { display: flex; gap: 10px; flex-wrap: wrap; margin: 16px 0 22px; }
+.counter {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card);
+  padding: 12px 18px; cursor: pointer; min-width: 96px;
+}
+.counter:hover { background: var(--surface-hover); }
+.counter b { display: block; font-size: 20px; }
+.storage-bar { height: 10px; background: var(--surface-hover); border-radius: 6px; overflow: hidden; max-width: 420px; }
+.storage-bar > div { height: 100%; background: var(--primary); }
+
+/* ---------- grids, tables ---------- */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.card {
+  position: relative; background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-card); overflow: hidden; cursor: pointer;
+}
+.card:hover { background: var(--surface-hover); }
+.card img, .card video { width: 100%; height: 130px; object-fit: cover; display: block; background: #000; }
+.card .title { padding: 8px; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.badge-dur {
+  position: absolute; right: 6px; bottom: 6px; background: rgba(0,0,0,.65); color: #fff;
+  font-size: 11px; padding: 1px 6px; border-radius: 6px;
+}
+.pick {
+  position: absolute; top: 6px; left: 6px; width: 20px; height: 20px; border-radius: 6px;
+  border: 1.5px solid rgba(255,255,255,.8); background: rgba(0,0,0,.35); display: none;
+  align-items: center; justify-content: center; color: #fff; font-size: 13px;
+}
+.card:hover .pick, .card.selected .pick { display: flex; }
+.card.selected { outline: 2px solid var(--primary); }
+.card.selected .pick { background: var(--primary); border-color: var(--primary); }
+
+table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: var(--radius-card); overflow: hidden; }
+th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 13px; }
+th { color: var(--text-secondary); font-weight: 600; font-size: 12px; }
+tr:last-child td { border-bottom: 0; }
+tr:hover td { background: var(--surface-hover); }
+td.num, th.num { text-align: right; }
+.type-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; border-radius: 7px; color: #fff; font-weight: 700; font-size: 11px;
+}
+.row-actions { opacity: 0; display: inline-flex; gap: 6px; }
+tr:hover .row-actions { opacity: 1; }
+
+/* ---------- panels ---------- */
+.split { display: flex; gap: 16px; }
+.side-panel { width: 220px; flex-shrink: 0; }
+.side-panel .album { display: flex; gap: 10px; align-items: center; padding: 8px; border-radius: var(--radius-card); cursor: pointer; }
+.side-panel .album:hover { background: var(--surface-hover); }
+.side-panel .album .thumb { width: 44px; height: 44px; border-radius: 8px; background: var(--surface-hover); object-fit: cover; }
+.tree-item { padding: 6px 8px; border-radius: 8px; cursor: pointer; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tree-item:hover { background: var(--surface-hover); }
+.tree-item.active { color: var(--primary); }
+
+/* ---------- breadcrumb ---------- */
+.breadcrumb { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; color: var(--text-secondary); font-size: 13px; }
+.breadcrumb span { cursor: pointer; }
+.breadcrumb span:hover { color: var(--primary); }
+
+/* ---------- transfer tray ---------- */
+#tray {
+  position: fixed; left: var(--sidebar); right: 0; bottom: 0; background: var(--surface);
+  border-top: 1px solid var(--border); transform: translateY(100%); transition: transform .2s ease;
+  max-height: 42vh; overflow: auto; z-index: 10;
+}
+#tray.open { transform: translateY(0); }
+#tray header { display: flex; align-items: center; gap: 10px; padding: 10px 16px; font-weight: 600; }
+.transfer-row { display: flex; align-items: center; gap: 10px; padding: 8px 16px; font-size: 13px; }
+.transfer-row .bar { flex: 1; height: 6px; background: var(--surface-hover); border-radius: 4px; overflow: hidden; }
+.transfer-row .bar > div { height: 100%; background: var(--sending); transition: width .15s linear; }
+.transfer-row.done .bar > div { background: var(--primary); }
+.transfer-row.failed .bar > div { background: var(--error); }
+
+/* ---------- modal ---------- */
+#modal {
+  position: fixed; inset: 0; background: rgba(0,0,0,.82); display: none;
+  align-items: center; justify-content: center; z-index: 20; padding: 24px;
+}
+#modal.open { display: flex; }
+#modal .body { max-width: 90vw; max-height: 90vh; text-align: center; }
+#modal img, #modal video { max-width: 100%; max-height: 74vh; border-radius: var(--radius-card); background: #000; }
+#modal .bar { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 12px; color: #fff; }
+.arrow {
+  position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px;
+  border-radius: 50%; border: 0; background: rgba(255,255,255,.14); color: #fff; font-size: 22px; cursor: pointer;
+}
+.arrow.left { left: 18px; } .arrow.right { right: 18px; }
+
+/* ---------- mini player ---------- */
+#player {
+  position: sticky; bottom: 0; background: var(--surface); border-top: 1px solid var(--border);
+  display: none; align-items: center; gap: 12px; padding: 10px 16px;
+}
+#player.open { display: flex; }
+#player .bar { flex: 1; height: 5px; background: var(--surface-hover); border-radius: 4px; overflow: hidden; }
+#player .bar > div { height: 100%; background: var(--primary); width: 0; }
+
+/* ---------- responsive ---------- */
+#hamburger { display: none; }
+#scrim { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 14; }
+#scrim.open { display: block; }
+@media (max-width: 768px) {
+  body { flex-direction: column; }
+  #sidebar {
+    position: fixed; bottom: 0; top: auto; left: 0; right: 0; width: 100%; height: auto;
+    flex-direction: row; justify-content: space-around; border-right: 0; border-top: 1px solid var(--border);
+    padding: 6px 0; z-index: 15;
+  }
+  .brand { display: none; }
+  #main { padding-bottom: 64px; }
+  #tray { left: 0; bottom: 60px; }
+  .side-panel {
+    position: fixed; top: 0; bottom: 0; left: 0; width: 260px; background: var(--surface);
+    border-right: 1px solid var(--border); z-index: 16; transform: translateX(-100%);
+    transition: transform .2s ease; padding: 16px; overflow: auto;
+  }
+  .side-panel.open { transform: translateX(0); }
+  #hamburger { display: flex; }
+  .dropzone { width: 100%; min-height: 180px; }
+  .grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
+}
+</style>
+</head>
+<body>
+
+<nav id="sidebar">
+  <div class="brand">M</div>
+  <button class="nav-icon active" data-view="home" title="Home">
+    <svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/></svg>
+  </button>
+  <button class="nav-icon" data-view="photos" title="Photos">
+    <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="M5 17l5-5 4 4 3-3 2 2"/></svg>
+  </button>
+  <button class="nav-icon" data-view="videos" title="Videos">
+    <svg viewBox="0 0 24 24"><rect x="3" y="6" width="12" height="12" rx="2"/><path d="M10 10l4 2-4 2z"/></svg>
+  </button>
+  <button class="nav-icon" data-view="music" title="Music">
+    <svg viewBox="0 0 24 24"><path d="M10 6v10"/><ellipse cx="7.5" cy="16.5" rx="2.5" ry="2"/><path d="M15 4.5v9"/><ellipse cx="12.5" cy="13.5" rx="2" ry="1.6"/></svg>
+  </button>
+  <button class="nav-icon" data-view="documents" title="Documents">
+    <svg viewBox="0 0 24 24"><path d="M7 3h6l4 4v14H7z"/><path d="M13 3v4h4"/></svg>
+  </button>
+  <button class="nav-icon" data-view="apps" title="Apps">
+    <svg viewBox="0 0 24 24"><path d="M4 8l8-4 8 4v8l-8 4-8-4z"/><path d="M12 12v8M12 12l8-4M12 12L4 8"/></svg>
+  </button>
+  <button class="nav-icon" data-view="files" title="Files">
+    <svg viewBox="0 0 24 24"><path d="M3 6h6l2 2h10v10H3z"/></svg>
+  </button>
+</nav>
+
+<div id="main">
+  <div id="topbar">
+    <button class="icon-btn" id="hamburger" title="Menu">
+      <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+    <button class="upload-btn" id="action-btn">Upload files</button>
+    <input type="text" id="search" placeholder="Search this category" hidden>
+    <div class="spacer"></div>
+    <button class="icon-btn" id="btn-queue" title="Transfers">
+      <svg viewBox="0 0 24 24"><path d="M12 5v10"/><path d="M8 11l4 4 4-4"/><path d="M5 20h14"/></svg>
+    </button>
+    <button class="icon-btn" id="btn-refresh" title="Refresh">
+      <svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M20 4v4h-4"/></svg>
+    </button>
+    <span class="muted"><span id="status-dot"></span><span id="conn-text">connected</span></span>
+    <button class="icon-btn danger" id="btn-power" title="End WebShare session">
+      <svg viewBox="0 0 24 24"><path d="M12 4v8"/><path d="M6.6 7.6a8 8 0 1 0 10.8 0"/></svg>
+    </button>
+  </div>
+
+  <div id="content"></div>
+
+  <div id="player">
+    <strong id="player-title" style="min-width:140px"></strong>
+    <button class="icon-btn" id="player-play"><svg viewBox="0 0 24 24"><path d="M8 6l10 6-10 6z"/></svg></button>
+    <span class="muted" id="player-time">00:00</span>
+    <div class="bar"><div id="player-bar"></div></div>
+    <audio id="audio" style="display:none"></audio>
+  </div>
+</div>
+
+<input type="file" id="file-input" multiple hidden>
+<div id="scrim"></div>
+
+<div id="tray">
+  <header>
+    <span>Transfers</span>
+    <div class="spacer"></div>
+    <button class="icon-btn" id="tray-close">✕</button>
+  </header>
+  <div id="tray-rows"></div>
+</div>
+
+<div id="modal">
+  <button class="arrow left" id="modal-prev">‹</button>
+  <div class="body">
+    <div id="modal-body"></div>
+    <div class="bar">
+      <span id="modal-name"></span>
+      <button class="upload-btn" id="modal-download">Download</button>
+      <button class="icon-btn" id="modal-close" style="color:#fff">✕</button>
+    </div>
+  </div>
+  <button class="arrow right" id="modal-next">›</button>
+</div>
+
+<script>
+/* ------------------------------------------------------------------ state */
+const state = {
+  view: 'home',
+  info: {},
+  items: [],
+  filtered: [],
+  selection: new Set(),
+  path: '',
+  album: null,
+  lightbox: [],
+  lightboxIndex: 0,
+};
+
+const $ = (sel) => document.querySelector(sel);
+const content = $('#content');
+
+function bytes(n) {
+  if (!n) return '0 B';
+  const units = ['B', 'KB', 'MB', 'GB'];
+  let i = 0, v = n;
+  while (v >= 1024 && i < units.length - 1) { v /= 1024; i++; }
+  return (i === 0 ? v : v.toFixed(1)) + ' ' + units[i];
+}
+function dateLabel(ms) {
+  if (!ms) return '';
+  const d = new Date(ms);
+  const today = new Date(); today.setHours(0,0,0,0);
+  const diff = (today - new Date(d.getFullYear(), d.getMonth(), d.getDate())) / 86400000;
+  if (diff <= 0) return 'Today';
+  if (diff <= 1) return 'Yesterday';
+  return d.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
+}
+async function api(url) {
+  const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+  return res.json();
+}
+
+/* ------------------------------------------------------------------ views */
+const VIEWS = {
+  home: { label: 'Upload files', search: false },
+  photos: { label: 'Upload photos', search: true },
+  videos: { label: 'Upload videos', search: true },
+  music: { label: 'Upload music', search: true },
+  documents: { label: 'Upload document', search: true },
+  apps: { label: 'Download APK', search: true },
+  files: { label: 'Upload file', search: true },
+};
+
+function setView(view) {
+  state.view = view;
+  state.selection.clear();
+  state.path = '';
+  state.album = null;
+  document.querySelectorAll('.nav-icon').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+  $('#action-btn').textContent = VIEWS[view].label;
+  $('#search').hidden = !VIEWS[view].search;
+  closePanel();
+  load();
+}
+
+async function load() {
+  try {
+    if (state.view === 'home') return loadHome();
+    const params = new URLSearchParams({ category: state.view === 'documents' ? 'files' : state.view });
+    if (state.path) params.set('path', state.path);
+    const data = await api('/api/files?' + params.toString());
+    state.items = data.files || [];
+    applyFilter();
+  } catch (e) {
+    content.innerHTML = '<p class="muted">Could not load this category from the phone.</p>';
+  }
+}
+
+function applyFilter() {
+  const q = ($('#search').value || '').toLowerCase();
+  state.filtered = state.items.filter(f => !q || (f.name || '').toLowerCase().includes(q));
+  render();
+}
+
+async function loadHome() {
+  const info = await api('/api/info');
+  state.info = info;
+  const theme = await api('/api/theme');
+  document.body.classList.toggle('light', theme.theme === 'light');
+  renderHome();
+}
+
+function renderHome() {
+  const i = state.info || {};
+  const counts = i.counts || {};
+  const storage = i.storage || {};
+  const pct = storage.total ? Math.round(storage.used / storage.total * 100) : 0;
+  content.innerHTML = `
+    <div class="home-grid">
+      <div class="dropzone" id="dropzone">
+        <svg viewBox="0 0 60 100"><rect x="6" y="4" width="48" height="92" rx="8"/><path d="M26 10h8"/><path d="M27 88h6"/></svg>
+        <strong>Drag files here</strong>
+        <span class="muted">or click to send to phone</span>
+      </div>
+      <div style="flex:1; min-width:260px">
+        <h1 class="device-name">${i.device || 'Morselink phone'}</h1>
+        <p class="muted">${i.android || ''}</p>
+        <div class="counters">
+          ${['photos','videos','music','documents','apps'].map(k => `
+            <div class="counter" data-goto="${k}"><b>${counts[k] ?? 0}</b><span class="muted">${k}</span></div>
+          `).join('')}
+        </div>
+        <h2 class="section">Storage</h2>
+        <div class="storage-bar"><div style="width:${pct}%"></div></div>
+        <p class="muted" style="margin-top:6px">${bytes(storage.used || 0)} / ${bytes(storage.total || 0)} used</p>
+      </div>
+    </div>`;
+
+  const dz = $('#dropzone');
+  dz.onclick = () => $('#file-input').click();
+  dz.ondragover = (e) => { e.preventDefault(); dz.classList.add('drag'); };
+  dz.ondragleave = () => dz.classList.remove('drag');
+  dz.ondrop = (e) => { e.preventDefault(); dz.classList.remove('drag'); uploadFiles(e.dataTransfer.files); };
+  document.querySelectorAll('.counter').forEach(c => c.onclick = () => setView(c.dataset.goto));
+}
+
+function render() {
+  if (state.view === 'home') return renderHome();
+  const rows = state.filtered;
+  if (!rows.length) { content.innerHTML = '<p class="muted">Nothing to show here.</p>'; return; }
+
+  if (state.view === 'photos' || state.view === 'videos' || state.view === 'apps') {
+    renderGrid(rows);
+  } else if (state.view === 'music') {
+    renderMusic(rows);
+  } else {
+    renderFiles(rows);
+  }
+}
+
+function cardFor(item, index) {
+  const selected = state.selection.has(item.id);
+  const thumb = (state.view === 'photos' || state.view === 'videos')
+    ? `<img loading="lazy" src="/download?id=${encodeURIComponent(item.id)}" alt="${item.name}">`
+    : `<div style="height:130px;display:flex;align-items:center;justify-content:center;color:var(--text-secondary)">
+         <svg viewBox="0 0 24 24" style="width:44px;height:44px;fill:none;stroke:currentColor;stroke-width:1.6">
+           <path d="M4 8l8-4 8 4v8l-8 4-8-4z"/><path d="M12 12v8M12 12l8-4M12 12L4 8"/></svg></div>`;
+  const dur = item.duration ? `<span class="badge-dur">${Math.floor(item.duration/60000)}:${String(Math.floor(item.duration/1000)%60).padStart(2,'0')}</span>` : '';
+  return `<div class="card ${selected ? 'selected' : ''}" data-id="${item.id}" data-index="${index}">
+      ${thumb}${dur}
+      <div class="pick">✓</div>
+      <div class="title" title="${item.name}">${item.name}</div>
+    </div>`;
+}
+
+function renderGrid(rows) {
+  const albumPanel = state.view === 'photos' ? sideAlbums(rows) : '';
+  state.lightbox = rows;
+  content.innerHTML = `
+    <div class="split">
+      ${albumPanel}
+      <div style="flex:1; min-width:0">
+        <div class="breadcrumb"><span>${state.view}</span></div>
+        <div class="grid">${rows.map(cardFor).join('')}</div>
+      </div>
+    </div>`;
+
+  document.querySelectorAll('.card').forEach(card => card.onclick = (e) => {
+    const item = rows[Number(card.dataset.index)];
+    if (e.target.classList.contains('pick')) {
+      state.selection.has(item.id) ? state.selection.delete(item.id) : state.selection.add(item.id);
+      card.classList.toggle('selected');
+    } else if (state.view === 'photos' || state.view === 'videos') {
+      openLightbox(Number(card.dataset.index));
+    } else {
+      window.location.href = '/download?id=' + encodeURIComponent(item.id);
+    }
+  });
+}
+
+function sideAlbums(rows) {
+  const albums = {};
+  rows.forEach(r => {
+    const key = (r.uri || '').replace(/\/[^/]+$/, '');
+    albums[key] = albums[key] || { name: key.split('/').pop() || 'All', count: 0, first: r };
+    albums[key].count++;
+  });
+  const list = Object.values(albums).slice(0, 12);
+  return `<div class="side-panel" id="side-panel">
+      <h2 class="section" style="margin-top:0">Albums</h2>
+      ${list.map(a => `<div class="album" data-key="${a.first ? (a.first.uri || '') : ''}">
+          <img class="thumb" src="${a.first ? '/download?id=' + encodeURIComponent(a.first.id) : ''}" alt="">
+          <div><div>${a.name}</div><div class="muted">${a.count}</div></div>
+        </div>`).join('')}
+    </div>`;
+}
+
+function renderMusic(rows) {
+  content.innerHTML = `<table>
+    <thead><tr><th style="width:36px"></th><th>Title</th><th>Artist</th><th class="num">Duration</th><th class="num">Size</th><th></th></tr></thead>
+    <tbody>
+      ${rows.map((r, i) => `<tr data-index="${i}">
+        <td><button class="icon-btn" data-play="${i}">▶</button></td>
+        <td>${r.name}</td>
+        <td class="muted">${r.artist || 'Unknown'}</td>
+        <td class="num muted">${r.duration ? Math.floor(r.duration/60000) + ':' + String(Math.floor(r.duration/1000)%60).padStart(2,'0') : ''}</td>
+        <td class="num muted">${bytes(r.size)}</td>
+        <td class="num"><span class="row-actions"><button class="icon-btn" data-dl="${i}">↓</button></span></td>
+      </tr>`).join('')}
+    </tbody></table>`;
+  document.querySelectorAll('[data-play]').forEach(b => b.onclick = () => playTrack(rows[Number(b.dataset.play)]));
+  document.querySelectorAll('[data-dl]').forEach(b => b.onclick = () =>
+    window.location.href = '/download?id=' + encodeURIComponent(rows[Number(b.dataset.dl)].id));
+}
+
+function renderFiles(rows) {
+  const crumbs = (state.path || 'Internal storage').split('/').filter(Boolean);
+  const tree = state.view === 'files' ? `<div class="side-panel" id="side-panel">
+      <h2 class="section" style="margin-top:0">Folders</h2>
+      <div class="tree-item" data-path="/storage/emulated/0">Internal storage</div>
+      ${['Download','DCIM','Documents','Pictures','Movies','Music','WhatsApp','Telegram']
+        .map(f => `<div class="tree-item" data-path="/storage/emulated/0/${f}">${f}</div>`).join('')}
+    </div>` : '';
+  content.innerHTML = `<div class="split">
+      ${tree}
+      <div style="flex:1; min-width:0">
+        <div class="breadcrumb">${crumbs.map((c, i) => `<span data-crumb="${i}">${c}</span>`).join('<span>/</span>')}</div>
+        <table>
+          <thead><tr><th>Name</th><th class="num">Size</th><th class="num">Modified</th><th></th></tr></thead>
+          <tbody>
+            ${rows.map((r, i) => `<tr data-index="${i}" data-dir="${r.isDirectory ? 1 : 0}">
+              <td>${typeBadge(r)} ${r.name}</td>
+              <td class="num muted">${r.isDirectory ? '' : bytes(r.size)}</td>
+              <td class="num muted">${r.modified ? dateLabel(r.modified) : ''}</td>
+              <td class="num"><span class="row-actions">
+                ${r.isDirectory ? '' : `<button class="icon-btn" data-dl="${i}">↓</button>`}
+                <button class="icon-btn" data-rename="${i}">✎</button>
+                <button class="icon-btn" data-delete="${i}">🗑</button>
+              </span></td></tr>`).join('')}
+          </tbody></table>
+      </div></div>`;
+
+  document.querySelectorAll('[data-dl]').forEach(b => b.onclick = () =>
+    window.location.href = '/download?id=' + encodeURIComponent(rows[Number(b.dataset.dl)].id));
+  document.querySelectorAll('[data-crumb]').forEach(c => c.onclick = () => {
+    state.path = '/' + crumbs.slice(0, Number(c.dataset.crumb) + 1).join('/');
+    load();
+  });
+  document.querySelectorAll('tr[data-dir="1"]').forEach(tr => tr.onclick = () => {
+    state.path = rows[Number(tr.dataset.index)].path;
+    load();
+  });
+  document.querySelectorAll('[data-rename]').forEach(b => b.onclick = async () => {
+    const item = rows[Number(b.dataset.rename)];
+    const name = prompt('New name', item.name);
+    if (!name) return;
+    await fetch(`/api/rename?path=${encodeURIComponent(item.path)}&name=${encodeURIComponent(name)}`);
+    load();
+  });
+  document.querySelectorAll('[data-delete]').forEach(b => b.onclick = async () => {
+    const item = rows[Number(b.dataset.delete)];
+    if (!confirm(`Delete ${item.name}?`)) return;
+    await fetch(`/api/delete?path=${encodeURIComponent(item.path)}`);
+    load();
+  });
+  document.querySelectorAll('#side-panel .tree-item').forEach(t => t.onclick = () => {
+    state.path = t.dataset.path; load(); closePanel();
+  });
+}
+
+function typeBadge(file) {
+  const ext = (file.name || '').split('.').pop().toLowerCase();
+  const map = { pdf: ['P', '#E5484D'], doc: ['W', '#2D9CDB'], docx: ['W', '#2D9CDB'],
+    xls: ['X', '#1FA36B'], xlsx: ['X', '#1FA36B'], ppt: ['S', '#E5A23D'], pptx: ['S', '#E5A23D'],
+    txt: ['T', '#8A8F98'], zip: ['Z', '#9B6DE5'], apk: ['A', '#1FA36B'] };
+  const [letter, color] = map[ext] || ['F', '#8A8F98'];
+  return `<span class="type-badge" style="background:${color}">${letter}</span>`;
+}
+
+/* ------------------------------------------------------------------ lightbox */
+function openLightbox(index) {
+  state.lightboxIndex = index;
+  const item = state.lightbox[index];
+  if (!item) return;
+  const isVideo = state.view === 'videos';
+  $('#modal-body').innerHTML = isVideo
+    ? `<video src="/download?id=${encodeURIComponent(item.id)}&stream=1" controls autoplay style="max-height:74vh"></video>`
+    : `<img src="/download?id=${encodeURIComponent(item.id)}" alt="${item.name}">`;
+  $('#modal-name').textContent = item.name;
+  $('#modal-download').onclick = () => window.location.href = '/download?id=' + encodeURIComponent(item.id);
+  $('#modal').classList.add('open');
+}
+$('#modal-close').onclick = () => $('#modal').classList.remove('open');
+$('#modal-prev').onclick = () => openLightbox((state.lightboxIndex - 1 + state.lightbox.length) % state.lightbox.length);
+$('#modal-next').onclick = () => openLightbox((state.lightboxIndex + 1) % state.lightbox.length);
+
+/* ------------------------------------------------------------------ player */
+const audio = $('#audio');
+function playTrack(item) {
+  $('#player').classList.add('open');
+  $('#player-title').textContent = item.name;
+  audio.src = '/download?id=' + encodeURIComponent(item.id);
+  audio.play();
+  $('#player-play').onclick = () => audio.paused ? audio.play() : audio.pause();
+  audio.ontimeupdate = () => {
+    if (!audio.duration) return;
+    $('#player-bar').style.width = (audio.currentTime / audio.duration * 100) + '%';
+    const m = Math.floor(audio.currentTime / 60), s = Math.floor(audio.currentTime % 60);
+    $('#player-time').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  };
+}
+
+/* ------------------------------------------------------------------ uploads */
+function uploadFiles(fileList) {
+  openTray(true);
+  for (const file of fileList) {
+    const form = new FormData();
+    form.append('file', file);
+    form.append('category', state.view);
+    const row = addTransferRow(file.name);
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/upload');
+    xhr.upload.onprogress = (evt) => {
+      if (evt.lengthComputable) updateTransferRow(row, evt.loaded / evt.total);
+    };
+    xhr.onload = () => {
+      updateTransferRow(row, 1, xhr.status === 200 ? 'done' : 'failed');
+      load();
+    };
+    xhr.onerror = () => updateTransferRow(row, 1, 'failed');
+    xhr.send(form);
+  }
+}
+
+function addTransferRow(name) {
+  const el = document.createElement('div');
+  el.className = 'transfer-row';
+  el.innerHTML = `<span style="flex:0 0 40%">${name}</span><div class="bar"><div style="width:0%"></div></div><span class="muted">0%</span>`;
+  $('#tray-rows').appendChild(el);
+  return el;
+}
+function updateTransferRow(el, fraction, cls) {
+  const pct = Math.round(fraction * 100);
+  el.querySelector('.bar > div').style.width = pct + '%';
+  el.lastElementChild.textContent = pct + '%';
+  if (cls) el.classList.add(cls);
+}
+function openTray(open) { $('#tray').classList.toggle('open', open); }
+$('#btn-queue').onclick = () => openTray(!$('#tray').classList.contains('open'));
+$('#tray-close').onclick = () => openTray(false);
+$('#action-btn').onclick = () => {
+  if (state.view === 'apps') {
+    const picked = state.filtered.filter(f => state.selection.has(f.id));
+    (picked.length ? picked : state.filtered).forEach((f, i) =>
+      setTimeout(() => window.location.href = '/download?id=' + encodeURIComponent(f.id), i * 250));
+  } else {
+    $('#file-input').click();
+  }
+};
+$('#file-input').onchange = (e) => { uploadFiles(e.target.files); e.target.value = ''; };
+$('#btn-refresh').onclick = () => load();
+$('#btn-power').onclick = () => {
+  if (!confirm('End this WebShare session? The PC will be disconnected.')) return;
+  fetch('/api/stop').finally(() => {
+    document.body.innerHTML = '<div style="padding:48px;text-align:center"><h1>Session ended</h1>'
+      + '<p class="muted">Close this tab. Start WebShare again on the phone to reconnect.</p></div>';
+  });
+};
+$('#search').oninput = applyFilter;
+$('#hamburger').onclick = () => { $('#side-panel')?.classList.toggle('open'); $('#scrim').classList.toggle('open'); };
+$('#scrim').onclick = closePanel;
+function closePanel() { $('#side-panel')?.classList.remove('open'); $('#scrim').classList.remove('open'); }
+
+document.querySelectorAll('.nav-icon').forEach(b => b.onclick = () => setView(b.dataset.view));
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') { $('#modal').classList.remove('open'); closePanel(); }
+});
+
+/* boot */
+loadHome().then(() => setView('home'));
+</script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="transfer_via">Sending — via %1$s</string>
+    <string name="transfer_section_sending">Sending (%1$d)</string>
+    <string name="transfer_section_receiving">Receiving (%1$d)</string>
+    <string name="transfer_idle">No active transfer</string>
+    <string name="transfer_done">Transfer complete</string>
+</resources>

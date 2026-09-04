@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/unit_4">
+
+        <TextView
+            style="@style/Text.Morselink.Meta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/screen_padding"
+            android:paddingTop="@dimen/unit_2"
+            android:paddingBottom="@dimen/unit_half"
+            android:text="PROFILE" />
+
+        <include
+            android:id="@+id/row_device_name"
+            layout="@layout/item_settings_row" />
+
+        <include
+            android:id="@+id/row_avatar"
+            layout="@layout/item_settings_row" />
+
+        <TextView
+            style="@style/Text.Morselink.Meta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/screen_padding"
+            android:paddingTop="@dimen/unit_3"
+            android:paddingBottom="@dimen/unit_half"
+            android:text="TRANSFER" />
+
+        <include
+            android:id="@+id/row_download_dir"
+            layout="@layout/item_settings_row" />
+
+        <include
+            android:id="@+id/row_prefer_wifi_direct"
+            layout="@layout/item_settings_switch" />
+
+        <TextView
+            style="@style/Text.Morselink.Meta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/screen_padding"
+            android:paddingTop="@dimen/unit_3"
+            android:paddingBottom="@dimen/unit_half"
+            android:text="APPEARANCE" />
+
+        <include
+            android:id="@+id/row_theme"
+            layout="@layout/item_settings_row" />
+
+        <TextView
+            style="@style/Text.Morselink.Meta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/screen_padding"
+            android:paddingTop="@dimen/unit_3"
+            android:paddingBottom="@dimen/unit_half"
+            android:text="NOTIFICATIONS &amp; SOUND" />
+
+        <include
+            android:id="@+id/row_notifications"
+            layout="@layout/item_settings_switch" />
+
+        <include
+            android:id="@+id/row_sounds"
+            layout="@layout/item_settings_switch" />
+
+        <TextView
+            style="@style/Text.Morselink.Meta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/screen_padding"
+            android:paddingTop="@dimen/unit_3"
+            android:paddingBottom="@dimen/unit_half"
+            android:text="ADVANCED" />
+
+        <include
+            android:id="@+id/row_timeout"
+            layout="@layout/item_settings_row" />
+
+        <include
+            android:id="@+id/row_reconnect"
+            layout="@layout/item_settings_row" />
+
+        <TextView
+            style="@style/Text.Morselink.Meta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/screen_padding"
+            android:paddingTop="@dimen/unit_3"
+            android:paddingBottom="@dimen/unit_half"
+            android:text="ABOUT" />
+
+        <include
+            android:id="@+id/row_webshare"
+            layout="@layout/item_settings_row" />
+
+        <include
+            android:id="@+id/row_version"
+            layout="@layout/item_settings_row" />
+
+        <include
+            android:id="@+id/row_privacy"
+            layout="@layout/item_settings_row" />
+    </LinearLayout>
+</ScrollView>
