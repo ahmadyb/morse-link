@@ -23,11 +23,10 @@ class MediaStoreDataSource @Inject constructor(
 
     suspend fun photos(sort: SortOrder = SortOrder.DATE): List<MediaItem> = withContext(Dispatchers.IO) {
         query(
-            collection = if (Build.VERSION.SDK_INT >= 29) MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-            else MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            collection = MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
             sort = sort,
             extraColumns = arrayOf(MediaStore.Images.Media.BUCKET_DISPLAY_NAME),
-        ) { columns -> columns.copy(bucketName = columns.bucket()) }
+        ) { cursor, item -> item.copy(bucketName = cursor.bucket()) }
     }
 
     suspend fun videos(sort: SortOrder = SortOrder.DATE): List<MediaItem> = withContext(Dispatchers.IO) {
@@ -38,7 +37,9 @@ class MediaStoreDataSource @Inject constructor(
                 MediaStore.Video.Media.DURATION,
                 MediaStore.Video.Media.BUCKET_DISPLAY_NAME,
             ),
-        ) { columns -> columns.copy(durationMs = columns.duration(), bucketName = columns.bucket()) }
+        ) { cursor, item ->
+            item.copy(durationMs = cursor.duration(), bucketName = cursor.bucket())
+        }
     }
 
     suspend fun music(sort: SortOrder = SortOrder.DATE): List<MediaItem> = withContext(Dispatchers.IO) {
@@ -50,11 +51,11 @@ class MediaStoreDataSource @Inject constructor(
                 MediaStore.Audio.Media.ARTIST,
                 MediaStore.Audio.Media.ALBUM,
             ),
-        ) { columns ->
-            columns.copy(
-                durationMs = columns.duration(),
-                artist = columns.artist(),
-                album = columns.album(),
+        ) { cursor, item ->
+            item.copy(
+                durationMs = cursor.duration(),
+                artist = cursor.artist(),
+                album = cursor.album(),
             )
         }
     }
@@ -63,7 +64,7 @@ class MediaStoreDataSource @Inject constructor(
         collection: Uri,
         sort: SortOrder,
         extraColumns: Array<String>,
-        map: (MediaItem) -> MediaItem,
+        map: (Cursor, MediaItem) -> MediaItem,
     ): List<MediaItem> {
         val base = arrayOf(
             MediaStore.MediaColumns._ID,
@@ -85,7 +86,7 @@ class MediaStoreDataSource @Inject constructor(
                 resolver.query(collection, projection, null, null, orderBy)?.use { cursor ->
                     while (cursor.moveToNext()) {
                         val item = cursor.toMediaItem(collection) ?: continue
-                        items.add(map(item))
+                        items.add(map(cursor, item))
                     }
                 }
             }.isSuccess

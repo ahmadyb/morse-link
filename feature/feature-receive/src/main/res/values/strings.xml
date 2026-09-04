@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="receive_hint">Scan the QR code on the sender's screen</string>
+    <string name="receive_hint">Scan the QR code on the sender\'s screen</string>
     <string name="receive_manual">Enter code manually</string>
     <string name="receive_camera_needed">Camera permission is needed to scan a QR code</string>
     <string name="receive_camera_unavailable">No camera is available on this device</string>

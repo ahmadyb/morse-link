@@ -149,7 +149,7 @@ class NearbyConnectionsTransport @Inject constructor(
 
                 override fun onDisconnected(id: String) = Unit
             }
-            client.requestConnection(peer.name, endpointId = peer.id, callback)
+            client.requestConnection(peer.name, peer.id, callback)
                 .addOnFailureListener { error ->
                     if (resumed.compareAndSet(false, true) && continuation.isActive) {
                         continuation.resumeWithException(error)

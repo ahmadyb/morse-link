@@ -54,8 +54,10 @@ class ConnectionService : Service() {
     private fun observeProgress() {
         scope.launch {
             updater.text.collect { text ->
-                val manager = getSystemService(android.app.NotificationManager::class.java)
-                manager?.notify(Notifications.ID_TRANSFER, buildNotification(text))
+                if (android.os.Build.VERSION.SDK_INT >= 26) {
+                    val manager = getSystemService(android.app.NotificationManager::class.java)
+                    manager?.notify(Notifications.ID_TRANSFER, buildNotification(text))
+                }
             }
         }
     }

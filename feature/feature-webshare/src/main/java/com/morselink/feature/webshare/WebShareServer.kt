@@ -214,87 +214,136 @@ class WebShareServer @Inject constructor(
 
     // -------------------------------------------------------------------- upload
 
+    /**
+     * Streaming multipart upload: the body is scanned for the boundary and each
+     * part is streamed straight to disk, so a 2 GB upload never sits in RAM.
+     */
     private fun upload(session: IHTTPSession): Response {
-        val files = HashMap<String, String>()
-        return try {
-            session.parseBody(files)
-            val results = JSONArray()
-            val directory = fileOps.defaultDownloadDirectory()
-            files.forEach { (field, tempPath) ->
-                val originalName = session.parms[field] ?: File(tempPath).name
-                val target = File(directory, sanitize(originalName))
-                val temp = File(tempPath)
-                runCatching {
-                    temp.inputStream().use { input -> target.outputStream().use { input.copyTo(it) } }
-                    temp.delete()
-                    runBlocking {
-                        fileOps.publishToMediaStore(
-                            target,
-                            android.webkit.MimeTypeMap.getSingleton()
-                                .getMimeTypeFromExtension(target.extension.lowercase(Locale.US)),
-                        )
-                    }
+        val contentType = session.headers["content-type"]
+            ?: session.headers["Content-Type"]
+            ?: return json(errorJson("Expected multipart/form-data"))
+        val boundary = Regex("boundary=([^;\s]+)").find(contentType)
+            ?.groupValues?.get(1)?.trim('"')
+            ?: return json(errorJson("Missing multipart boundary"))
+
+        val marker = "--$boundary".toByteArray(Charsets.UTF_8)
+        val results = JSONArray()
+        val directory = fileOps.defaultDownloadDirectory()
+
+        runCatching {
+            val pushback = java.io.PushbackInputStream(session.inputStream, 8192)
+            readUntilBoundary(pushback, marker)   // skip the preamble
+            while (true) {
+                val partHeaders = readHeaders(pushback) ?: break
+                val name = Regex("filename\*?=\"([^\"]*)\"").find(partHeaders)
+                    ?.groupValues?.get(1)
+                    ?: Regex("filename\*?=([^;\r\n]+)").find(partHeaders)
+                        ?.groupValues?.get(1)?.trim()?.trim('"')
+                val target = if (name.isNullOrBlank()) null else File(directory, sanitize(name))
+                if (target == null) {
+                    if (!readUntilBoundary(pushback, marker)) break
+                    continue
                 }
+                FileOutputStream(target).use { out ->
+                    if (!readUntilBoundary(pushback, marker, out)) return@use
+                }
+                val mime = android.webkit.MimeTypeMap.getSingleton()
+                    .getMimeTypeFromExtension(target.extension.lowercase(Locale.US))
+                runBlocking { fileOps.publishToMediaStore(target, mime) }
                 results.put(JSONObject().apply {
                     put("name", target.name)
                     put("size", target.length())
                     put("saved", target.exists())
                 })
+                if (isFinalBoundary(pushback)) break
             }
-            json(JSONObject().apply {
-                put("uploaded", results.length())
-                put("files", results)
-            }.toString())
-        } catch (error: Exception) {
-            json(JSONObject().apply {
-                put("error", error.message ?: "Upload failed")
-            }.toString())
+        }.onFailure { error ->
+            return json(errorJson(error.message ?: "Upload failed"))
+        }
+
+        return json(JSONObject().apply {
+            put("uploaded", results.length())
+            put("files", results)
+        }.toString())
+    }
+
+    /** Copies bytes to [sink] until the boundary is seen; returns false on EOF. */
+    private fun readUntilBoundary(
+        input: java.io.PushbackInputStream,
+        marker: ByteArray,
+        sink: java.io.OutputStream? = null,
+    ): Boolean {
+        val buffer = ByteArray(BUFFER_SIZE)
+        var pending = 0
+        while (true) {
+            if (pending == buffer.size) {
+                val keep = marker.size - 1
+                sink?.write(buffer, 0, pending - keep)
+                System.arraycopy(buffer, pending - keep, buffer, 0, keep)
+                pending = keep
+            }
+            val read = input.read(buffer, pending, buffer.size - pending)
+            if (read < 0) {
+                sink?.write(buffer, 0, pending)
+                return false
+            }
+            pending += read
+            val index = indexOf(buffer, pending, marker)
+            if (index >= 0) {
+                sink?.write(buffer, 0, index)
+                val consumed = index + marker.size
+                val leftover = pending - consumed
+                if (leftover > 0) input.unread(buffer, consumed, leftover)
+                return true
+            }
+            val safe = pending - (marker.size - 1)
+            if (safe > 0) {
+                sink?.write(buffer, 0, safe)
+                System.arraycopy(buffer, safe, buffer, 0, pending - safe)
+                pending -= safe
+            }
         }
     }
 
-    private fun renameFile(session: IHTTPSession): String {
-        val path = session.parms["path"] ?: return errorJson("Missing path")
-        val name = session.parms["name"] ?: return errorJson("Missing name")
-        val result = runBlocking { runCatching { fileOps.rename(File(path), name) } }
-        return JSONObject().apply {
-            put("ok", result.isSuccess)
-            if (result.isFailure) put("error", result.exceptionOrNull()?.message)
-        }.toString()
-    }
-
-    private fun deleteFile(session: IHTTPSession): String {
-        val path = session.parms["path"] ?: return errorJson("Missing path")
-        val file = File(path)
-        val result = runBlocking {
-            runCatching {
-                fileOps.delete(
-                    com.morselink.core.media.FileItem(
-                        path = file.absolutePath,
-                        name = file.name,
-                        isDirectory = file.isDirectory,
-                        sizeBytes = file.length(),
-                        lastModified = file.lastModified(),
-                        mimeType = null,
-                    )
-                )
+    private fun readHeaders(input: java.io.PushbackInputStream): String? {
+        val builder = StringBuilder()
+        while (true) {
+            val byte = input.read()
+            if (byte < 0) return null
+            builder.append(byte.toChar())
+            if (builder.length >= HEADER_END.length &&
+                builder.substring(builder.length - HEADER_END.length) == HEADER_END
+            ) {
+                return builder.toString()
             }
         }
-        return JSONObject().apply {
-            put("ok", result.isSuccess)
-            if (result.isFailure) put("error", result.exceptionOrNull()?.message)
-        }.toString()
     }
 
-    private fun stopSession(): String {
-        onStopRequest?.invoke()
-        return JSONObject().apply { put("ok", true) }.toString()
+    /** True when the last boundary was the closing "--boundary--". */
+    private fun isFinalBoundary(input: java.io.PushbackInputStream): Boolean {
+        val first = input.read()
+        val second = input.read()
+        if (second >= 0) input.unread(second)
+        if (first >= 0) input.unread(first)
+        return first == '-'.code && second == '-'.code
     }
 
-    private fun errorJson(message: String): String =
-        JSONObject().apply { put("error", message) }.toString()
-
-    /** Called by the browser's "end session" button. */
-    var onStopRequest: (() -> Unit)? = null
+    private fun indexOf(buffer: ByteArray, length: Int, pattern: ByteArray): Int {
+        if (pattern.isEmpty() || length < pattern.size) return -1
+        val last = length - pattern.size
+        for (i in 0..last) {
+            if (buffer[i] != pattern[0]) continue
+            var matched = true
+            for (j in 1 until pattern.size) {
+                if (buffer[i + j] != pattern[j]) {
+                    matched = false
+                    break
+                }
+            }
+            if (matched) return i
+        }
+        return -1
+    }
 
     private fun sanitize(name: String): String =
         name.replace(Regex("[\\\\/:*?\"<>|]"), "_").ifBlank { "upload.bin" }
@@ -314,5 +363,7 @@ class WebShareServer @Inject constructor(
         const val PORT = 33455
         private const val SOCKET_READ_TIMEOUT = 20_000
         private const val APK_MIME = "application/vnd.android.package-archive"
+        private const val HEADER_END = "\r\n\r\n"
+        private const val BUFFER_SIZE = 64 * 1024
     }
 }
