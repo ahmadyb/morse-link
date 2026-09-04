@@ -35,9 +35,22 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Assemble release
+        id: assemble
         run: |
           chmod +x ./gradlew
-          ./gradlew assembleRelease --no-daemon --stacktrace
+          set +e
+          ./gradlew assembleRelease --no-daemon --stacktrace > build.log 2>&1
+          code=$?
+          set -e
+          tail -n 300 build.log
+          if [ "$code" -ne 0 ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add -f build.log
+            git commit -m "build: attach failing build log [skip ci]" || true
+            git push origin HEAD:"${GITHUB_REF_NAME}" || true
+          fi
+          exit "$code"
 
       - name: Collect the APK
         run: |
