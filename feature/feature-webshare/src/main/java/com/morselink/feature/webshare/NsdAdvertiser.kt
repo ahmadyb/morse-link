@@ -30,10 +30,17 @@ class NsdAdvertiser @Inject constructor(
         val manager = nsdManager ?: return false
         stop()
         val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
-        multicastLock = wifiManager?.createMulticastLock("morselink-mdns")?.apply {
-            setReferenceCounted(true)
-            acquire()
-        }
+        // mDNS is a convenience on top of the plain address, which is always
+        // shown. Several OEM builds refuse the multicast lock outright, and that
+        // used to take the whole app down.
+        multicastLock = runCatching {
+            wifiManager?.createMulticastLock("morselink-mdns")?.apply {
+                setReferenceCounted(true)
+                acquire()
+            }
+        }.onFailure {
+            android.util.Log.w("Morselink", "Multicast lock refused; continuing without mDNS", it)
+        }.getOrNull()
 
         val info = NsdServiceInfo().apply {
             serviceName = deviceName

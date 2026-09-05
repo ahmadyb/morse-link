@@ -238,6 +238,27 @@ class LegacyWifiDirectTransport @Inject constructor(
         val handle = withTimeoutOrNull(GROUP_TIMEOUT_MS) { deferred.await() }
         runCatching { context.unregisterReceiver(receiver) }
         val group = handle ?: GroupHandle(ownerIp = peer.address ?: "", isOwner = false)
+
+        // A session used to be handed back even when nothing was on the other
+        // end, so typing a made-up port still reported "connected" and then sat
+        // there forever. Verify the endpoint before claiming success.
+        if (handle == null) {
+            val host = group.ownerIp
+            val port = peer.port
+            if (host.isBlank() || port <= 0) {
+                error("No address to connect to")
+            }
+            runCatching {
+                Socket().use { it.connect(java.net.InetSocketAddress(host, port), 4_000) }
+            }.onFailure { cause ->
+                throw IOException(
+                    "Could not reach $host:$port. Make sure the sender is still " +
+                        "showing its code on this network.",
+                    cause,
+                )
+            }
+        }
+
         lastGroupOwner = group.ownerIp
         weAreOwner = group.isOwner
         return LegacySession(peer, group)
