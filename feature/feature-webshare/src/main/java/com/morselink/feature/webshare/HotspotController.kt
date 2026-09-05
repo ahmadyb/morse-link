@@ -51,6 +51,8 @@ class ModernHotspotController(
 
     private var reservation: WifiManager.LocalOnlyHotspotReservation? = null
 
+    private val manualScope = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob())
+
     override fun start(onResult: (HotspotResult) -> Unit) {
         val manager = wifiManager
         if (manager == null) {
@@ -87,7 +89,40 @@ class ModernHotspotController(
                 manager.startLocalOnlyHotspot(callback, null)
             }
         }.onFailure { error ->
-            onResult(HotspotResult.Failed(error.message ?: "Hotspot unavailable"))
+            // Several OEM builds reject startLocalOnlyHotspot with a
+            // SecurityException regardless of what the manifest declares. That
+            // used to surface as a raw "package=... UID=... does not have
+            // permission" message and nothing else, leaving the user stuck.
+            // Open the hotspot settings and wait for it to come up instead.
+            android.util.Log.w("Morselink", "startLocalOnlyHotspot rejected", error)
+            fallbackToManual(onResult)
+        }
+    }
+
+    /** Ask the user to switch the hotspot on, then poll until it appears. */
+    private fun fallbackToManual(onResult: (HotspotResult) -> Unit) {
+        onResult(HotspotResult.ManualSetupRequired)
+        runCatching {
+            context.startActivity(
+                Intent(Settings.ACTION_WIRELESS_SETTINGS)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            )
+        }
+        manualScope.launch {
+            repeat(40) {
+                delay(1_500)
+                val ip = network.localIpAddress()
+                if (ip != null && (ip.startsWith("192.168.43.") || ip.startsWith("192.168.49."))) {
+                    onResult(
+                        HotspotResult.Ready(
+                            ssid = "Phone hotspot",
+                            password = null,
+                            gatewayIp = ip,
+                        )
+                    )
+                    return@launch
+                }
+            }
         }
     }
 

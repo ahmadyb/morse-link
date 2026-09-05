@@ -51,7 +51,7 @@ class WebShareViewModel @Inject constructor(
             _message.value = "Connect to Wi-Fi (or start a hotspot) first"
             return
         }
-        val started = server.startServer()
+        val started = runCatching { server.startServer() }.getOrDefault(false)
         if (!started) {
             _message.value = "Could not start the WebShare server on port ${WebShareServer.PORT}"
             return
