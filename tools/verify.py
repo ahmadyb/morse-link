@@ -289,6 +289,33 @@ def check_binding_ids(mods, errors):
                         )
 
 
+# kotlinx.coroutines exposes these as top-level extensions; using one without
+# importing it is a compile error the Capitalised-name check cannot see.
+COROUTINE_EXTENSIONS = [
+    "launch", "async", "withContext", "runBlocking", "delay",
+    "flow", "callbackFlow", "channelFlow", "flowOn", "combine",  # no await: Deferred.await() is a member
+    "flatMapLatest", "mapLatest",
+]
+
+
+def check_coroutine_extensions(errors):
+    for p in kotlin_files():
+        text = open(p, encoding="utf-8").read()
+        imported = set(re.findall(r"^\s*import\s+([\w.]+)", text, re.M))
+        body = "\n".join(
+            line for line in strip_code(text, blank_strings=True).splitlines()
+            if not line.strip().startswith(("import ", "package "))
+        )
+        for name in COROUTINE_EXTENSIONS:
+            if not re.search(r"(?<![\w.])" + name + r"\b", body):
+                continue
+            if not any(i.endswith("." + name) for i in imported):
+                errors.append(
+                    f"MISSING IMPORT {p}: '{name}' used but "
+                    f"kotlinx.coroutines.{name} is not imported"
+                )
+
+
 def check_companion_objects(errors):
     """Kotlin allows only one companion object per class; a second one is a
     compile error that is easy to introduce when adding constants."""
@@ -300,6 +327,90 @@ def check_companion_objects(errors):
                 f"DUPLICATE COMPANION {p}: {count} companion objects "
                 f"(only one allowed per class)"
             )
+
+
+VALUE_KINDS = {
+    "string", "color", "dimen", "style", "array", "plurals",
+    "integer", "bool", "id", "attr", "declare-styleable", "fraction",
+}
+DIR_KINDS = {
+    "drawable", "layout", "menu", "mipmap", "anim", "animator",
+    "xml", "raw", "navigation", "transition", "font",
+}
+
+
+def res_names(root):
+    """Every resource name a module declares, bucketed by kind."""
+    out = {k: set() for k in set(VALUE_KINDS) | DIR_KINDS}
+    for d in glob.glob(os.path.join(root, "src/main/res")):
+        for sub in sorted(os.listdir(d)):
+            base = sub.split("-")[0]
+            full = os.path.join(d, sub)
+            if not os.path.isdir(full):
+                continue
+            if base in DIR_KINDS:
+                for f in glob.glob(os.path.join(full, "*")):
+                    out[base].add(os.path.splitext(os.path.basename(f))[0])
+            elif base == "values":
+                for f in glob.glob(os.path.join(full, "*.xml")):
+                    text = open(f, encoding="utf-8").read()
+                    for m in re.finditer(
+                        r'<(string-array|integer-array|array|string|color|dimen|'
+                        r'style|plurals|integer|bool)\b[^>]*?name\s*=\s*"([^"]+)"',
+                        text, re.S,
+                    ):
+                        kind = m.group(1)
+                        if kind.endswith("-array"):
+                            kind = "array"
+                        out[kind].add(m.group(2))
+                    for m in re.finditer(
+                        r'<item\b[^>]*type\s*=\s*"id"[^>]*name\s*=\s*"([^"]+)"', text
+                    ):
+                        out["id"].add(m.group(1))
+    for f in glob.glob(os.path.join(root, "src/main/res", "**", "*.xml"), recursive=True):
+        if os.sep + "values" in os.path.dirname(f):
+            continue
+        for m in re.finditer(r"@\+id/(\w+)", open(f, encoding="utf-8").read()):
+            out["id"].add(m.group(1))
+    return out
+
+
+def check_resource_refs(errors):
+    """R.<kind>.<name> must exist in this module; core-ui references must be
+    written fully qualified, because R is per-module in Gradle."""
+    mods = [
+        m[: -len("/src/main/res")]
+        for m in glob.glob("*/src/main/res") + glob.glob("*/*/src/main/res")
+    ]
+
+    def module_of(path):
+        for r in sorted(mods, key=len, reverse=True):
+            if path.startswith(r):
+                return r
+        return None
+
+    ui = res_names("core/core-ui")
+    cache = {}
+    skip = {"id", "style", "attr"}
+    for p in kotlin_files():
+        mod = module_of(p)
+        if mod is None:
+            continue
+        cache.setdefault(mod, res_names(mod))
+        own = cache[mod]
+        text = open(p, encoding="utf-8").read()
+        for m in re.finditer(r"com\.morselink\.core\.ui\.R\.(\w+)\.(\w+)", text):
+            kind, name = m.group(1), m.group(2)
+            if kind in skip or kind not in ui:
+                continue
+            if name not in ui[kind]:
+                errors.append(f"MISSING RESOURCE core-ui {kind}/{name} in {p}")
+        for m in re.finditer(r"(?<![\w.])R\.(\w+)\.(\w+)", text):
+            kind, name = m.group(1), m.group(2)
+            if kind in skip or kind not in own:
+                continue
+            if name not in own[kind]:
+                errors.append(f"MISSING RESOURCE {kind}/{name} in {p}")
 
 
 def check_xml(errors):
@@ -325,7 +436,9 @@ def main():
     check_escapes(errors)
     check_imports_and_deps(mods, errors)
     check_binding_ids(mods, errors)
+    check_coroutine_extensions(errors)
     check_companion_objects(errors)
+    check_resource_refs(errors)
     check_xml(errors)
 
     print(f"modules={len(mods)} kotlin={len(kotlin_files())}")

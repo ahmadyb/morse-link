@@ -64,7 +64,7 @@ class ConnectionService : Service() {
 
     private fun buildNotification(text: String) =
         NotificationCompat.Builder(this, Notifications.CHANNEL_TRANSFERS)
-            .setSmallIcon(R.drawable.ic_send)
+            .setSmallIcon(com.morselink.core.ui.R.drawable.ic_send)
             .setContentTitle("Morselink transfer")
             .setContentText(text)
             .setOngoing(true)

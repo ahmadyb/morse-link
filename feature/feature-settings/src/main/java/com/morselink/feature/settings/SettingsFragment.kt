@@ -104,7 +104,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle(R.string.history_privacy_title)
                 .setMessage(R.string.history_privacy_body)
-                .setPositiveButton(R.string.action_ok, null)
+                .setPositiveButton(com.morselink.core.ui.R.string.action_ok, null)
                 .show()
         }
     }

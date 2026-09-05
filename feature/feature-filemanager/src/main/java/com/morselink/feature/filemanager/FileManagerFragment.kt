@@ -9,6 +9,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.morselink.core.media.DirectoryState
 import com.morselink.core.media.FileItem
@@ -142,7 +143,7 @@ class FileManagerFragment : Fragment(R.layout.fragment_file_manager) {
         binding.empty.text = when (viewModel.state.value ?: DirectoryState.OK) {
             DirectoryState.RESTRICTED -> getString(R.string.files_restricted)
             DirectoryState.MISSING -> getString(R.string.files_missing)
-            DirectoryState.EMPTY, DirectoryState.OK -> getString(R.string.empty_generic)
+            DirectoryState.EMPTY, DirectoryState.OK -> getString(com.morselink.core.ui.R.string.empty_generic)
         }
     }
 
@@ -169,7 +170,7 @@ class FileManagerFragment : Fragment(R.layout.fragment_file_manager) {
             putParcelableArrayListExtra(Intent.EXTRA_STREAM, ArrayList(uris))
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
-        runCatching { startActivity(Intent.createChooser(intent, getString(R.string.action_share))) }
+        runCatching { startActivity(Intent.createChooser(intent, getString(com.morselink.core.ui.R.string.action_share))) }
             .onFailure { Toast.makeText(requireContext(), "No app can open these files", Toast.LENGTH_SHORT).show() }
         clearSelection()
     }
@@ -179,9 +180,9 @@ class FileManagerFragment : Fragment(R.layout.fragment_file_manager) {
         if (items.isEmpty()) return
         Dialogs.confirm(
             requireContext(),
-            getString(R.string.action_delete),
+            getString(com.morselink.core.ui.R.string.action_delete),
             "Delete ${items.size} item(s)?",
-            confirmLabel = getString(R.string.action_delete),
+            confirmLabel = getString(com.morselink.core.ui.R.string.action_delete),
             destructive = true,
         ) {
             viewModel.delete(items) { removed ->
@@ -197,7 +198,7 @@ class FileManagerFragment : Fragment(R.layout.fragment_file_manager) {
 
     private fun renameSelection() {
         val item = viewModel.selectedItems().firstOrNull() ?: return
-        Dialogs.input(requireContext(), getString(R.string.action_rename), item.name) { newName ->
+        Dialogs.input(requireContext(), getString(com.morselink.core.ui.R.string.action_rename), item.name) { newName ->
             viewModel.rename(item, newName) { clearSelection() }
         }
     }
@@ -242,7 +243,7 @@ class FileManagerFragment : Fragment(R.layout.fragment_file_manager) {
                 Format.fullDate(item.lastModified),
                 item.path,
             ).replace("\\n", "\n"),
-            confirmLabel = getString(R.string.action_ok),
+            confirmLabel = getString(com.morselink.core.ui.R.string.action_ok),
         ) { }
         file.length() // touch to keep the reference meaningful for lint
     }
