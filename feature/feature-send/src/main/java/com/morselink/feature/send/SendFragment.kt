@@ -93,7 +93,7 @@ class SendFragment : Fragment(R.layout.fragment_send) {
                     suppressSortCallback = false
                     return
                 }
-                viewModel.setSort(SortOrder.fromIndex(position))
+                viewModel.setSort(SortOrder.values().getOrElse(position) { SortOrder.DATE })
             }
             override fun onNothingSelected(parent: AdapterView<*>?) = Unit
         }

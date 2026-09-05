@@ -142,7 +142,11 @@ class SendAdapter(
         }
     }
 
-    private fun resetSelection(check: ImageView, ring: ImageView?) {
+    /**
+     * The selection ring is a plain <View> in item_media_grid.xml, not an
+     * ImageView, so this takes the widest type that can be hidden.
+     */
+    private fun resetSelection(check: android.view.View, ring: android.view.View?) {
         check.visibility = android.view.View.GONE
         ring?.visibility = android.view.View.GONE
     }

@@ -289,6 +289,70 @@ def check_binding_ids(mods, errors):
                         )
 
 
+TEXTUAL_TAGS = {
+    "TextView", "EditText", "Button", "TextInputEditText", "TextInputLayout",
+    "AppCompatTextView", "AppCompatEditText", "MaterialButton", "MaterialTextView",
+    "Chip", "CheckBox", "RadioButton", "Switch", "SwitchMaterial", "TextClock",
+    "Chronometer", "AutoCompleteTextView", "MultiAutoCompleteTextView",
+}
+IMAGE_TAGS = {"ImageView", "AppCompatImageView", "ShapeableImageView", "ImageButton"}
+
+
+def check_binding_types(mods, errors):
+    """A binding id can exist in the layout and still have the wrong View type.
+    Catch the common cases: text on a non-TextView, images on a non-ImageView."""
+    for d in list(mods) + [ROOT]:
+        java = os.path.join(d, "src/main/java")
+        layouts = os.path.join(d, "src/main/res/layout")
+        if not os.path.isdir(java) or not os.path.isdir(layouts):
+            continue
+        tag_of = {}
+        for xml in glob.glob(os.path.join(layouts, "*.xml")):
+            text = open(xml, encoding="utf-8").read()
+            tag_id = re.compile(
+                r'<([\w.]+)\b[^>]*?android:id\s*=\s*"@\+id/(\w+)"', re.S
+            )
+            for m in tag_id.finditer(text):
+                tag, raw = m.group(1), m.group(2)
+                head, *rest = raw.split("_")
+                camel = head + "".join(w.title() for w in rest)
+                tag_of.setdefault(camel, set()).add(tag.split(".")[-1])
+        if not tag_of:
+            continue
+        for root, _, files in os.walk(java):
+            for f in files:
+                if not f.endswith(".kt"):
+                    continue
+                path = os.path.join(root, f)
+                src = open(path, encoding="utf-8").read()
+                for m in re.finditer(r"\bbinding\.(\w+)\s*\.\s*(\w+)", src):
+                    name, member = m.group(1), m.group(2)
+                    tags = tag_of.get(name)
+                    if not tags:
+                        continue
+                    if member in ("text", "setText", "setHint", "hint", "setError"):
+                        if not (tags & TEXTUAL_TAGS):
+                            errors.append(
+                                f"BINDING TYPE {path}: binding.{name}.{member} "
+                                f"but <{sorted(tags)[0]}> is not a TextView"
+                            )
+                    if member in ("setImageResource", "setImageBitmap",
+                                  "setImageDrawable", "setImageURI"):
+                        if not (tags & IMAGE_TAGS):
+                            errors.append(
+                                f"BINDING TYPE {path}: binding.{name}.{member} "
+                                f"but <{sorted(tags)[0]}> is not an ImageView"
+                            )
+                for m in re.finditer(r"(?:Glide\s*\.\s*with|\.\s*into)\s*\(\s*"
+                                     r"binding\.(\w+)", src):
+                    tags = tag_of.get(m.group(1))
+                    if tags and not (tags & IMAGE_TAGS):
+                        errors.append(
+                            f"BINDING TYPE {path}: Glide loads binding.{m.group(1)} "
+                            f"but <{sorted(tags)[0]}> is not an ImageView"
+                        )
+
+
 # kotlinx.coroutines exposes these as top-level extensions; using one without
 # importing it is a compile error the Capitalised-name check cannot see.
 COROUTINE_EXTENSIONS = [
@@ -436,6 +500,7 @@ def main():
     check_escapes(errors)
     check_imports_and_deps(mods, errors)
     check_binding_ids(mods, errors)
+    check_binding_types(mods, errors)
     check_coroutine_extensions(errors)
     check_companion_objects(errors)
     check_resource_refs(errors)
