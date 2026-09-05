@@ -16,6 +16,9 @@ import java.util.Locale
 object CrashLog {
 
     private const val FILE_NAME = "crash.log"
+    private const val PREFS = "crash_log_state"
+    private const val KEY_NEWEST = "newest_stamp"
+    private const val KEY_SEEN = "seen_stamp"
     private const val MARKER = "==== CRASH "
     private const val MAX_ENTRIES = 5
     private const val MAX_CAUSE_DEPTH = 5
@@ -29,6 +32,31 @@ object CrashLog {
     fun clear(context: Context) {
         runCatching { file(context).delete() }
     }
+
+    /** Just the newest entry, for showing in a dialog. */
+    fun newest(text: String): String {
+        val next = text.indexOf(MARKER, MARKER.length)
+        return if (next > 0) text.substring(0, next) else text
+    }
+
+    /**
+     * True when a crash has been recorded that the user has not seen yet.
+     * The log has to be surfaced outside Settings — a crash in Settings
+     * would otherwise make it permanently unreachable.
+     */
+    fun hasUnseen(context: Context): Boolean =
+        read(context) != null && newestStamp(context) > seenStamp(context)
+
+    fun newestStamp(context: Context): Long = prefs(context).getLong(KEY_NEWEST, 0L)
+
+    fun seenStamp(context: Context): Long = prefs(context).getLong(KEY_SEEN, 0L)
+
+    fun markSeen(context: Context) {
+        prefs(context).edit().putLong(KEY_SEEN, newestStamp(context)).apply()
+    }
+
+    private fun prefs(context: Context) =
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 
     /** Number of crashes recorded in [text]. */
     fun entryCount(text: String): Int =
@@ -48,6 +76,8 @@ object CrashLog {
     }
 
     private fun record(context: Context, thread: Thread, throwable: Throwable) {
+        val now = System.currentTimeMillis()
+        runCatching { prefs(context).edit().putLong(KEY_NEWEST, now).apply() }
         val entry = buildString {
             append(MARKER).append(stamp()).appendLine()
             appendLine("thread: ${thread.name}")

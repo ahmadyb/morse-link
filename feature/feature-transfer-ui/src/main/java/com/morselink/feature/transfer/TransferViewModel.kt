@@ -15,11 +15,13 @@ import com.morselink.core.network.TransportSelector
 import com.morselink.core.transfer.engine.TransferEngine
 import com.morselink.core.transfer.legacy.LegacyPorts
 import com.morselink.core.transfer.model.TransferDirection
+import com.morselink.core.transfer.model.TransportType
 import com.morselink.core.transfer.model.TransferSessionState
 import com.morselink.core.transfer.model.label
 import com.morselink.core.ui.Format
 import com.morselink.core.ui.QrCode
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.map
@@ -31,6 +33,7 @@ import javax.inject.Inject
 data class PairingState(
     val qr: Bitmap? = null,
     val address: String? = null,
+    val port: Int? = null,
     val status: String = "",
     val visible: Boolean = false,
 )
@@ -47,11 +50,6 @@ class TransferViewModel @Inject constructor(
 
     val rows: LiveData<List<TransferRow>> = engine.state.map { it.toRows() }.asLiveData()
 
-    val transportLabel: LiveData<String> = engine.state.map { state ->
-        val transport = state.all().firstOrNull()?.transport
-        if (transport != null) "Transferring — via ${transport.label()}" else "Waiting for a connection"
-    }.asLiveData()
-
     val stats: LiveData<String> = engine.state.map { state ->
         val active = state.all().filter { !it.isFinished }
         if (active.isEmpty()) "No active transfer"
@@ -64,36 +62,83 @@ class TransferViewModel @Inject constructor(
         }
     }.asLiveData()
 
+    /**
+     * One line that always says what is going on, so the screen never sits on a
+     * bare "waiting for a connection" while the user wonders whether the scan
+     * did anything.
+     */
+    private val _statusLine = MutableLiveData("Waiting for a connection")
+    val statusLine: LiveData<String> = _statusLine
+
     private val _pairing = MutableLiveData(PairingState())
     val pairing: LiveData<PairingState> = _pairing
 
+    /** Set once cancel has finished, so the screen can take the user back. */
+    private val _dismiss = MutableLiveData(false)
+    val dismiss: LiveData<Boolean> = _dismiss
+
     private var advertiseJob: Job? = null
+    private var sendJob: Job? = null
 
     init {
-        // If the Send flow queued files, we are the sender: start listening and
-        // publish the QR the receiver has to scan.
+        viewModelScope.launch { engine.state.collect { pushStatus() } }
+
         if (holder.pendingOutgoing.isNotEmpty() && holder.session == null) {
             startSenderPairing()
         } else {
             service.start()
+            // Arriving as the receiver: the session is already up, so say who
+            // we are connected to instead of implying nothing happened.
+            val peer = holder.peer
+            if (peer != null && holder.hasSession()) {
+                _statusLine.postValue("Connected to ${peer.name} — waiting for files")
+            }
         }
+    }
+
+    private fun pushStatus() {
+        val state = engine.state.value
+        val active = state.all().filter { !it.isFinished }
+        val peer = holder.peer
+        _statusLine.postValue(
+            when {
+                active.isNotEmpty() -> {
+                    val transport = active.first().transport
+                    "Transferring ${active.size} file(s)" +
+                        (transport?.let { " via ${it.label()}" } ?: "")
+                }
+                holder.hasSession() && peer != null ->
+                    "Connected to ${peer.name} — waiting for files"
+                holder.pendingOutgoing.isNotEmpty() ->
+                    "Waiting for a receiver to scan the code"
+                else -> "Waiting for a connection"
+            }
+        )
     }
 
     private fun startSenderPairing() {
         service.start()
+        pushStatus()
         advertiseJob = viewModelScope.launch {
             val name = runCatching { settings.current().deviceName }
                 .getOrDefault("Morselink")
                 .ifBlank { "Morselink" }
 
-            // Listen in the background; the flow emits when a receiver joins.
             launch {
                 runCatching {
                     selector.advertise(name) { peer ->
                         holder.peer = peer
-                        viewModelScope.launch {
+                        sendJob = viewModelScope.launch {
                             runCatching { holder.session = selector.connect(peer) }
-                                .onSuccess { sendPending() }
+                                .onSuccess {
+                                    _statusLine.postValue("Connected to ${peer.name}")
+                                    sendPending()
+                                }
+                                .onFailure { error ->
+                                    _statusLine.postValue(
+                                        "Could not connect: ${error.message ?: "unknown error"}"
+                                    )
+                                }
                         }
                     }
                 }
@@ -110,16 +155,18 @@ class TransferViewModel @Inject constructor(
                         visible = true,
                     )
                 } else {
+                    val port = LegacyPorts.CONTROL_PORT
                     val payload = PairingPayload(
                         name = name,
                         address = address,
-                        port = LegacyPorts.CONTROL_PORT,
+                        port = port,
                         transport = selector.primary().id.name,
                     )
                     PairingState(
                         qr = QrCode.bitmap(payload.toJson()),
                         address = address,
-                        status = "Show this code to the receiver",
+                        port = port,
+                        status = "Scan this code, or type the address and port below into the receiver.",
                         visible = true,
                     )
                 }
@@ -130,8 +177,7 @@ class TransferViewModel @Inject constructor(
     /** Files queued by the Send flow, sent once a session exists. */
     private suspend fun sendPending() {
         val session = holder.session ?: return
-        val transport = holder.peer?.transport
-            ?: com.morselink.core.transfer.model.TransportType.LEGACY_WIFI_DIRECT
+        val transport = holder.peer?.transport ?: TransportType.LEGACY_WIFI_DIRECT
         val files = holder.pendingOutgoing
         _pairing.postValue(PairingState(visible = false))
         files.forEach { file ->
@@ -141,6 +187,9 @@ class TransferViewModel @Inject constructor(
                     engine.update(progress.fileId.ifBlank { id }, progress.bytesTransferred)
                 }
             } catch (error: Throwable) {
+                // Cancellation is not a failure — let it propagate or cancel
+                // would only ever mark files as failed and keep sending.
+                if (error is CancellationException) throw error
                 engine.fail(file.id, error.message ?: "Send failed")
             }
         }
@@ -149,15 +198,21 @@ class TransferViewModel @Inject constructor(
 
     fun cancelAll() {
         advertiseJob?.cancel()
+        sendJob?.cancel()
+        holder.pendingOutgoing = emptyList()
         viewModelScope.launch {
             engine.cancelAll()
             holder.close()
             service.stop()
+            _pairing.postValue(PairingState(visible = false))
+            _statusLine.postValue("Cancelled")
+            _dismiss.postValue(true)
         }
     }
 
     override fun onCleared() {
         advertiseJob?.cancel()
+        sendJob?.cancel()
         super.onCleared()
     }
 

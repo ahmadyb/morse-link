@@ -2,6 +2,8 @@ package com.morselink.feature.filemanager
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import android.content.Context
+import android.os.Environment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.morselink.core.media.DirectoryState
@@ -13,6 +15,7 @@ import com.morselink.core.media.SmartCategory
 import com.morselink.core.media.StorageInfo
 import com.morselink.core.ui.Format
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
@@ -23,6 +26,7 @@ data class Breadcrumb(val label: String, val path: String)
 class FileManagerViewModel @Inject constructor(
     private val media: MediaRepository,
     private val fileOps: FileOps,
+    @ApplicationContext private val context: Context,
 ) : ViewModel() {
 
     private val _rows = MutableLiveData<List<FileRow>>(emptyList())
@@ -45,7 +49,7 @@ class FileManagerViewModel @Inject constructor(
     private val selection = LinkedHashMap<String, FileItem>()
 
     private val rootPath: String = runCatching {
-        FileBrowser.storageRoots().firstOrNull()?.absolutePath
+        FileBrowser.storageRoots(context).firstOrNull()?.absolutePath
     }.getOrDefault("/storage/emulated/0") ?: "/storage/emulated/0"
 
     /** Empty means "the smart-category overview", which is the entry state. */
@@ -87,7 +91,13 @@ class FileManagerViewModel @Inject constructor(
             }
             else -> {
                 val counts = runCatching { media.categoryCounts() }.getOrDefault(emptyMap())
-                rows = SmartCategory.values().map { FileRow.Category(it, counts[it] ?: 0) }
+                // Every storage volume is offered as a browsable folder, so an
+                // SD card is reachable instead of being silently invisible.
+                val volumes = FileBrowser.storageRoots(context)
+                    .filterNot { it.absolutePath == Environment.getExternalStoragePublicDirectory(
+                        Environment.DIRECTORY_DOWNLOADS)?.absolutePath }
+                    .map { FileRow.Entry(FileBrowser.asItem(it)) }
+                rows = volumes + SmartCategory.values().map { FileRow.Category(it, counts[it] ?: 0) }
                 state = if (rows.isEmpty()) DirectoryState.EMPTY else DirectoryState.OK
             }
         }
@@ -107,10 +117,18 @@ class FileManagerViewModel @Inject constructor(
             return if (category == null) listOf(Breadcrumb(ROOT_LABEL, ""))
             else listOf(Breadcrumb(ROOT_LABEL, ""), Breadcrumb(category.label(), ""))
         }
-        val relative = path.removePrefix(rootPath).trim('/')
-        val list = mutableListOf(Breadcrumb(ROOT_LABEL, ""))
+        // Measure against whichever volume the path lives on, so browsing an
+        // SD card shows "SD card" instead of a raw volume id like ABCD-1234.
+        val base = FileBrowser.storageRoots(context)
+            .firstOrNull { path == it.absolutePath || path.startsWith(it.absolutePath + "/") }
+            ?: File(rootPath)
+        val list = mutableListOf(
+            Breadcrumb(ROOT_LABEL, ""),
+            Breadcrumb(FileBrowser.volumeLabel(base.absolutePath), base.absolutePath),
+        )
+        val relative = path.removePrefix(base.absolutePath).trim('/')
         if (relative.isNotEmpty()) {
-            var accumulated = rootPath
+            var accumulated = base.absolutePath
             for (segment in relative.split('/')) {
                 if (segment.isEmpty()) continue
                 accumulated = "$accumulated/$segment"

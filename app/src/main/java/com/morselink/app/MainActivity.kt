@@ -1,16 +1,25 @@
 package com.morselink.app
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
+import android.graphics.Typeface
 import android.os.Build
 import android.os.Bundle
+import android.widget.ScrollView
+import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.morselink.app.databinding.ActivityMainBinding
 import com.morselink.core.transfer.model.TransferableFile
+import com.morselink.core.ui.CrashLog
 import com.morselink.core.ui.Permissions
 import com.morselink.feature.send.SendArgs
 import dagger.hilt.android.AndroidEntryPoint
@@ -67,8 +76,53 @@ class MainActivity : AppCompatActivity() {
             binding.bottomNav.isVisible = destination.id in topLevelDestinations
         }
 
+        showPendingCrash()
         requestBaselinePermissions()
         handleIncomingIntent(intent)
+    }
+
+    /**
+     * A crash has to be surfaced from somewhere the user can actually reach.
+     * Putting the log only in Settings was a mistake: a crash *in* Settings
+     * made it permanently unreachable. Offering it on launch also means it can
+     * be photographed, which is the channel this user reports through.
+     */
+    private fun showPendingCrash() {
+        if (!CrashLog.hasUnseen(this)) return
+        CrashLog.markSeen(this)
+        val log = CrashLog.read(this) ?: return
+        val text = CrashLog.newest(log).trim()
+
+        val density = resources.displayMetrics.density
+        val pad = (16 * density).toInt()
+        val body = TextView(this).apply {
+            this.text = text
+            typeface = Typeface.MONOSPACE
+            textSize = 11f
+            setTextIsSelectable(true)
+        }
+        val scroller = ScrollView(this).apply {
+            setPadding(pad, pad / 2, pad, 0)
+            addView(body)
+        }
+
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Morselink crashed")
+            .setMessage(
+                "The crash below was recorded on the last run. Screenshot it or " +
+                    "tap Copy, then send it over so it can be fixed."
+            )
+            .setView(scroller)
+            .setPositiveButton("Copy") { _, _ -> copyToClipboard("morselink-crash", text) }
+            .setNegativeButton("Clear") { _, _ -> CrashLog.clear(this) }
+            .setNeutralButton("Close", null)
+            .show()
+    }
+
+    private fun copyToClipboard(label: String, text: String) {
+        val manager = getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+        manager?.setPrimaryClip(ClipData.newPlainText(label, text))
+        Toast.makeText(this, com.morselink.core.ui.R.string.copied, Toast.LENGTH_SHORT).show()
     }
 
     override fun onNewIntent(intent: Intent) {
