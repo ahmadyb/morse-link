@@ -125,12 +125,14 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
      * row surfaces it so it can be read or copied out.
      */
     private fun setupCrashLogRow() {
+        val binding = binding ?: return
         binding.rowCrashLog.title.text = getString(R.string.settings_crash_log)
         refreshCrashLogRow()
         binding.rowCrashLog.root.setOnClickListener { showCrashLog() }
     }
 
     private fun refreshCrashLogRow() {
+        val binding = binding ?: return
         val log = CrashLog.read(requireContext())
         binding.rowCrashLog.subtitle.text = if (log == null) {
             getString(R.string.settings_crash_log_none)
