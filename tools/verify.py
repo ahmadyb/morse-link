@@ -289,6 +289,19 @@ def check_binding_ids(mods, errors):
                         )
 
 
+def check_companion_objects(errors):
+    """Kotlin allows only one companion object per class; a second one is a
+    compile error that is easy to introduce when adding constants."""
+    for p in kotlin_files():
+        text = open(p, encoding="utf-8").read()
+        count = len(re.findall(r"\bcompanion\s+object\b", text))
+        if count > 1:
+            errors.append(
+                f"DUPLICATE COMPANION {p}: {count} companion objects "
+                f"(only one allowed per class)"
+            )
+
+
 def check_xml(errors):
     import xml.etree.ElementTree as ET
     for root, _, files in os.walk(ROOT):
@@ -312,6 +325,7 @@ def main():
     check_escapes(errors)
     check_imports_and_deps(mods, errors)
     check_binding_ids(mods, errors)
+    check_companion_objects(errors)
     check_xml(errors)
 
     print(f"modules={len(mods)} kotlin={len(kotlin_files())}")

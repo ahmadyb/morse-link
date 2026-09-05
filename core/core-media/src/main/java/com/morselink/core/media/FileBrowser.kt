@@ -38,6 +38,9 @@ class FileBrowser @Inject constructor() {
         private const val SCAN_BUDGET_MS = 4_000L
         private const val MAX_MATCHES = 2_000
 
+        /** A folder's child count is not computed during a listing — see below. */
+        private const val UNKNOWN_CHILD_COUNT = -1
+
         fun storageRoots(): List<File> {
             val roots = mutableListOf<File>()
             runCatching { Environment.getExternalStorageDirectory()?.let { roots.add(it) } }
@@ -191,9 +194,5 @@ class FileBrowser @Inject constructor() {
         val extension = name.substringAfterLast('.', "")
         if (extension.isEmpty()) return null
         return MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension.lowercase())
-    }
-
-    private companion object {
-        const val UNKNOWN_CHILD_COUNT = -1
     }
 }
