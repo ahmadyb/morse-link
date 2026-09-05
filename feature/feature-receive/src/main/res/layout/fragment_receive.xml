@@ -15,11 +15,12 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <View
-        android:id="@+id/scan_frame"
-        android:layout_width="240dp"
-        android:layout_height="240dp"
-        android:background="@drawable/bg_card_selected"
+    <!-- Cut-out mask: dims everything outside the frame and leaves the frame
+         itself transparent so the live preview stays visible. -->
+    <com.morselink.feature.receive.ScannerOverlayView
+        android:id="@+id/scan_overlay"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -27,16 +28,18 @@
 
     <TextView
         android:id="@+id/hint"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/unit_3"
+        android:layout_marginStart="@dimen/unit_4"
+        android:layout_marginEnd="@dimen/unit_4"
+        android:layout_marginBottom="@dimen/unit_2"
         android:text="@string/receive_hint"
         android:textAlignment="center"
         android:textColor="@android:color/white"
         android:textSize="14sp"
+        app:layout_constraintBottom_toTopOf="@id/btn_manual"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/scan_frame" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_manual"
@@ -59,4 +62,5 @@
         android:tint="@android:color/white"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

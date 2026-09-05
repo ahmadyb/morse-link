@@ -6,11 +6,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.morselink.core.network.ConnectionHolder
 import com.morselink.core.network.DiscoveredPeer
+import com.morselink.core.network.PairingPayload
 import com.morselink.core.network.TransportSelector
 import com.morselink.core.transfer.model.TransportType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import org.json.JSONObject
 import javax.inject.Inject
 
 @HiltViewModel
@@ -25,16 +25,14 @@ class ReceiveViewModel @Inject constructor(
     private val _connected = MutableLiveData(false)
     val connected: LiveData<Boolean> = _connected
 
-    /** QR payload: {"ip":"192.168.43.1","port":54321,"name":"..."} */
+    /** QR payload: {"ip":"192.168.43.1","port":54321,"name":"...","transport":"..."} */
     fun onQrScanned(payload: String) {
-        val json = runCatching { JSONObject(payload) }.getOrNull()
-        val ip = json?.optString("ip").orEmpty()
-        val port = json?.optInt("port", 54321) ?: 54321
-        if (ip.isBlank()) {
+        val parsed = PairingPayload.parse(payload)
+        if (parsed == null) {
             _status.value = "That code is not a Morselink pairing code"
             return
         }
-        connectManually(ip, port)
+        connectManually(parsed.address, parsed.port)
     }
 
     fun connectManually(ip: String, port: Int) {

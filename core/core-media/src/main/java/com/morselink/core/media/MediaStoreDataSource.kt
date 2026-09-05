@@ -121,6 +121,17 @@ class MediaStoreDataSource @Inject constructor(
 
     private fun Cursor.duration(): Long = optLong(MediaStore.Video.Media.DURATION)
     private fun Cursor.bucket(): String? = optString(MediaStore.Images.Media.BUCKET_DISPLAY_NAME)
-    private fun Cursor.artist(): String? = optString(MediaStore.Audio.Media.ARTIST)
-    private fun Cursor.album(): String? = optString(MediaStore.Audio.Media.ALBUM)
+    /**
+     * MediaStore reports a missing artist as the literal string "<unknown>",
+     * which reads like a debug value leaking into the UI. Normalise it here so
+     * the row falls back to its album or size instead.
+     */
+    private fun Cursor.artist(): String? =
+        optString(MediaStore.Audio.Media.ARTIST)?.takeUnless { it.isPlaceholder() }
+
+    private fun Cursor.album(): String? =
+        optString(MediaStore.Audio.Media.ALBUM)?.takeUnless { it.isPlaceholder() }
+
+    private fun String.isPlaceholder(): Boolean =
+        isBlank() || equals("<unknown>", ignoreCase = true) || equals("unknown", ignoreCase = true)
 }

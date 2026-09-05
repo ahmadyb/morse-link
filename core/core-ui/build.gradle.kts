@@ -38,6 +38,7 @@ dependencies {
     implementation(libs.bundles.androidx.base)
     implementation(libs.bundles.androidx.ui)
     implementation(libs.glide)
+    implementation(libs.zxing.core)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 }

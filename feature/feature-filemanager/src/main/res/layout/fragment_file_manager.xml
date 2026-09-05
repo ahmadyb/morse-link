@@ -6,18 +6,12 @@
     android:layout_height="match_parent"
     android:background="@color/background">
 
-    <TextView
-        android:id="@+id/breadcrumb"
+    <!-- §14.3 — interactive trail: tap a segment to jump up, tap a caret for
+         sibling folders, tap the empty tail to type a path. -->
+    <com.morselink.core.ui.AddressBarView
+        android:id="@+id/address_bar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:ellipsize="start"
-        android:paddingStart="@dimen/screen_padding"
-        android:paddingTop="@dimen/unit_2"
-        android:paddingEnd="@dimen/screen_padding"
-        android:singleLine="true"
-        android:text="@string/files_internal_storage"
-        android:textColor="@color/textPrimary"
-        android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -31,10 +25,10 @@
         android:layout_marginTop="@dimen/unit"
         android:layout_marginEnd="@dimen/screen_padding"
         android:max="100"
-        android:progressDrawable="@drawable/bg_progress_track"
+        android:progressDrawable="@drawable/bg_storage_bar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/breadcrumb" />
+        app:layout_constraintTop_toBottomOf="@id/address_bar" />
 
     <TextView
         android:id="@+id/storage_text"
@@ -55,10 +49,23 @@
         android:clipToPadding="false"
         android:paddingStart="@dimen/screen_padding"
         android:paddingEnd="@dimen/screen_padding"
+        android:paddingBottom="@dimen/unit_2"
         app:layout_constraintBottom_toTopOf="@id/action_bar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/storage_text" />
+
+    <!-- Shown while a scan is in flight. The empty state below is reserved for
+         a confirmed, fully-loaded, genuinely empty result. -->
+    <ProgressBar
+        android:id="@+id/progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/list"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/list" />
 
     <TextView
         android:id="@+id/empty"

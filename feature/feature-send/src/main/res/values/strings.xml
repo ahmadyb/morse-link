@@ -3,6 +3,7 @@
     <string name="send_search_hint">Search local files</string>
     <string name="send_sort">Sort</string>
     <string name="send_browse_folders">Browse all folders</string>
+    <string name="send_select_group">Select everything in this group</string>
     <string name="send_no_selection">Pick at least one file</string>
     <string name="send_action_with_count">Send %1$d · %2$s</string>
     <string-array name="send_sort_options">

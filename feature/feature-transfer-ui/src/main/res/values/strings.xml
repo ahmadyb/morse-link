@@ -5,4 +5,8 @@
     <string name="transfer_section_receiving">Receiving (%1$d)</string>
     <string name="transfer_idle">No active transfer</string>
     <string name="transfer_done">Transfer complete</string>
+    <string name="transfer_qr_description">Pairing QR code</string>
+    <string name="transfer_pairing_hint">On the other phone open Morselink and tap Receive, then scan this code.</string>
+    <string name="transfer_pairing_waiting">Waiting for a receiver…</string>
+    <string name="transfer_pairing_no_network">Connect both phones to the same Wi-Fi or hotspot, then reopen this screen.</string>
 </resources>

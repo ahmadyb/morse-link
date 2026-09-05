@@ -4,21 +4,29 @@ import android.Manifest
 import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import android.net.Uri
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.morselink.core.network.NetworkUtils
+import com.morselink.core.network.PairingPayload
 import com.morselink.core.ui.Dialogs
 import com.morselink.feature.receive.databinding.FragmentReceiveBinding
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
-/** §14.8 — full-screen scanner with a manual entry fallback that is always visible. */
+/** §14.8 — full-screen scanner with a manual fallback that is always visible. */
 @AndroidEntryPoint
 class ReceiveFragment : Fragment(R.layout.fragment_receive) {
+
+    @Inject
+    lateinit var network: NetworkUtils
 
     private val viewModel: ReceiveViewModel by viewModels()
 
@@ -39,7 +47,24 @@ class ReceiveFragment : Fragment(R.layout.fragment_receive) {
             if (connected) findNavController().navigate(Uri.parse("morselink://transfer"))
         }
 
+        // Nearby Connections starts BLE scanning as soon as discovery begins,
+        // which flips the Bluetooth icon on with no explanation. Say why once.
+        showBluetoothNoteOnce()
+
         startCameraWithPermissionCheck()
+    }
+
+    private fun showBluetoothNoteOnce() {
+        val prefs = runCatching {
+            requireContext().getSharedPreferences("morselink_hints", 0)
+        }.getOrNull() ?: return
+        if (prefs.getBoolean(KEY_BLUETOOTH_NOTE_SHOWN, false)) return
+        prefs.edit().putBoolean(KEY_BLUETOOTH_NOTE_SHOWN, true).apply()
+        Toast.makeText(
+            requireContext(),
+            R.string.receive_bluetooth_note,
+            Toast.LENGTH_LONG,
+        ).show()
     }
 
     private fun startCameraWithPermissionCheck() {
@@ -63,6 +88,7 @@ class ReceiveFragment : Fragment(R.layout.fragment_receive) {
         if (grantResults.firstOrNull() == android.content.pm.PackageManager.PERMISSION_GRANTED) {
             bindCamera()
         } else {
+            showCameraFailure()
             Dialogs.permissionRationale(
                 requireContext(),
                 getString(R.string.receive_camera_needed),
@@ -77,7 +103,7 @@ class ReceiveFragment : Fragment(R.layout.fragment_receive) {
         future.addListener({
             val provider = runCatching { future.get() }.getOrNull()
             if (provider == null) {
-                Toast.makeText(context, R.string.receive_camera_unavailable, Toast.LENGTH_SHORT).show()
+                showCameraFailure()
                 return@addListener
             }
             val preview = androidx.camera.core.Preview.Builder().build().also {
@@ -88,7 +114,7 @@ class ReceiveFragment : Fragment(R.layout.fragment_receive) {
                 .build()
             scanner = QrScanner { text -> viewModel.onQrScanned(text) }
             analysis.setAnalyzer(ContextCompat.getMainExecutor(context), scanner!!)
-            runCatching {
+            val bound = runCatching {
                 provider.unbindAll()
                 provider.bindToLifecycle(
                     viewLifecycleOwner,
@@ -96,33 +122,58 @@ class ReceiveFragment : Fragment(R.layout.fragment_receive) {
                     preview,
                     analysis,
                 )
-            }.onFailure {
-                Toast.makeText(context, R.string.receive_camera_unavailable, Toast.LENGTH_SHORT).show()
-            }
+            }.isSuccess
+            if (!bound) showCameraFailure()
         }, ContextCompat.getMainExecutor(context))
     }
 
+    /** A black viewfinder with no message looks like a hang; offer a retry. */
+    private fun showCameraFailure() {
+        val binding = binding ?: return
+        binding.hint.text = getString(R.string.receive_camera_failed)
+        binding.hint.isVisible = true
+        binding.hint.setOnClickListener {
+            binding.hint.setOnClickListener(null)
+            binding.hint.text = getString(R.string.receive_hint)
+            startCameraWithPermissionCheck()
+        }
+        Toast.makeText(requireContext(), R.string.receive_camera_unavailable, Toast.LENGTH_SHORT).show()
+    }
+
+    /**
+     * The gateway address is deterministic in the primary flow (the phone hosting
+     * the hotspot is always .1), so only the port is actually worth typing. The
+     * address is shown read-only above the field rather than silently prefilled.
+     */
     private fun showManualEntry() {
         val context = requireContext()
-        val ip = android.widget.EditText(context).apply { hint = "192.168.43.1" }
+        val gateway = runCatching { network.hotspotGatewayIp() }.getOrNull()
+            ?: NetworkUtils.DEFAULT_GATEWAY
+
+        val addressNote = TextView(context).apply {
+            text = getString(R.string.receive_manual_address, gateway)
+            setTextColor(ContextCompat.getColor(context, com.morselink.core.ui.R.color.textSecondary))
+            textSize = 13f
+            setPadding(0, 0, 0, (8 * resources.displayMetrics.density).toInt())
+        }
         val port = android.widget.EditText(context).apply {
-            hint = "54321"
+            hint = getString(R.string.receive_manual_port_hint)
             inputType = android.text.InputType.TYPE_CLASS_NUMBER
         }
         val container = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
             val pad = (24 * resources.displayMetrics.density).toInt()
             setPadding(pad, pad / 2, pad, 0)
-            addView(ip)
+            addView(addressNote)
             addView(port)
         }
         MaterialAlertDialogBuilder(context)
             .setTitle(R.string.receive_manual_title)
             .setView(container)
             .setNegativeButton(android.R.string.cancel, null)
-            .setPositiveButton("Connect") { _, _ ->
-                val enteredPort = port.text.toString().toIntOrNull() ?: 54321
-                viewModel.connectManually(ip.text.toString().trim(), enteredPort)
+            .setPositiveButton(R.string.receive_manual_connect) { _, _ ->
+                val enteredPort = port.text.toString().toIntOrNull() ?: PairingPayload.DEFAULT_PORT
+                viewModel.connectManually(gateway, enteredPort)
             }
             .show()
     }
@@ -133,7 +184,8 @@ class ReceiveFragment : Fragment(R.layout.fragment_receive) {
         super.onDestroyView()
     }
 
-    companion object {
+    private companion object {
         private const val REQUEST_CAMERA = 2101
+        private const val KEY_BLUETOOTH_NOTE_SHOWN = "bluetooth_note_shown"
     }
 }

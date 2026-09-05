@@ -8,9 +8,12 @@ import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.morselink.core.media.DirectoryState
 import com.morselink.core.media.FileItem
 import com.morselink.core.media.SmartCategory
+import com.morselink.core.ui.AddressSegment
 import com.morselink.core.ui.Dialogs
 import com.morselink.core.ui.Format
 import com.morselink.feature.filemanager.databinding.FragmentFileManagerBinding
@@ -52,9 +55,27 @@ class FileManagerFragment : Fragment(R.layout.fragment_file_manager) {
 
         viewModel.rows.observe(viewLifecycleOwner) { rows ->
             adapter.submitList(rows)
-            binding.empty.isVisible = rows.isEmpty()
+            updateEmptyState()
         }
-        viewModel.breadcrumb.observe(viewLifecycleOwner) { binding.breadcrumb.text = it }
+        viewModel.loading.observe(viewLifecycleOwner) { loading ->
+            binding.progress.isVisible = loading
+            updateEmptyState()
+        }
+        viewModel.state.observe(viewLifecycleOwner) { updateEmptyState() }
+        viewModel.breadcrumbs.observe(viewLifecycleOwner) { crumbs ->
+            binding.addressBar.setSegments(crumbs.map { AddressSegment(it.label, it.path) })
+        }
+        binding.addressBar.onSegmentClick = { _, segment -> viewModel.navigateTo(segment.path) }
+        binding.addressBar.onPathSubmitted = { path -> viewModel.navigateTo(path) }
+        binding.addressBar.onCaretClick = { index, _ ->
+            viewLifecycleOwner.lifecycleScope.launch {
+                val siblings = viewModel.siblingsAt(index)
+                binding.addressBar.showSiblings(
+                    index,
+                    siblings.map { AddressSegment(it.label, it.path) },
+                )
+            }
+        }
         viewModel.storage.observe(viewLifecycleOwner) { info ->
             binding.storageBar.progress = (info.usedFraction * 100).toInt()
             binding.storageText.text = "${Format.bytes(info.usedBytes)} / ${Format.bytes(info.totalBytes)}"
@@ -105,6 +126,23 @@ class FileManagerFragment : Fragment(R.layout.fragment_file_manager) {
         super.onResume()
         if (android.os.Build.VERSION.SDK_INT < 30 || permissions.hasAllFilesAccess()) {
             viewModel.refresh()
+        }
+    }
+
+    /**
+     * The empty state is only for a confirmed, fully-loaded, genuinely empty
+     * result. A restricted folder (scoped storage) says so explicitly instead of
+     * pretending there is nothing inside it.
+     */
+    private fun updateEmptyState() {
+        val binding = binding ?: return
+        val loading = viewModel.loading.value == true
+        val rowsEmpty = viewModel.rows.value.isNullOrEmpty()
+        binding.empty.isVisible = !loading && rowsEmpty
+        binding.empty.text = when (viewModel.state.value ?: DirectoryState.OK) {
+            DirectoryState.RESTRICTED -> getString(R.string.files_restricted)
+            DirectoryState.MISSING -> getString(R.string.files_missing)
+            DirectoryState.EMPTY, DirectoryState.OK -> getString(R.string.empty_generic)
         }
     }
 

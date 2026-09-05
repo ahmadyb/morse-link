@@ -8,17 +8,35 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Why a folder came back with nothing in it. */
+enum class DirectoryState { OK, EMPTY, RESTRICTED, MISSING }
+
+data class DirectoryListing(
+    val items: List<FileItem>,
+    val state: DirectoryState,
+)
+
 /**
  * Raw folder browsing plus the smart-category filtering used by the Files tab.
- * Depth and node counts are capped so a phone with tens of thousands of files
- * still returns quickly on low-end hardware (§7).
+ *
+ * Two rules drive this file, both learned the hard way:
+ *
+ * 1. **Never report "empty" when the truth is "can't read".** From API 30
+ *    scoped storage blocks `File.listFiles()` on other apps' `Android/data`
+ *    trees, which returns null. Treating that as an empty folder made every
+ *    nested directory look like it had nothing in it.
+ * 2. **One traversal, with a budget.** Counting five categories used to mean
+ *    five independent recursive walks of the whole storage root, which took
+ *    the better part of a minute on a full phone. Now it is a single pass
+ *    that tallies every category at once and stops at a deadline.
  */
 @Singleton
 class FileBrowser @Inject constructor() {
 
     companion object {
-        private const val MAX_NODES = 4000
         private const val MAX_DEPTH = 4
+        private const val SCAN_BUDGET_MS = 4_000L
+        private const val MAX_MATCHES = 2_000
 
         fun storageRoots(): List<File> {
             val roots = mutableListOf<File>()
@@ -32,13 +50,30 @@ class FileBrowser @Inject constructor() {
         }
     }
 
-    suspend fun listDirectory(path: String): List<FileItem> = withContext(Dispatchers.IO) {
+    // ------------------------------------------------------------- directories
+
+    suspend fun listDirectory(path: String): DirectoryListing = withContext(Dispatchers.IO) {
         val directory = File(path)
-        if (!directory.isDirectory) return@withContext emptyList()
-        val entries = (directory.listFiles()?.toList() ?: emptyList())
-            .filter { !it.name.startsWith(".") }
-            .sortedWith(compareByDescending<File> { it.isDirectory }.thenBy { it.name.lowercase() })
-        entries.map { file ->
+        when {
+            !directory.exists() || !directory.isDirectory ->
+                DirectoryListing(emptyList(), DirectoryState.MISSING)
+            !directory.canRead() ->
+                DirectoryListing(emptyList(), DirectoryState.RESTRICTED)
+            else -> {
+                val children = runCatching { directory.listFiles() }.getOrNull()
+                when {
+                    children == null -> DirectoryListing(emptyList(), DirectoryState.RESTRICTED)
+                    children.isEmpty() -> DirectoryListing(emptyList(), DirectoryState.EMPTY)
+                    else -> DirectoryListing(children.toFileItems(), DirectoryState.OK)
+                }
+            }
+        }
+    }
+
+    private fun Array<File>.toFileItems(): List<FileItem> = asSequence()
+        .filter { !it.name.startsWith(".") }
+        .sortedWith(compareByDescending<File> { it.isDirectory }.thenBy { it.name.lowercase() })
+        .map { file ->
             FileItem(
                 path = file.absolutePath,
                 name = file.name,
@@ -46,43 +81,54 @@ class FileBrowser @Inject constructor() {
                 sizeBytes = if (file.isDirectory) 0L else file.length(),
                 lastModified = file.lastModified(),
                 mimeType = if (file.isDirectory) null else mimeOf(file.name),
-                childCount = if (file.isDirectory) file.listFiles()?.size ?: 0 else 0,
+                // Counting a subfolder's children means listing it, which is far
+                // too expensive to do for every row. -1 means "unknown" and the
+                // UI just says "Folder".
+                childCount = if (file.isDirectory) UNKNOWN_CHILD_COUNT else 0,
+                canRead = if (file.isDirectory) file.canRead() else true,
             )
         }
-    }
+        .toList()
+
+    // --------------------------------------------------------------- categories
 
     suspend fun category(category: SmartCategory): List<FileItem> = withContext(Dispatchers.IO) {
+        val deadline = System.currentTimeMillis() + SCAN_BUDGET_MS
         val matches = mutableListOf<FileItem>()
         for (root in storageRoots()) {
-            walk(root, 0, matches) { file ->
-                when (category) {
-                    SmartCategory.LARGE_FILES -> file.length() >= category.minSizeBytes
-                    else -> file.extension.lowercase() in category.extensions
-                }
-            }
-            if (matches.size >= MAX_NODES) break
+            walkForCategory(root, 0, matches, category, deadline)
+            if (matches.size >= MAX_MATCHES) break
         }
         matches.sortedByDescending { it.lastModified }
     }
 
+    /** One traversal tallies every category at once. */
     suspend fun counts(): Map<SmartCategory, Int> = withContext(Dispatchers.IO) {
-        SmartCategory.values().associateWith { runCatching { category(it).size }.getOrDefault(0) }
+        val tally = SmartCategory.values().associateWith { 0 }.toMutableMap()
+        val deadline = System.currentTimeMillis() + SCAN_BUDGET_MS
+        for (root in storageRoots()) {
+            walkForCounts(root, 0, tally, deadline)
+        }
+        tally
     }
 
-    private fun walk(
+    private fun walkForCategory(
         directory: File,
         depth: Int,
         sink: MutableList<FileItem>,
-        predicate: (File) -> Boolean,
+        category: SmartCategory,
+        deadline: Long,
     ) {
-        if (depth > MAX_DEPTH || sink.size >= MAX_NODES) return
+        if (depth > MAX_DEPTH || sink.size >= MAX_MATCHES) return
+        if (System.currentTimeMillis() > deadline) return
         val children = directory.listFiles() ?: return
         for (child in children) {
-            if (sink.size >= MAX_NODES) return
+            if (sink.size >= MAX_MATCHES || System.currentTimeMillis() > deadline) return
             if (child.name.startsWith(".")) continue
             if (child.isDirectory) {
-                walk(child, depth + 1, sink, predicate)
-            } else if (predicate(child)) {
+                if (isRestricted(child)) continue
+                walkForCategory(child, depth + 1, sink, category, deadline)
+            } else if (matches(child, category)) {
                 sink.add(
                     FileItem(
                         path = child.absolutePath,
@@ -97,9 +143,57 @@ class FileBrowser @Inject constructor() {
         }
     }
 
+    private fun walkForCounts(
+        directory: File,
+        depth: Int,
+        tally: MutableMap<SmartCategory, Int>,
+        deadline: Long,
+    ) {
+        if (depth > MAX_DEPTH) return
+        if (System.currentTimeMillis() > deadline) return
+        val children = directory.listFiles() ?: return
+        for (child in children) {
+            if (System.currentTimeMillis() > deadline) return
+            if (child.name.startsWith(".")) continue
+            if (child.isDirectory) {
+                if (isRestricted(child)) continue
+                walkForCounts(child, depth + 1, tally, deadline)
+                continue
+            }
+            val extension = child.extension.lowercase()
+            val size = child.length()
+            for (category in SmartCategory.values()) {
+                if (matches(category, extension, size)) {
+                    tally[category] = (tally[category] ?: 0) + 1
+                }
+            }
+        }
+    }
+
+    private fun matches(file: File, category: SmartCategory): Boolean =
+        matches(category, file.extension.lowercase(), file.length())
+
+    private fun matches(category: SmartCategory, extension: String, size: Long): Boolean =
+        if (category == SmartCategory.LARGE_FILES) size >= category.minSizeBytes
+        else extension in category.extensions
+
+    /**
+     * `Android/data` and `Android/obb` are blocked by scoped storage from API 30,
+     * and walking them is pure cost: they return null and are enormous.
+     */
+    private fun isRestricted(directory: File): Boolean {
+        if (!directory.canRead()) return true
+        val parent = directory.parentFile?.name ?: return false
+        return parent == "Android" && (directory.name == "data" || directory.name == "obb")
+    }
+
     fun mimeOf(name: String): String? {
         val extension = name.substringAfterLast('.', "")
         if (extension.isEmpty()) return null
         return MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension.lowercase())
+    }
+
+    private companion object {
+        const val UNKNOWN_CHILD_COUNT = -1
     }
 }

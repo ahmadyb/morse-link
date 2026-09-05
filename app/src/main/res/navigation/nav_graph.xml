@@ -50,8 +50,9 @@
         android:name="com.morselink.feature.transfer.TransferFragment"
         android:label="Transfer"
         tools:layout="@layout/fragment_transfer"
-        xmlns:tools="http://schemas.android.com/tools" />
+        xmlns:tools="http://schemas.android.com/tools">
         <deepLink app:uri="morselink://transfer" />
+    </fragment>
 
     <fragment
         android:id="@+id/nav_files"
@@ -83,6 +84,7 @@
         android:name="com.morselink.feature.webshare.WebShareFragment"
         android:label="WebShare"
         tools:layout="@layout/fragment_webshare"
-        xmlns:tools="http://schemas.android.com/tools" />
+        xmlns:tools="http://schemas.android.com/tools">
         <deepLink app:uri="morselink://webshare" />
+    </fragment>
 </navigation>

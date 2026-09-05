@@ -111,7 +111,7 @@ class WebShareServer @Inject constructor(
             else -> {
                 val files: List<FileItem> = runBlocking {
                     if (path.isNullOrBlank()) media.category(SmartCategory.DOCUMENTS)
-                    else media.listDirectory(path)
+                    else media.listDirectory(path).items
                 }
                 files.forEach { file ->
                     val id = "file:${file.path}"

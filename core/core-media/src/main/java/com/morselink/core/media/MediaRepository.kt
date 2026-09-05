@@ -26,7 +26,7 @@ class MediaRepository @Inject constructor(
     suspend fun music(sort: SortOrder = SortOrder.DATE): List<MediaItem> = mediaStore.music(sort)
     suspend fun apps(): List<AppItem> = appScanner.installedApps()
 
-    suspend fun listDirectory(path: String): List<FileItem> = fileBrowser.listDirectory(path)
+    suspend fun listDirectory(path: String): DirectoryListing = fileBrowser.listDirectory(path)
     suspend fun category(category: SmartCategory): List<FileItem> = fileBrowser.category(category)
 
     suspend fun categoryCounts(force: Boolean = false): Map<SmartCategory, Int> {

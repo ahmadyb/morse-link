@@ -10,5 +10,7 @@ Path: %4$s</string>
     <string name="files_compressed">Saved %1$s</string>
     <string name="files_move_to">Move to…</string>
     <string name="files_copy_to">Copy to…</string>
+    <string name="files_restricted">Android blocks access to this folder. Open it from your file app, or pick files from the Send tab instead.</string>
+    <string name="files_missing">This folder no longer exists</string>
     <string name="files_storage_needed">Grant storage access to browse files</string>
 </resources>

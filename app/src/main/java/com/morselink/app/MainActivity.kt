@@ -5,6 +5,7 @@ import android.os.Build
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
@@ -52,6 +53,19 @@ class MainActivity : AppCompatActivity() {
         val host = supportFragmentManager.findFragmentById(R.id.nav_host) as NavHostFragment
         navController = host.navController
         binding.bottomNav.setupWithNavController(navController)
+
+        // Send/Receive/Transfer/WebShare are focused sub-flows, not tabs: leaving
+        // the global bottom bar on screen made the Send flow look like the Files
+        // tab and gave two ways to leave a half-finished selection.
+        val topLevelDestinations = setOf(
+            R.id.nav_connect,
+            R.id.nav_files,
+            R.id.nav_history,
+            R.id.nav_settings,
+        )
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            binding.bottomNav.isVisible = destination.id in topLevelDestinations
+        }
 
         requestBaselinePermissions()
         handleIncomingIntent(intent)

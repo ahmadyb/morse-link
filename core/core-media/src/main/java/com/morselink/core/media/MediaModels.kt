@@ -46,6 +46,8 @@ data class FileItem(
     val mimeType: String?,
     val childCount: Int = 0,
     val uri: Uri? = null,
+    /** False when scoped storage refused to open a folder, so the UI can say so. */
+    val canRead: Boolean = true,
 )
 
 data class StorageInfo(

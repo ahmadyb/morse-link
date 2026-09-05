@@ -24,6 +24,11 @@ class FileAdapter(
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(row: FileRow) {
+            // Reset every mutable property first: a recycled holder arrives with
+            // the previous row's text, icon and selection still attached.
+            binding.size.text = ""
+            binding.root.isSelected = false
+            binding.root.setOnLongClickListener(null)
             when (row) {
                 is FileRow.Category -> {
                     binding.name.text = row.category.label()
@@ -37,7 +42,7 @@ class FileAdapter(
                     val item = row.item
                     binding.name.text = item.name
                     binding.meta.text = if (item.isDirectory) {
-                        "${item.childCount} items"
+                        if (item.childCount >= 0) "${item.childCount} items" else "Folder"
                     } else Format.fullDate(item.lastModified)
                     binding.size.text = if (item.isDirectory) "" else Format.bytes(item.sizeBytes)
                     binding.icon.iconFor(item)
@@ -52,6 +57,7 @@ class FileAdapter(
 
     private fun ImageView.iconFor(item: com.morselink.core.media.FileItem) {
         val resource = when {
+            item.isDirectory && !item.canRead -> com.morselink.core.ui.R.drawable.ic_blocked
             item.isDirectory -> android.R.drawable.ic_menu_agenda
             item.mimeType?.startsWith("image") == true -> com.morselink.core.ui.R.drawable.ic_photo
             item.mimeType?.startsWith("video") == true -> com.morselink.core.ui.R.drawable.ic_video
