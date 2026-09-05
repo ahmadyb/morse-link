@@ -25,6 +25,19 @@ BUILTIN = set("""String Int Long Boolean Float Double Byte Short Char Any Unit N
 List MutableList Map MutableMap Set MutableSet Array ArrayList HashMap HashSet
 T R Result Pair Triple Lazy Sequence Throwable Exception Error Runnable Thread
 Deprecated JvmStatic Suppress OptIn Volatile Companion Build It Enum
+System Math Integer Character Object StringBuilder Number Void Class Package
+Runtime Process ThreadGroup ThreadLocal StrictMath SecurityManager
+CharSequence Appendable AutoCloseable Cloneable Iterable Comparable
+Collection MutableCollection MutableIterable IntRange LongRange
+JvmOverloads JvmField JvmName JvmStatic SuppressLint
+# constants inherited from android.view.View / android.app.Service
+VISIBLE INVISIBLE GONE START_STICKY START_NOT_STICKY START_REDELIVER_INTENT
+ByteArray Charsets LinkedHashMap LinkedHashSet Synchronized Transient Throws
+IllegalStateException IllegalArgumentException NullPointerException
+NumberFormatException IndexOutOfBoundsException UnsupportedOperationException
+IntArray LongArray FloatArray DoubleArray CharArray BooleanArray ShortArray Regex
+# nested types of a superclass (NanoHTTPD.Response / .IHTTPSession / .Method)
+IHTTPSession Response Method
 """.split())
 
 
@@ -47,13 +60,24 @@ def strip_code(src, blank_strings=False):
         c = src[i]
         if c == "/" and i + 1 < n and src[i + 1] == "/":
             j = src.find("\n", i)
-            out.append("")
+            # keep the newline, otherwise every line comment shifts line numbers
+            out.append("\n" if j >= 0 else "")
             i = j + 1 if j >= 0 else n
         elif c == "/" and i + 1 < n and src[i + 1] == "*":
             j = src.find("*/", i)
             chunk = src[i:(j + 2) if j >= 0 else n]
             out.append("\n" * chunk.count("\n"))
             i = (j + 2) if j >= 0 else n
+        elif c == "'":
+            # Kotlin char literal such as '"' — not the start of a string
+            j = i + 1
+            while j < n and src[j] != "'":
+                if src[j] == "\\":
+                    j += 2
+                    continue
+                j += 1
+            out.append(" ")
+            i = j + 1
         elif c == '"':
             if src[i:i + 3] == '"""':
                 j = src.find('"""', i + 3)
@@ -98,6 +122,16 @@ def check_escapes(errors):
                 j = src.find("*/", i)
                 line += src.count("\n", i, j)
                 i = (j + 2) if j >= 0 else n
+                continue
+            if c == "'":
+                # Kotlin char literal, e.g. '"' — must not be read as a string
+                j = i + 1
+                while j < n and src[j] != "'":
+                    if src[j] == "\\":
+                        j += 2
+                        continue
+                    j += 1
+                i = j + 1
                 continue
             if c == '"':
                 if src[i:i + 3] == '"""':
@@ -148,6 +182,12 @@ DECL = re.compile(
     r"class|interface|object|typealias)\s+(\w+)"
 )
 
+# Companion-object constants and members are local too, otherwise every
+# SCREAMING_CASE reference looks like an unimported type.
+DECL_MEMBER = re.compile(r"\b(?:const\s+)?(?:val|var|fun)\s+(\w+)")
+
+ENUM_BODY = re.compile(r"enum\s+class\s+\w+[^{]*\{([^{}]*)\}")
+
 
 def check_imports_and_deps(mods, errors):
     imported_simple = collections.defaultdict(set)
@@ -157,8 +197,14 @@ def check_imports_and_deps(mods, errors):
 
     decl_by_dir = collections.defaultdict(set)
     for p in kotlin_files():
-        for m in DECL.finditer(open(p, encoding="utf-8").read()):
+        text = open(p, encoding="utf-8").read()
+        for m in DECL.finditer(text):
             decl_by_dir[os.path.dirname(p)].add(m.group(1))
+        for m in DECL_MEMBER.finditer(text):
+            decl_by_dir[os.path.dirname(p)].add(m.group(1))
+        for m in ENUM_BODY.finditer(text):
+            for tok in re.findall(r"\b([A-Z][A-Z0-9_]*)\b", m.group(1)):
+                decl_by_dir[os.path.dirname(p)].add(tok)
 
     for d, info in mods.items():
         java = os.path.join(d, "src/main/java")
@@ -180,6 +226,12 @@ def check_imports_and_deps(mods, errors):
                         if name in BUILTIN or name in imported or name in local:
                             continue
                         if name not in imported_simple:
+                            if name.isupper():
+                                continue  # inherited framework constant
+                            errors.append(
+                                f"UNKNOWN TYPE {p}:{i} '{name}' is used bare but is "
+                                f"never imported anywhere in the repo"
+                            )
                             continue
                         owner = None
                         for fq in sorted(imported_simple[name]):

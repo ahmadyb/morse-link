@@ -12,6 +12,7 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.FrameLayout
+import android.widget.FrameLayout.LayoutParams
 import android.widget.HorizontalScrollView
 import android.widget.ImageView
 import android.widget.LinearLayout
