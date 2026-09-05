@@ -65,7 +65,7 @@ class FileManagerFragment : Fragment(R.layout.fragment_file_manager) {
         viewModel.breadcrumbs.observe(viewLifecycleOwner) { crumbs ->
             binding.addressBar.setSegments(crumbs.map { AddressSegment(it.label, it.path) })
         }
-        binding.addressBar.onSegmentClick = { _, segment -> viewModel.navigateTo(segment.path) }
+        binding.addressBar.onSegmentClick = { _, segment -> viewModel.navigateTo(segment.key) }
         binding.addressBar.onPathSubmitted = { path -> viewModel.navigateTo(path) }
         binding.addressBar.onCaretClick = { index, _ ->
             viewLifecycleOwner.lifecycleScope.launch {
