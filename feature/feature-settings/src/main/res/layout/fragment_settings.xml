@@ -111,5 +111,19 @@
         <include
             android:id="@+id/row_privacy"
             layout="@layout/item_settings_row" />
+
+        <TextView
+            android:id="@+id/diagnostics_header"
+            style="@style/Text.Morselink.Meta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/screen_padding"
+            android:paddingTop="@dimen/unit_3"
+            android:paddingBottom="@dimen/unit_half"
+            android:text="DIAGNOSTICS" />
+
+        <include
+            android:id="@+id/row_crash_log"
+            layout="@layout/item_settings_row" />
     </LinearLayout>
 </ScrollView>

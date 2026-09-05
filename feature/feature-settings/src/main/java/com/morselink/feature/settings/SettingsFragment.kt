@@ -1,7 +1,14 @@
 package com.morselink.feature.settings
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.graphics.Typeface
 import android.os.Bundle
 import android.view.View
+import android.widget.ScrollView
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -9,6 +16,7 @@ import android.net.Uri
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.morselink.core.data.prefs.ThemeMode
+import com.morselink.core.ui.CrashLog
 import com.morselink.core.ui.Dialogs
 import com.morselink.feature.settings.databinding.FragmentSettingsBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -64,6 +72,8 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
             binding.rowPrivacy.subtitle.text = "Offline by design"
         }
 
+        setupCrashLogRow()
+
         binding.rowDeviceName.root.setOnClickListener {
             Dialogs.input(requireContext(), getString(R.string.settings_device_name), viewModel.deviceName()) {
                 if (it.isNotBlank()) viewModel.setDeviceName(it)
@@ -107,6 +117,71 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
                 .setPositiveButton(com.morselink.core.ui.R.string.action_ok, null)
                 .show()
         }
+    }
+
+    /**
+     * The crash log is how a crash gets reported without a USB cable: the
+     * handler writes the trace to a private file during process death, and this
+     * row surfaces it so it can be read or copied out.
+     */
+    private fun setupCrashLogRow() {
+        binding.rowCrashLog.title.text = getString(R.string.settings_crash_log)
+        refreshCrashLogRow()
+        binding.rowCrashLog.root.setOnClickListener { showCrashLog() }
+    }
+
+    private fun refreshCrashLogRow() {
+        val log = CrashLog.read(requireContext())
+        binding.rowCrashLog.subtitle.text = if (log == null) {
+            getString(R.string.settings_crash_log_none)
+        } else {
+            getString(R.string.settings_crash_log_count, CrashLog.entryCount(log))
+        }
+    }
+
+    private fun showCrashLog() {
+        val context = requireContext()
+        val log = CrashLog.read(context)
+        if (log == null) {
+            MaterialAlertDialogBuilder(context)
+                .setTitle(R.string.settings_crash_log)
+                .setMessage(R.string.settings_crash_log_empty)
+                .setPositiveButton(com.morselink.core.ui.R.string.action_ok, null)
+                .show()
+            return
+        }
+        val pad = (16 * context.resources.displayMetrics.density).toInt()
+        val body = TextView(context).apply {
+            text = log
+            typeface = Typeface.MONOSPACE
+            textSize = 11f
+            setTextIsSelectable(true)
+        }
+        val scroller = ScrollView(context).apply {
+            setPadding(pad, pad / 2, pad, 0)
+            addView(body)
+        }
+        MaterialAlertDialogBuilder(context)
+            .setTitle(R.string.settings_crash_log)
+            .setView(scroller)
+            .setPositiveButton(com.morselink.core.ui.R.string.action_close, null)
+            .setNegativeButton(com.morselink.core.ui.R.string.action_clear) { _, _ ->
+                CrashLog.clear(context)
+                refreshCrashLogRow()
+            }
+            .setNeutralButton(com.morselink.core.ui.R.string.action_copy) { _, _ -> copyCrashLog(log) }
+            .show()
+    }
+
+    private fun copyCrashLog(text: String) {
+        val manager = requireContext().getSystemService(Context.CLIPBOARD_SERVICE)
+            as? ClipboardManager
+        manager?.setPrimaryClip(ClipData.newPlainText("morselink-crash", text))
+        Toast.makeText(
+            requireContext(),
+            com.morselink.core.ui.R.string.copied,
+            Toast.LENGTH_SHORT,
+        ).show()
     }
 
     private fun showThemePicker() {

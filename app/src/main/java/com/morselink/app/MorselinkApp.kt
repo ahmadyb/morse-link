@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.appcompat.app.AppCompatDelegate
 import com.morselink.core.data.prefs.SettingsStore
 import com.morselink.core.data.prefs.ThemeMode
+import com.morselink.core.ui.CrashLog
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -18,6 +19,7 @@ class MorselinkApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        CrashLog.install(this)
         val mode = runCatching {
             runBlocking(Dispatchers.IO) { settings.settings.first().themeMode }
         }.getOrDefault(ThemeMode.SYSTEM)

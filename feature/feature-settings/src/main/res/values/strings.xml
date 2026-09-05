@@ -12,6 +12,10 @@
     <string name="settings_webshare">WebShare (phone ↔ PC)</string>
     <string name="settings_version">Version</string>
     <string name="settings_privacy">Privacy policy</string>
+    <string name="settings_crash_log">Crash log</string>
+    <string name="settings_crash_log_none">No crashes recorded</string>
+    <string name="settings_crash_log_count">%1$d recorded — tap to view</string>
+    <string name="settings_crash_log_empty">The app has not recorded any crashes.</string>
     <string name="history_empty">No transfers yet</string>
     <string name="history_received">Received</string>
     <string name="history_sent">Sent</string>
