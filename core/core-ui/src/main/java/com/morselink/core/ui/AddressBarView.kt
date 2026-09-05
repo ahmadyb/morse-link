@@ -84,9 +84,11 @@ class AddressBarView @JvmOverloads constructor(
         trail.addView(spacer, LinearLayout.LayoutParams(0, 1, 1f))
         trailScroll.addView(
             trail,
-            HorizontalScrollView.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT,
+            // FrameLayout.LayoutParams, not HorizontalScrollView.LayoutParams:
+            // Kotlin does not resolve a nested class through a subclass.
+            FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT,
             ),
         )
 
