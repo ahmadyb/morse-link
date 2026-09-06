@@ -1,0 +1,92 @@
+name: Build APK
+
+on:
+  push:
+    branches:
+      - '**'
+    paths-ignore:
+      - '**.md'
+      - 'app/release/**'
+      - 'art/**'
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build signed release APK
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Test and assemble release
+        id: assemble
+        run: |
+          chmod +x ./gradlew
+          set +e
+          ./gradlew testReleaseUnitTest assembleRelease --no-daemon --stacktrace > build.log 2>&1
+          code=$?
+          set -e
+          tail -n 300 build.log
+          if [ "$code" -ne 0 ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add -f build.log
+            git commit -m "build: attach failing build log [skip ci]" || true
+            git push origin HEAD:"${GITHUB_REF_NAME}" || true
+          fi
+          exit "$code"
+
+      - name: Collect the APK
+        run: |
+          mkdir -p app/release
+          cp app/build/outputs/apk/release/app-release.apk app/release/morse-link.apk
+          ls -la app/release
+
+      - name: Diagnose resource failure
+        if: failure()
+        run: |
+          AAPT=$(ls "$ANDROID_HOME"/build-tools/*/aapt2 2>/dev/null | head -1)
+          echo "aapt2: $AAPT"
+          mkdir -p /tmp/resout
+          for d in app/src/main/res core/core-ui/src/main/res core/core-data/src/main/res                    core/core-media/src/main/res core/core-transfer/src/main/res core/core-network/src/main/res                    feature/feature-dashboard/src/main/res feature/feature-send/src/main/res                    feature/feature-receive/src/main/res feature/feature-transfer-ui/src/main/res                    feature/feature-filemanager/src/main/res feature/feature-webshare/src/main/res                    feature/feature-settings/src/main/res; do
+            if [ -d "$d" ]; then
+              echo "=== $d"
+              "$AAPT" compile --dir "$d" -o /tmp/resout 2>&1 | tail -12
+            fi
+          done
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: morse-link-apk
+          path: app/release/morse-link.apk
+          if-no-files-found: error
+
+      - name: Commit the APK back to the branch
+        if: github.event_name == 'push'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f app/release/morse-link.apk
+          if git diff --cached --quiet; then
+            echo "APK is unchanged"
+          else
+            git commit -m "build: refresh MorseLink APK [skip ci]"
+            git push origin HEAD:"${GITHUB_REF_NAME}"
+          fi

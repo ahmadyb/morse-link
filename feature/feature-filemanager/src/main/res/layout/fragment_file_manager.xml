@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background">
+
+    <!-- §14.3 — interactive trail: tap a segment to jump up, tap a caret for
+         sibling folders, tap the empty tail to type a path. -->
+    <com.morselink.core.ui.AddressBarView
+        android:id="@+id/address_bar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ProgressBar
+        android:id="@+id/storage_bar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="0dp"
+        android:layout_height="8dp"
+        android:layout_marginStart="@dimen/screen_padding"
+        android:layout_marginTop="@dimen/unit"
+        android:layout_marginEnd="@dimen/screen_padding"
+        android:max="100"
+        android:progressDrawable="@drawable/bg_storage_bar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/address_bar" />
+
+    <TextView
+        android:id="@+id/storage_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/screen_padding"
+        android:layout_marginEnd="@dimen/screen_padding"
+        android:textColor="@color/textSecondary"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/storage_bar" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/list"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:paddingStart="@dimen/screen_padding"
+        android:paddingEnd="@dimen/screen_padding"
+        android:paddingBottom="@dimen/unit_2"
+        app:layout_constraintBottom_toTopOf="@id/action_bar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/storage_text" />
+
+    <!-- Shown while a scan is in flight. The empty state below is reserved for
+         a confirmed, fully-loaded, genuinely empty result. -->
+    <ProgressBar
+        android:id="@+id/progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/list"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/list" />
+
+    <TextView
+        android:id="@+id/empty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/empty_generic"
+        android:textColor="@color/textSecondary"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/list"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/list" />
+
+    <!-- §14.4 — long-press action toolbar -->
+    <HorizontalScrollView
+        android:id="@+id/action_bar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@color/surface"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="@dimen/unit">
+
+            <Button
+                android:id="@+id/action_share"
+                style="@style/Widget.Morselink.Button.Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_share"
+                android:text="@string/action_share" />
+
+            <Button
+                android:id="@+id/action_delete"
+                style="@style/Widget.Morselink.Button.Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_delete"
+                android:text="@string/action_delete" />
+
+            <Button
+                android:id="@+id/action_rename"
+                style="@style/Widget.Morselink.Button.Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_rename"
+                android:text="@string/action_rename" />
+
+            <Button
+                android:id="@+id/action_move"
+                style="@style/Widget.Morselink.Button.Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_move"
+                android:text="@string/action_move" />
+
+            <Button
+                android:id="@+id/action_copy"
+                style="@style/Widget.Morselink.Button.Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_copy"
+                android:text="@string/action_copy" />
+
+            <Button
+                android:id="@+id/action_compress"
+                style="@style/Widget.Morselink.Button.Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_compress"
+                android:text="@string/action_compress" />
+
+            <Button
+                android:id="@+id/action_properties"
+                style="@style/Widget.Morselink.Button.Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_info"
+                android:text="@string/action_properties" />
+        </LinearLayout>
+    </HorizontalScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

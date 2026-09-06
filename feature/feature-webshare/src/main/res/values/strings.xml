@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="webshare_start">Start WebShare</string>
+    <string name="webshare_stop">Stop WebShare</string>
+    <string name="webshare_hotspot">Start hotspot</string>
+    <string name="webshare_hotspot_stop">Stop hotspot</string>
+    <string name="webshare_idle">WebShare is off. Connect the PC to the same Wi-Fi, or start a hotspot on this phone and join it from the PC.</string>
+    <string name="webshare_running">WebShare is running. Open the address below in the PC browser.</string>
+    <string name="webshare_url">WebShare address</string>
+    <string name="webshare_help">Wi-Fi and hotspot share one radio on most phones, so turning the hotspot on will drop your current Wi-Fi connection — that is expected. Multicast (mDNS) is often blocked on phone-hosted hotspots, which is why the plain address is always shown. Files are served straight from this device; nothing touches the internet.</string>
+    <string name="webshare_hotspot_ready">Hotspot: %1$s</string>
+    <string name="webshare_manual_hotspot">Open Wi-Fi settings and turn on the hotspot, then connect the PC to it. Morselink will pick the address up automatically.</string>
+</resources>

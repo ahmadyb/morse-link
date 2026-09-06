@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- §12.1 design tokens — dark theme -->
+    <color name="background">#FF121212</color>
+    <color name="surface">#FF1E1E1E</color>
+    <color name="surfaceHover">#FF262626</color>
+    <color name="textPrimary">#FFFFFFFF</color>
+    <color name="textSecondary">#FFA0A0A0</color>
+    <color name="divider">#FF2A2A2A</color>
+
+    <color name="success">#FF1FA36B</color>
+    <color name="sending">#FF2D9CDB</color>
+    <color name="error">#FFE5484D</color>
+    <color name="scrim">#B3000000</color>
+</resources>
