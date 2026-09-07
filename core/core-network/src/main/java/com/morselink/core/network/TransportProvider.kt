@@ -31,6 +31,9 @@ interface TransportProvider {
 
     suspend fun stopDiscovery()
 
+    suspend fun sessionForAccepted(peer: DiscoveredPeer): TransportSession =
+        error("Transport does not expose an accepted session")
+
     /** Optional: transports that need an advertising/listening role expose it here. */
     suspend fun startAdvertising(localName: String): Flow<DiscoveredPeer> = emptyFlow()
 
