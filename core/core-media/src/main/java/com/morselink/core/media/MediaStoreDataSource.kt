@@ -72,6 +72,10 @@ class MediaStoreDataSource @Inject constructor(
             MediaStore.MediaColumns.SIZE,
             MediaStore.MediaColumns.MIME_TYPE,
             MediaStore.MediaColumns.DATE_MODIFIED,
+            // Deprecated but still the only way to get a path the sender can
+            // open. Without it every send failed with "A file path is required".
+            @Suppress("DEPRECATION")
+            MediaStore.MediaColumns.DATA,
         )
         val orderBy = when (sort) {
             SortOrder.DATE -> "${MediaStore.MediaColumns.DATE_MODIFIED} DESC"
@@ -101,7 +105,8 @@ class MediaStoreDataSource @Inject constructor(
         val size = getLong(getColumnIndexOrThrow(MediaStore.MediaColumns.SIZE))
         val mime = optString(MediaStore.MediaColumns.MIME_TYPE)
         val modified = getLong(getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_MODIFIED)) * 1000L
-        val path = if (Build.VERSION.SDK_INT < 29) optString(MediaStore.MediaColumns.DATA) else null
+        @Suppress("DEPRECATION")
+        val path = optString(MediaStore.MediaColumns.DATA)
         return MediaItem(
             id = id,
             uri = ContentUris.withAppendedId(collection, id),

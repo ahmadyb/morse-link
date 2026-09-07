@@ -52,8 +52,8 @@ class TransportSelector @Inject constructor(
      * Direct TCP, no Wi-Fi Direct group involved: the sender binds the control
      * port and waits for the receiver that scanned its QR code.
      */
-    suspend fun hostDirect(): TransportSession? = runCatching {
-        legacy.hostDirect()?.let { legacy.sessionForDirect(it, isHost = true) }
+    suspend fun hostDirect(localName: String): TransportSession? = runCatching {
+        legacy.hostDirect(localName)?.let { legacy.sessionForDirect(it, isHost = true) }
     }.getOrNull()
 
     /** Direct TCP: dial a sender that is showing its QR code. */

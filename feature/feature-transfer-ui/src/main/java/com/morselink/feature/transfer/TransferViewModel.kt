@@ -164,7 +164,7 @@ class TransferViewModel @Inject constructor(
             Log.d("Morselink", "sender: advertising $address:$port, waiting for a receiver")
             _statusLine.postValue("Waiting for a receiver to scan the code")
             sendJob = viewModelScope.launch {
-                val session = selector.hostDirect()
+                val session = selector.hostDirect(name)
                 if (session == null) {
                     Log.w("Morselink", "sender: no receiver dialled in")
                     _statusLine.postValue("No receiver connected. Check both phones are on the same network.")

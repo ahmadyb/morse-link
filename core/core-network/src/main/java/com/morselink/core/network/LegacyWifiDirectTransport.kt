@@ -279,7 +279,10 @@ class LegacyWifiDirectTransport @Inject constructor(
      * and waits, the receiver dials in and says who it is, and the normal
      * chunk protocol then runs over the socket that was just opened.
      */
-    suspend fun hostDirect(port: Int = LegacyPorts.CONTROL_PORT): DirectConnection? =
+    suspend fun hostDirect(
+        localName: String,
+        port: Int = LegacyPorts.CONTROL_PORT,
+    ): DirectConnection? =
         withContext(Dispatchers.IO) {
             runCatching {
                 val server = ServerSocket(port).apply { soTimeout = DIRECT_ACCEPT_TIMEOUT_MS }
@@ -291,9 +294,12 @@ class LegacyWifiDirectTransport @Inject constructor(
                 }
                 socket.soTimeout = SOCKET_TIMEOUT_MS
                 Log.d("Morselink", "transport: inbound connection accepted")
-                val name = runCatching {
-                    DataInputStream(socket.getInputStream()).readUtfLine()
-                }.getOrNull()?.trim().orEmpty().ifBlank { "Receiver" }
+                val stream = socket.getInputStream()
+                val name = runCatching { DataInputStream(stream).readUtfLine() }
+                    .getOrNull()?.trim().orEmpty().ifBlank { "Receiver" }
+                runCatching {
+                    DataOutputStream(socket.getOutputStream()).writeUtfLine(localName)
+                }
                 val address = socket.inetAddress?.hostAddress.orEmpty()
                 DirectConnection(
                     socket = socket,
@@ -316,11 +322,15 @@ class LegacyWifiDirectTransport @Inject constructor(
                 socket.soTimeout = SOCKET_TIMEOUT_MS
                 Log.d("Morselink", "transport: connected to $host:$port")
                 DataOutputStream(socket.getOutputStream()).writeUtfLine(localName)
+                val remoteName = runCatching {
+                    DataInputStream(socket.getInputStream()).readUtfLine()
+                }.getOrNull()?.trim().orEmpty().ifBlank { host }
+                Log.d("Morselink", "transport: sender identified itself as $remoteName")
                 DirectConnection(
                     socket = socket,
                     peer = DiscoveredPeer(
                         id = host,
-                        name = host,
+                        name = remoteName,
                         transport = TransportType.LEGACY_WIFI_DIRECT,
                         address = host,
                         port = port,
@@ -360,7 +370,7 @@ class LegacyWifiDirectTransport @Inject constructor(
             val id = engine.begin(file, TransferDirection.OUTGOING, TransportType.LEGACY_WIFI_DIRECT)
             try {
                 withContext(Dispatchers.IO) {
-                    val source = File(requireNotNull(file.path) { "A file path is required" })
+                    val source = resolveSource(file)
                     val control = openControlSocket()
                     val controlOut = DataOutputStream(control.getOutputStream())
                     val controlIn = DataInputStream(control.getInputStream())
@@ -644,6 +654,29 @@ class LegacyWifiDirectTransport @Inject constructor(
                 runCatching { Thread.sleep(400L * (attempt + 1)) }
             }
             throw lastError ?: IOException("Unable to reach $host:$port")
+        }
+
+        /**
+         * A sendable source of bytes for [file].
+         *
+         * The path is preferred, but scoped storage can leave it null or
+         * unreadable even when the content is perfectly shareable. In that case
+         * the content is copied out of its Uri into a cache file so the chunked
+         * sender can keep using a FileChannel.
+         */
+        private fun resolveSource(file: TransferableFile): File {
+            file.path?.takeIf { it.isNotBlank() }
+                ?.let(::File)?.takeIf { it.canRead() }
+                ?.let { return it }
+
+            val uri = file.uri
+                ?: throw IllegalArgumentException("A file path or a readable source is required")
+            val temp = File(context.cacheDir, "outgoing-${file.id.hashCode()}-${file.name}")
+            context.contentResolver.openInputStream(uri)?.use { input ->
+                java.io.FileOutputStream(temp).use { output -> input.copyTo(output) }
+            } ?: throw IllegalArgumentException("Could not open ${file.name}")
+            temp.deleteOnExit()
+            return temp
         }
 
         private fun readFully(input: java.io.InputStream, destination: ByteArray): Boolean {

@@ -1,5 +1,7 @@
 package com.morselink.feature.webshare
 
+import android.util.Log
+
 import android.content.Context
 import com.morselink.core.media.AppItem
 import com.morselink.core.media.FileItem
@@ -318,10 +320,18 @@ class WebShareServer @Inject constructor(
                 val mime = android.webkit.MimeTypeMap.getSingleton()
                     .getMimeTypeFromExtension(target.extension.lowercase(Locale.US))
                 runBlocking { fileOps.publishToMediaStore(target, mime) }
+                val written = target.length()
+                // An empty file "exists", so reporting exists() alone claimed
+                // success for an upload that actually streamed nothing.
+                Log.d(
+                    "Morselink",
+                    "webshare: saved ${target.absolutePath} ($written bytes)",
+                )
                 results.put(JSONObject().apply {
                     put("name", target.name)
-                    put("size", target.length())
-                    put("saved", target.exists())
+                    put("size", written)
+                    put("saved", written > 0)
+                    put("path", target.absolutePath)
                 })
                 if (isFinalBoundary(pushback)) break
             }

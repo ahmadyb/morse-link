@@ -163,6 +163,18 @@ class SendAdapter(
         // Cancel any load still in flight from the row this holder used to show.
         Glide.with(image).clear(image)
         image.tag = row.key
+
+        // An app icon is a small square drawing; blowing it up to fill the cell
+        // the way a photo does makes the Apps tab look wrong. Photos crop to
+        // fill, icons sit inside the cell with room around them.
+        if (row is SendRow.App) {
+            val pad = (14 * image.resources.displayMetrics.density).toInt()
+            image.setPadding(pad, pad, pad, pad)
+            image.scaleType = ImageView.ScaleType.FIT_CENTER
+        } else {
+            image.setPadding(0, 0, 0, 0)
+            image.scaleType = ImageView.ScaleType.CENTER_CROP
+        }
         when (row) {
             is SendRow.Media -> loadMediaThumb(image, row.item)
             is SendRow.App -> loadAppIcon(image, row)
