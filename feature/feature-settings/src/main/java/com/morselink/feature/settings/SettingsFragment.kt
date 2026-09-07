@@ -166,6 +166,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
     }
 
     private fun setupAppLogRow() {
+        val binding = binding ?: return
         binding.rowAppLog.title.text = getString(R.string.settings_app_log)
         binding.rowAppLog.subtitle.text = getString(R.string.settings_app_log_hint)
         val on = AppLog.isEnabled(requireContext())

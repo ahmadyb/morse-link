@@ -1,6 +1,6 @@
-import android.util.Log
-
 package com.morselink.feature.receive
+
+import android.util.Log
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

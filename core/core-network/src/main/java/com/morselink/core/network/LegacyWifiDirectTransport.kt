@@ -1,6 +1,6 @@
-import android.util.Log
-
 package com.morselink.core.network
+
+import android.util.Log
 
 import android.content.BroadcastReceiver
 import android.content.Context
