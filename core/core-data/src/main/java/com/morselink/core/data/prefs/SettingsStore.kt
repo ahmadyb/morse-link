@@ -36,6 +36,7 @@ class SettingsStore @Inject constructor(
         val PREFER_WIFI_DIRECT = booleanPreferencesKey("prefer_wifi_direct")
         val TIMEOUT_SEC = intPreferencesKey("timeout_sec")
         val RECONNECT_ATTEMPTS = intPreferencesKey("reconnect_attempts")
+        val DIAGNOSTICS = booleanPreferencesKey("diagnostics_enabled")
     }
 
     val settings: Flow<UserSettings> = context.settingsDataStore.data
@@ -52,6 +53,7 @@ class SettingsStore @Inject constructor(
                 preferWifiDirectOverHotspot = prefs[Keys.PREFER_WIFI_DIRECT] ?: true,
                 connectionTimeoutSeconds = prefs[Keys.TIMEOUT_SEC] ?: 15,
                 maxReconnectAttempts = prefs[Keys.RECONNECT_ATTEMPTS] ?: 3,
+                diagnosticsEnabled = prefs[Keys.DIAGNOSTICS] ?: true,
             )
         }
 
@@ -78,4 +80,6 @@ class SettingsStore @Inject constructor(
     suspend fun setTimeoutSeconds(value: Int) = edit { it[Keys.TIMEOUT_SEC] = value }
 
     suspend fun setReconnectAttempts(value: Int) = edit { it[Keys.RECONNECT_ATTEMPTS] = value }
+
+    suspend fun setDiagnosticsEnabled(value: Boolean) = edit { it[Keys.DIAGNOSTICS] = value }
 }

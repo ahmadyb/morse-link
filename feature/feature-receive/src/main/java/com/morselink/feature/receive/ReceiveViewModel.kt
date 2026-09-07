@@ -32,10 +32,10 @@ class ReceiveViewModel @Inject constructor(
             _status.value = "That code is not a Morselink pairing code"
             return
         }
-        connectManually(parsed.address, parsed.port)
+        connectManually(parsed.address, parsed.port, parsed.name)
     }
 
-    fun connectManually(ip: String, port: Int) {
+    fun connectManually(ip: String, port: Int, peerName: String = "") {
         if (ip.isBlank()) {
             _status.value = "Enter the address shown on the other device"
             return
@@ -44,7 +44,7 @@ class ReceiveViewModel @Inject constructor(
         viewModelScope.launch {
             val peer = DiscoveredPeer(
                 id = "$ip:$port",
-                name = "Peer $ip",
+                name = peerName.ifBlank { "Peer $ip" },
                 transport = TransportType.LEGACY_WIFI_DIRECT,
                 address = ip,
                 port = port,

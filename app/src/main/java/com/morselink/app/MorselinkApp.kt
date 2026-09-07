@@ -19,7 +19,10 @@ class MorselinkApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        CrashLog.install(this)
+        val diagnosticsEnabled = runCatching {
+            runBlocking(Dispatchers.IO) { settings.settings.first().diagnosticsEnabled }
+        }.getOrDefault(true)
+        if (diagnosticsEnabled) CrashLog.install(this)
         val mode = runCatching {
             runBlocking(Dispatchers.IO) { settings.settings.first().themeMode }
         }.getOrDefault(ThemeMode.SYSTEM)

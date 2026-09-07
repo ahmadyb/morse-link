@@ -100,6 +100,9 @@ button, input { font-family: inherit; }
 #content { flex: 1; padding: 16px; overflow: auto; }
 h2.section { font-size: 15px; font-weight: 600; margin: 18px 0 10px; }
 .muted { color: var(--text-secondary); font-size: 12px; }
+.toolbar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin: 10px 0; }
+.select-all { accent-color: var(--primary); }
+#player-close { color: var(--error); }
 
 /* ---------- home ---------- */
 .home-grid { display: flex; gap: 32px; flex-wrap: wrap; align-items: center; }
@@ -287,7 +290,7 @@ tr:hover .row-actions { opacity: 1; }
   <div id="player">
     <strong id="player-title" style="min-width:140px"></strong>
     <button class="icon-btn" id="player-play"><svg viewBox="0 0 24 24"><path d="M8 6l10 6-10 6z"/></svg></button>
-    <span class="muted" id="player-time">00:00</span>
+    <span class="muted" id="player-time">00:00</span><button class="icon-btn" id="player-close" title="Stop">✕</button>
     <div class="bar"><div id="player-bar"></div></div>
     <audio id="audio" style="display:none"></audio>
   </div>
@@ -328,6 +331,7 @@ const state = {
   selection: new Set(),
   path: '',
   album: null,
+  sort: 'date',
   lightbox: [],
   lightboxIndex: 0,
 };
@@ -395,6 +399,10 @@ async function load() {
 function applyFilter() {
   const q = ($('#search').value || '').toLowerCase();
   state.filtered = state.items.filter(f => !q || (f.name || '').toLowerCase().includes(q));
+  const key = state.sort;
+  state.filtered.sort((a, b) => key === 'name' ? (a.name || '').localeCompare(b.name || '')
+    : key === 'size' ? (b.size || 0) - (a.size || 0)
+    : (b.date || b.modified || 0) - (a.date || a.modified || 0));
   render();
 }
 
@@ -476,6 +484,11 @@ function renderGrid(rows) {
     <div class="split">
       ${albumPanel}
       <div style="flex:1; min-width:0">
+        <div class="toolbar">
+          <label><input class="select-all" id="select-all" type="checkbox"> Select all</label>
+          <select id="sort-select" aria-label="Sort files"><option value="date">Newest first</option><option value="name">Name</option><option value="size">Largest first</option></select>
+          <button class="upload-btn" id="bulk-download">Download selected</button>
+        </div>
         <div class="breadcrumb"><span>${state.view}</span></div>
         <div class="grid">${rows.map(cardFor).join('')}</div>
       </div>
@@ -492,6 +505,10 @@ function renderGrid(rows) {
       window.location.href = '/download?id=' + encodeURIComponent(item.id);
     }
   });
+  $('#select-all').onchange = (e) => { rows.forEach(item => e.target.checked ? state.selection.add(item.id) : state.selection.delete(item.id)); render(); };
+  $('#sort-select').value = state.sort;
+  $('#sort-select').onchange = (e) => { state.sort = e.target.value; applyFilter(); };
+  $('#bulk-download').onclick = () => downloadSelected(rows);
 }
 
 function sideAlbums(rows) {
@@ -512,7 +529,7 @@ function sideAlbums(rows) {
 }
 
 function renderMusic(rows) {
-  content.innerHTML = `<table>
+  content.innerHTML = `<div class="toolbar"><label><input class="select-all" id="select-all" type="checkbox"> Select all</label><button class="upload-btn" id="bulk-download">Download selected</button></div><table>
     <thead><tr><th style="width:36px"></th><th>Title</th><th>Artist</th><th class="num">Duration</th><th class="num">Size</th><th></th></tr></thead>
     <tbody>
       ${rows.map((r, i) => `<tr data-index="${i}">
@@ -527,6 +544,8 @@ function renderMusic(rows) {
   document.querySelectorAll('[data-play]').forEach(b => b.onclick = () => playTrack(rows[Number(b.dataset.play)]));
   document.querySelectorAll('[data-dl]').forEach(b => b.onclick = () =>
     window.location.href = '/download?id=' + encodeURIComponent(rows[Number(b.dataset.dl)].id));
+  $('#select-all').onchange = (e) => { rows.forEach(item => e.target.checked ? state.selection.add(item.id) : state.selection.delete(item.id)); render(); };
+  $('#bulk-download').onclick = () => downloadSelected(rows);
 }
 
 function renderFiles(rows) {
@@ -537,7 +556,7 @@ function renderFiles(rows) {
       ${['Download','DCIM','Documents','Pictures','Movies','Music','WhatsApp','Telegram']
         .map(f => `<div class="tree-item" data-path="/storage/emulated/0/${f}">${f}</div>`).join('')}
     </div>` : '';
-  content.innerHTML = `<div class="split">
+  content.innerHTML = `<div class="toolbar"><label><input class="select-all" id="select-all" type="checkbox"> Select all</label><button class="upload-btn" id="bulk-download">Download selected</button></div><div class="split">
       ${tree}
       <div style="flex:1; min-width:0">
         <div class="breadcrumb">${crumbs.map((c, i) => `<span data-crumb="${i}">${c}</span>`).join('<span>/</span>')}</div>
@@ -545,11 +564,11 @@ function renderFiles(rows) {
           <thead><tr><th>Name</th><th class="num">Size</th><th class="num">Modified</th><th></th></tr></thead>
           <tbody>
             ${rows.map((r, i) => `<tr data-index="${i}" data-dir="${r.isDirectory ? 1 : 0}">
-              <td>${typeBadge(r)} ${r.name}</td>
+              <td><input class="row-check" type="checkbox" data-select="${i}" ${state.selection.has(r.id) ? "checked" : ""}> ${typeBadge(r)} ${r.name}</td>
               <td class="num muted">${r.isDirectory ? '' : bytes(r.size)}</td>
               <td class="num muted">${r.modified ? dateLabel(r.modified) : ''}</td>
               <td class="num"><span class="row-actions">
-                ${r.isDirectory ? '' : `<button class="icon-btn" data-dl="${i}">↓</button>`}
+                <button class="icon-btn" data-dl="${i}">↓</button>
                 <button class="icon-btn" data-rename="${i}">✎</button>
                 <button class="icon-btn" data-delete="${i}">🗑</button>
               </span></td></tr>`).join('')}
@@ -566,6 +585,9 @@ function renderFiles(rows) {
     state.path = rows[Number(tr.dataset.index)].path;
     load();
   });
+  document.querySelectorAll('.row-check').forEach(c => c.onchange = () => { const item = rows[Number(c.dataset.select)]; c.checked ? state.selection.add(item.id) : state.selection.delete(item.id); });
+  $('#select-all').onchange = (e) => { rows.forEach(item => e.target.checked ? state.selection.add(item.id) : state.selection.delete(item.id)); render(); };
+  $('#bulk-download').onclick = () => downloadSelected(rows);
   document.querySelectorAll('[data-rename]').forEach(b => b.onclick = async () => {
     const item = rows[Number(b.dataset.rename)];
     const name = prompt('New name', item.name);
@@ -612,6 +634,7 @@ $('#modal-next').onclick = () => openLightbox((state.lightboxIndex + 1) % state.
 
 /* ------------------------------------------------------------------ player */
 const audio = $('#audio');
+$('#player-close').onclick = () => { audio.pause(); audio.removeAttribute('src'); $('#player').classList.remove('open'); };
 function playTrack(item) {
   $('#player').classList.add('open');
   $('#player-title').textContent = item.name;
@@ -624,6 +647,12 @@ function playTrack(item) {
     const m = Math.floor(audio.currentTime / 60), s = Math.floor(audio.currentTime % 60);
     $('#player-time').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
   };
+}
+
+function downloadSelected(rows) {
+  const picked = rows.filter(item => state.selection.has(item.id));
+  if (!picked.length) return alert('Select at least one item first.');
+  window.location.href = '/download?ids=' + picked.map(item => encodeURIComponent(item.id)).join(',');
 }
 
 /* ------------------------------------------------------------------ uploads */

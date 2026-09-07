@@ -73,6 +73,8 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         }
 
         setupCrashLogRow()
+        binding.rowDiagnostics.toggle.setOnCheckedChangeListener { _, checked -> viewModel.setDiagnosticsEnabled(checked) }
+        binding.rowDiagnostics.root.setOnClickListener { binding.rowDiagnostics.toggle.isChecked = !binding.rowDiagnostics.toggle.isChecked }
 
         binding.rowDeviceName.root.setOnClickListener {
             Dialogs.input(requireContext(), getString(R.string.settings_device_name), viewModel.deviceName()) {
@@ -89,6 +91,9 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         }
         binding.rowPreferWifiDirect.toggle.setOnCheckedChangeListener { _, checked ->
             viewModel.setPreferWifiDirect(checked)
+        }
+        binding.rowPreferWifiDirect.root.setOnClickListener {
+            binding.rowPreferWifiDirect.toggle.isChecked = !binding.rowPreferWifiDirect.toggle.isChecked
         }
         binding.rowTheme.root.setOnClickListener { showThemePicker() }
         binding.rowNotifications.toggle.setOnCheckedChangeListener { _, checked ->

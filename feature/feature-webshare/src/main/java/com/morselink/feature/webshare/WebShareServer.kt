@@ -18,6 +18,8 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.Locale
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -39,7 +41,7 @@ class WebShareServer @Inject constructor(
      *  also release the hotspot and the foreground service. */
     var onStopRequest: (() -> Unit)? = null
 
-    data class Entry(val path: String, val name: String, val size: Long, val mime: String)
+    data class Entry(val path: String, val name: String, val size: Long, val mime: String, val uri: String? = null)
 
     fun startServer(): Boolean = runCatching { start(SOCKET_READ_TIMEOUT, false); true }.getOrDefault(false)
 
@@ -89,6 +91,7 @@ class WebShareServer @Inject constructor(
                         name = item.displayName,
                         size = item.sizeBytes,
                         mime = item.mimeType ?: "application/octet-stream",
+                        uri = item.uri.toString(),
                     )
                     array.put(jsonFor(id, item.displayName, item.sizeBytes, item.mimeType ?: "",
                         extra = JSONObject().apply {
@@ -247,37 +250,71 @@ class WebShareServer @Inject constructor(
     // ------------------------------------------------------------------ download
 
     private fun download(session: IHTTPSession): Response {
+        val bundleIds = session.parms["ids"]?.split(',')?.map { it.trim() }?.filter { it.isNotBlank() }.orEmpty()
+        if (bundleIds.isNotEmpty()) return downloadBundle(bundleIds)
         val id = session.parms["id"] ?: return newFixedLengthResponse(Response.Status.BAD_REQUEST, MIME_PLAINTEXT, "Missing id")
         val entry = entries[id]
             ?: return newFixedLengthResponse(Response.Status.NOT_FOUND, MIME_PLAINTEXT, "Unknown file")
-        val file = File(entry.path)
-        if (!file.exists()) {
-            return newFixedLengthResponse(Response.Status.NOT_FOUND, MIME_PLAINTEXT, "File unavailable")
-        }
+        val file = entry.path.takeIf { it.isNotBlank() }?.let(::File)
+        val contentStream = if (file?.exists() == true) FileInputStream(file)
+            else entry.uri?.let { runCatching { context.contentResolver.openInputStream(android.net.Uri.parse(it)) }.getOrNull() }
+        if (contentStream == null) return newFixedLengthResponse(Response.Status.NOT_FOUND, MIME_PLAINTEXT, "File unavailable")
+        val totalLength = file?.length() ?: entry.size
         val rangeHeader = session.headers["range"] ?: session.headers["Range"]
         var start = 0L
-        var end = file.length() - 1
+        var end = totalLength - 1
         var status = Response.Status.OK
-        if (!rangeHeader.isNullOrBlank()) {
+        if (!rangeHeader.isNullOrBlank() && file != null) {
             val match = Regex("bytes=(\\d*)-(\\d*)").find(rangeHeader)
             if (match != null) {
                 val from = match.groupValues[1].toLongOrNull()
                 val to = match.groupValues[2].toLongOrNull()
-                start = from ?: (file.length() - (to ?: 0))
-                end = to ?: (file.length() - 1)
+                start = from ?: (totalLength - (to ?: 0))
+                end = (to ?: (totalLength - 1)).coerceAtMost(totalLength - 1)
                 status = Response.Status.PARTIAL_CONTENT
             }
         }
         val length = (end - start + 1).coerceAtLeast(0)
-        val stream = FileInputStream(file).apply { skip(start) }
+        if (start > 0) contentStream.skip(start)
+        val stream = contentStream
         val response = newFixedLengthResponse(status, entry.mime.ifBlank { "application/octet-stream" }, stream, length)
         response.addHeader("Accept-Ranges", "bytes")
         response.addHeader("Content-Length", length.toString())
         if (status == Response.Status.PARTIAL_CONTENT) {
-            response.addHeader("Content-Range", "bytes $start-$end/${file.length()}")
+            response.addHeader("Content-Range", "bytes $start-$end/$totalLength")
         }
         response.addHeader("Content-Disposition", "attachment; filename=\"${entry.name}\"")
         return cors(response)
+    }
+
+    /** Creates a temporary zip for multi-select downloads, including folders. */
+    private fun downloadBundle(ids: List<String>): Response {
+        val files = ids.mapNotNull { entries[it] }.map { EntryFile(it, File(it.path)) }
+            .filter { it.file.exists() }
+        if (files.isEmpty()) return newFixedLengthResponse(Response.Status.NOT_FOUND, MIME_PLAINTEXT, "No files selected")
+        val zip = File.createTempFile("morselink-share-", ".zip", context.cacheDir)
+        runCatching {
+            ZipOutputStream(FileOutputStream(zip)).use { out ->
+                val used = HashSet<String>()
+                files.forEach { item -> addToZip(out, item.file, item.entry.name, used) }
+            }
+        }.onFailure { zip.delete(); return newFixedLengthResponse(Response.Status.INTERNAL_ERROR, MIME_PLAINTEXT, "Could not create archive") }
+        val response = newFixedLengthResponse(Response.Status.OK, "application/zip", FileInputStream(zip), zip.length())
+        response.addHeader("Content-Disposition", "attachment; filename=\"morselink-files.zip\"")
+        return cors(response)
+    }
+
+    private data class EntryFile(val entry: Entry, val file: File)
+
+    private fun addToZip(out: ZipOutputStream, file: File, name: String, used: MutableSet<String>) {
+        if (file.isDirectory) {
+            file.listFiles()?.forEach { child -> addToZip(out, child, "$name/${child.name}", used) }
+            return
+        }
+        var safe = name.replace('\\', '/').trimStart('/')
+        var n = 1; val original = safe
+        while (!used.add(safe)) safe = "${original.substringBeforeLast('.', original)}-$n.${original.substringAfterLast('.', "bin")}".also { n++ }
+        out.putNextEntry(ZipEntry(safe)); FileInputStream(file).use { it.copyTo(out) }; out.closeEntry()
     }
 
     // -------------------------------------------------------------------- upload

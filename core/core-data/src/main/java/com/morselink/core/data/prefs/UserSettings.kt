@@ -12,6 +12,7 @@ data class UserSettings(
     val preferWifiDirectOverHotspot: Boolean = true,
     val connectionTimeoutSeconds: Int = 15,
     val maxReconnectAttempts: Int = 3,
+    val diagnosticsEnabled: Boolean = true,
 ) {
     companion object {
         const val DEFAULT_DEVICE_NAME = "Morselink Phone"

@@ -34,6 +34,7 @@ class SettingsViewModel @Inject constructor(
     fun downloadDirectory(): String = latest.downloadDirectory ?: defaultDownloadPath()
     fun timeout(): Int = latest.connectionTimeoutSeconds
     fun reconnect(): Int = latest.maxReconnectAttempts
+    fun diagnosticsEnabled(): Boolean = latest.diagnosticsEnabled
 
     fun defaultDownloadPath(): String =
         runCatching { media.defaultDownloadDirectory().absolutePath }.getOrDefault("")
@@ -52,6 +53,7 @@ class SettingsViewModel @Inject constructor(
     fun setTimeout(value: Int) = viewModelScope.launch {
         settings.setTimeoutSeconds(value.coerceIn(5, 120)); refresh()
     }
+    fun setDiagnosticsEnabled(value: Boolean) = viewModelScope.launch { settings.setDiagnosticsEnabled(value); refresh() }
     fun setReconnect(value: Int) = viewModelScope.launch {
         settings.setReconnectAttempts(value.coerceIn(0, 10)); refresh()
     }
