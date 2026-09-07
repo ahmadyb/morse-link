@@ -48,6 +48,20 @@ class TransportSelector @Inject constructor(
 
     suspend fun connect(peer: DiscoveredPeer): TransportSession = providerFor(peer).connect(peer)
 
+    /**
+     * Direct TCP, no Wi-Fi Direct group involved: the sender binds the control
+     * port and waits for the receiver that scanned its QR code.
+     */
+    suspend fun hostDirect(): TransportSession? = runCatching {
+        legacy.hostDirect()?.let { legacy.sessionForDirect(it, isHost = true) }
+    }.getOrNull()
+
+    /** Direct TCP: dial a sender that is showing its QR code. */
+    suspend fun joinDirect(host: String, port: Int, localName: String): TransportSession? =
+        runCatching {
+            legacy.joinDirect(host, port, localName)?.let { legacy.sessionForDirect(it, isHost = false) }
+        }.getOrNull()
+
     suspend fun stop() {
         runCatching { nearby.stopDiscovery() }
         runCatching { legacy.stopDiscovery() }

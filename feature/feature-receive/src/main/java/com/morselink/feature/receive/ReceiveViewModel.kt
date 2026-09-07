@@ -1,9 +1,12 @@
+import android.util.Log
+
 package com.morselink.feature.receive
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.morselink.core.data.prefs.SettingsStore
 import com.morselink.core.network.ConnectionHolder
 import com.morselink.core.network.DiscoveredPeer
 import com.morselink.core.network.PairingPayload
@@ -17,7 +20,10 @@ import javax.inject.Inject
 class ReceiveViewModel @Inject constructor(
     private val selector: TransportSelector,
     private val holder: ConnectionHolder,
+    private val settings: SettingsStore,
 ) : ViewModel() {
+
+    private var connectJob: kotlinx.coroutines.Job? = null
 
     private val _status = MutableLiveData("Scan the QR code on the sender's screen")
     val status: LiveData<String> = _status
@@ -41,23 +47,33 @@ class ReceiveViewModel @Inject constructor(
             return
         }
         _status.value = "Connecting to $ip…"
-        viewModelScope.launch {
-            val peer = DiscoveredPeer(
-                id = "$ip:$port",
-                name = "Peer $ip",
-                transport = TransportType.LEGACY_WIFI_DIRECT,
-                address = ip,
-                port = port,
-            )
-            runCatching { selector.connect(peer) }
-                .onSuccess { session ->
-                    holder.session = session
-                    holder.peer = peer
-                    _connected.postValue(true)
-                }
-                .onFailure { error ->
-                    _status.postValue("Could not connect: ${error.message ?: "unknown error"}")
-                }
+        connectJob = viewModelScope.launch {
+            val name = runCatching { settings.current().deviceName }
+                .getOrDefault("Morselink")
+                .ifBlank { "Morselink" }
+            Log.d("Morselink", "receiver: joining $ip:$port as $name")
+            val session = selector.joinDirect(ip, port, name)
+            if (session == null) {
+                Log.w("Morselink", "receiver: no answer from $ip:$port")
+                _status.postValue(
+                    "No answer from $ip:$port. Check the sender is still showing its " +
+                        "code and that both phones are on the same network."
+                )
+                return@launch
+            }
+            Log.d("Morselink", "receiver: connected to $ip")
+            holder.session = session
+            holder.peer = session.peer
+            _status.postValue("Connected to $ip — waiting for files")
+            _connected.postValue(true)
         }
+    }
+
+    /** Abandon a connect attempt that has not answered yet. */
+    fun cancel() {
+        connectJob?.cancel()
+        connectJob = null
+        _status.postValue("Cancelled")
+        viewModelScope.launch { runCatching { holder.close() } }
     }
 }

@@ -1,3 +1,5 @@
+import android.util.Log
+
 package com.morselink.feature.transfer
 
 import android.graphics.Bitmap
@@ -26,6 +28,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -124,53 +127,56 @@ class TransferViewModel @Inject constructor(
                 .getOrDefault("Morselink")
                 .ifBlank { "Morselink" }
 
-            launch {
-                runCatching {
-                    selector.advertise(name) { peer ->
-                        holder.peer = peer
-                        sendJob = viewModelScope.launch {
-                            runCatching { holder.session = selector.connect(peer) }
-                                .onSuccess {
-                                    _statusLine.postValue("Connected to ${peer.name}")
-                                    sendPending()
-                                }
-                                .onFailure { error ->
-                                    _statusLine.postValue(
-                                        "Could not connect: ${error.message ?: "unknown error"}"
-                                    )
-                                }
-                        }
-                    }
-                }
-            }
-
             val address = withContext(Dispatchers.IO) {
                 runCatching { network.localIpAddress() }.getOrNull()
             }
-            _pairing.postValue(
-                if (address.isNullOrBlank()) {
+            if (address.isNullOrBlank()) {
+                _pairing.postValue(
                     PairingState(
                         address = null,
                         status = "Connect both phones to the same Wi-Fi or hotspot, then reopen this screen.",
                         visible = true,
                     )
-                } else {
-                    val port = LegacyPorts.CONTROL_PORT
-                    val payload = PairingPayload(
-                        name = name,
-                        address = address,
-                        port = port,
-                        transport = selector.primary().id.name,
-                    )
-                    PairingState(
-                        qr = QrCode.bitmap(payload.toJson()),
-                        address = address,
-                        port = port,
-                        status = "Scan this code, or type the address and port below into the receiver.",
-                        visible = true,
-                    )
-                }
+                )
+                return@launch
+            }
+
+            val port = LegacyPorts.CONTROL_PORT
+            val payload = PairingPayload(
+                name = name,
+                address = address,
+                port = port,
+                transport = selector.primary().id.name,
             )
+            _pairing.postValue(
+                PairingState(
+                    qr = QrCode.bitmap(payload.toJson()),
+                    address = address,
+                    port = port,
+                    status = "Scan this code, or type the address and port below into the receiver.",
+                    visible = true,
+                )
+            )
+
+            // Bind the control port and wait for the receiver that scanned the
+            // code. This is plain TCP over whatever network the two phones
+            // share, so it does not depend on Wi-Fi Direct group formation.
+            Log.d("Morselink", "sender: advertising $address:$port, waiting for a receiver")
+            _statusLine.postValue("Waiting for a receiver to scan the code")
+            sendJob = viewModelScope.launch {
+                val session = selector.hostDirect()
+                if (session == null) {
+                    Log.w("Morselink", "sender: no receiver dialled in")
+                    _statusLine.postValue("No receiver connected. Check both phones are on the same network.")
+                    return@launch
+                }
+                Log.d("Morselink", "sender: receiver connected from ${session.peer.name}")
+                holder.session = session
+                holder.peer = session.peer
+                _pairing.postValue(PairingState(visible = false))
+                _statusLine.postValue("Connected to ${session.peer.name}")
+                sendPending()
+            }
         }
     }
 
@@ -179,6 +185,7 @@ class TransferViewModel @Inject constructor(
         val session = holder.session ?: return
         val transport = holder.peer?.transport ?: TransportType.LEGACY_WIFI_DIRECT
         val files = holder.pendingOutgoing
+        Log.d("Morselink", "sender: sending ${files.size} file(s)")
         _pairing.postValue(PairingState(visible = false))
         files.forEach { file ->
             try {
@@ -200,13 +207,20 @@ class TransferViewModel @Inject constructor(
         advertiseJob?.cancel()
         sendJob?.cancel()
         holder.pendingOutgoing = emptyList()
+
+        // Let the screen go immediately. Teardown used to run first, and a
+        // session blocked on a socket meant Cancel just sat there doing
+        // nothing, which is what made it look broken.
+        _pairing.postValue(PairingState(visible = false))
+        _statusLine.postValue("Cancelled")
+        _dismiss.postValue(true)
+
         viewModelScope.launch {
-            engine.cancelAll()
-            holder.close()
-            service.stop()
-            _pairing.postValue(PairingState(visible = false))
-            _statusLine.postValue("Cancelled")
-            _dismiss.postValue(true)
+            runCatching {
+                withTimeoutOrNull(3_000) { engine.cancelAll() }
+                withTimeoutOrNull(3_000) { holder.close() }
+                service.stop()
+            }
         }
     }
 

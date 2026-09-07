@@ -3,6 +3,7 @@ package com.morselink.feature.settings
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
 import android.view.View
@@ -12,10 +13,13 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import android.net.Uri
 import androidx.navigation.fragment.findNavController
+import kotlinx.coroutines.launch
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.morselink.core.data.prefs.ThemeMode
+import com.morselink.core.ui.AppLog
 import com.morselink.core.ui.CrashLog
 import com.morselink.core.ui.Dialogs
 import com.morselink.feature.settings.databinding.FragmentSettingsBinding
@@ -38,7 +42,14 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
             binding.rowDeviceName.value.text = settings.deviceName
 
             binding.rowAvatar.title.text = getString(R.string.settings_avatar)
-            binding.rowAvatar.subtitle.text = "Pick a colour for your device badge"
+            binding.rowAvatar.subtitle.text = getString(R.string.settings_avatar_hint)
+            // The seed was cycled but never drawn anywhere, so the control
+            // looked dead. Show the colour it selects.
+            binding.rowAvatar.value.text = "\u25CF"
+            binding.rowAvatar.value.textSize = 22f
+            binding.rowAvatar.value.setTextColor(
+                AVATAR_COLORS[settings.avatarSeed % AVATAR_COLORS.size]
+            )
 
             binding.rowDownloadDir.title.text = getString(R.string.settings_download_dir)
             binding.rowDownloadDir.value.text = settings.downloadDirectory
@@ -73,6 +84,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         }
 
         setupCrashLogRow()
+        setupAppLogRow()
 
         binding.rowDeviceName.root.setOnClickListener {
             Dialogs.input(requireContext(), getString(R.string.settings_device_name), viewModel.deviceName()) {
@@ -80,6 +92,18 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
             }
         }
         binding.rowAvatar.root.setOnClickListener { viewModel.cycleAvatar() }
+
+        // Tapping the row should do the same as tapping the switch: the switch
+        // alone is a small target and felt unresponsive.
+        binding.rowPreferWifiDirect.root.setOnClickListener {
+            binding.rowPreferWifiDirect.toggle.toggle()
+        }
+        binding.rowNotifications.root.setOnClickListener {
+            binding.rowNotifications.toggle.toggle()
+        }
+        binding.rowSounds.root.setOnClickListener {
+            binding.rowSounds.toggle.toggle()
+        }
         binding.rowDownloadDir.root.setOnClickListener {
             Dialogs.input(
                 requireContext(),
@@ -141,6 +165,45 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         }
     }
 
+    private fun setupAppLogRow() {
+        binding.rowAppLog.title.text = getString(R.string.settings_app_log)
+        binding.rowAppLog.subtitle.text = getString(R.string.settings_app_log_hint)
+        val on = AppLog.isEnabled(requireContext())
+        binding.rowAppLog.toggle.isChecked = on
+        binding.rowAppLog.toggle.setOnCheckedChangeListener { _, checked ->
+            AppLog.setEnabled(requireContext(), checked)
+        }
+        binding.rowAppLog.root.setOnClickListener { showAppLog() }
+    }
+
+    private fun showAppLog() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val text = AppLog.capture(requireContext())
+            val pad = (16 * resources.displayMetrics.density).toInt()
+            val body = TextView(requireContext()).apply {
+                this.text = text
+                typeface = Typeface.MONOSPACE
+                textSize = 10f
+                setTextIsSelectable(true)
+            }
+            val scroller = ScrollView(requireContext()).apply {
+                setPadding(pad, pad / 2, pad, 0)
+                addView(body)
+            }
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.settings_app_log)
+                .setView(scroller)
+                .setPositiveButton(com.morselink.core.ui.R.string.action_copy) { _, _ ->
+                    copyCrashLog(text)
+                }
+                .setNegativeButton(com.morselink.core.ui.R.string.action_clear) { _, _ ->
+                    AppLog.clear(requireContext())
+                }
+                .setNeutralButton(com.morselink.core.ui.R.string.action_close, null)
+                .show()
+        }
+    }
+
     private fun showCrashLog() {
         val context = requireContext()
         val log = CrashLog.read(context)
@@ -185,6 +248,17 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
             Toast.LENGTH_SHORT,
         ).show()
     }
+
+    private val AVATAR_COLORS = intArrayOf(
+        Color.parseColor("#1FA36B"),
+        Color.parseColor("#2F80ED"),
+        Color.parseColor("#9B51E0"),
+        Color.parseColor("#EB5757"),
+        Color.parseColor("#F2994A"),
+        Color.parseColor("#00B8D9"),
+        Color.parseColor("#F2C94C"),
+        Color.parseColor("#8D6E63"),
+    )
 
     private fun showThemePicker() {
         val options = arrayOf("Light", "Dark", "System")

@@ -38,6 +38,7 @@ dependencies {
     implementation(libs.bundles.androidx.base)
     implementation(libs.bundles.androidx.ui)
     implementation(project(":core:core-ui"))
+    implementation(project(":core:core-data"))
     implementation(project(":core:core-network"))
     implementation(project(":core:core-transfer"))
     implementation(libs.androidx.navigation.fragment)

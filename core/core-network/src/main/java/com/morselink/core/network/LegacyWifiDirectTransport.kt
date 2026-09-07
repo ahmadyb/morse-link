@@ -1,3 +1,5 @@
+import android.util.Log
+
 package com.morselink.core.network
 
 import android.content.BroadcastReceiver
@@ -266,6 +268,74 @@ class LegacyWifiDirectTransport @Inject constructor(
 
     private data class GroupHandle(val ownerIp: String, val isOwner: Boolean)
 
+    /** A control socket plus the peer it came from. */
+    data class DirectConnection(val socket: Socket, val peer: DiscoveredPeer)
+
+    /**
+     * Direct TCP for the QR and manual-connect flows.
+     *
+     * Wi-Fi Direct is not involved: this works on any network the two phones
+     * share, including a hotspot created by either of them. The sender binds
+     * and waits, the receiver dials in and says who it is, and the normal
+     * chunk protocol then runs over the socket that was just opened.
+     */
+    suspend fun hostDirect(port: Int = LegacyPorts.CONTROL_PORT): DirectConnection? =
+        withContext(Dispatchers.IO) {
+            runCatching {
+                val server = ServerSocket(port).apply { soTimeout = DIRECT_ACCEPT_TIMEOUT_MS }
+                Log.d("Morselink", "transport: listening on $port")
+                val socket = try {
+                    server.accept()
+                } finally {
+                    runCatching { server.close() }
+                }
+                socket.soTimeout = SOCKET_TIMEOUT_MS
+                Log.d("Morselink", "transport: inbound connection accepted")
+                val name = runCatching {
+                    DataInputStream(socket.getInputStream()).readUtfLine()
+                }.getOrNull()?.trim().orEmpty().ifBlank { "Receiver" }
+                val address = socket.inetAddress?.hostAddress.orEmpty()
+                DirectConnection(
+                    socket = socket,
+                    peer = DiscoveredPeer(
+                        id = address,
+                        name = name,
+                        transport = TransportType.LEGACY_WIFI_DIRECT,
+                        address = address,
+                        port = port,
+                    ),
+                )
+            }.getOrNull()
+        }
+
+    suspend fun joinDirect(host: String, port: Int, localName: String): DirectConnection? =
+        withContext(Dispatchers.IO) {
+            runCatching {
+                val socket = Socket()
+                socket.connect(java.net.InetSocketAddress(host, port), DIRECT_CONNECT_TIMEOUT_MS)
+                socket.soTimeout = SOCKET_TIMEOUT_MS
+                Log.d("Morselink", "transport: connected to $host:$port")
+                DataOutputStream(socket.getOutputStream()).writeUtfLine(localName)
+                DirectConnection(
+                    socket = socket,
+                    peer = DiscoveredPeer(
+                        id = host,
+                        name = host,
+                        transport = TransportType.LEGACY_WIFI_DIRECT,
+                        address = host,
+                        port = port,
+                    ),
+                )
+            }.getOrNull()
+        }
+
+    fun sessionForDirect(connection: DirectConnection, isHost: Boolean): TransportSession =
+        LegacySession(
+            connection.peer,
+            GroupHandle(ownerIp = connection.peer.address.orEmpty(), isOwner = isHost),
+            connection.socket,
+        )
+
     private fun WifiP2pDevice.toPeer() = DiscoveredPeer(
         id = deviceAddress ?: deviceName,
         name = deviceName ?: "Unknown device",
@@ -278,10 +348,13 @@ class LegacyWifiDirectTransport @Inject constructor(
     private inner class LegacySession(
         override val peer: DiscoveredPeer,
         private val group: GroupHandle,
+        /** Set when the control socket was made by the direct TCP handshake. */
+        presetControl: Socket? = null,
     ) : TransportSession {
 
         private var controlSocket: Socket? = null
         private var dataSocket: Socket? = null
+        private var preset: Socket? = presetControl
 
         override suspend fun sendFile(file: TransferableFile): Flow<TransferProgress> = flow {
             val id = engine.begin(file, TransferDirection.OUTGOING, TransportType.LEGACY_WIFI_DIRECT)
@@ -536,7 +609,11 @@ class LegacyWifiDirectTransport @Inject constructor(
 
         private fun openControlSocket(): Socket {
             controlSocket?.takeIf { it.isConnected && !it.isClosed }?.let { return it }
-            val socket = if (group.isOwner) {
+            val handedOver = preset
+            val socket = if (handedOver != null) {
+                preset = null
+                handedOver
+            } else if (group.isOwner) {
                 serverSocket(LegacyPorts.CONTROL_PORT).accept()
             } else {
                 connectWithRetry(group.ownerIp, LegacyPorts.CONTROL_PORT)
@@ -617,6 +694,10 @@ class LegacyWifiDirectTransport @Inject constructor(
     companion object {
         private const val SOCKET_TIMEOUT_MS = 30_000
         private const val GROUP_TIMEOUT_MS = 20_000L
+
+        /** How long the sender holds the port open waiting for a scan. */
+        private const val DIRECT_ACCEPT_TIMEOUT_MS = 120_000
+        private const val DIRECT_CONNECT_TIMEOUT_MS = 8_000
         private const val CONNECT_ATTEMPTS = 6
 
         /** §7 — concurrent chunk handlers scale with the device tier. */
