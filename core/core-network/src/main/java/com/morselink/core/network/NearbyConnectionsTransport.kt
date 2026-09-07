@@ -121,6 +121,8 @@ class NearbyConnectionsTransport @Inject constructor(
         runCatching { client.stopDiscovery() }
     }
 
+    override suspend fun sessionForAccepted(peer: DiscoveredPeer): TransportSession = NearbySession(peer)
+
     override suspend fun connect(peer: DiscoveredPeer): TransportSession {
         suspendCancellableCoroutine<Boolean> { continuation ->
             val resumed = AtomicBoolean(false)

@@ -25,6 +25,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -79,6 +80,7 @@ class TransferViewModel @Inject constructor(
 
     private var advertiseJob: Job? = null
     private var sendJob: Job? = null
+    private var incomingJob: Job? = null
 
     init {
         viewModelScope.launch { engine.state.collect { pushStatus() } }
@@ -87,6 +89,11 @@ class TransferViewModel @Inject constructor(
             startSenderPairing()
         } else {
             service.start()
+            holder.session?.let { session ->
+                incomingJob = viewModelScope.launch {
+                    runCatching { session.incomingFiles().collect { /* engine updates the UI */ } }
+                }
+            }
             // Arriving as the receiver: the session is already up, so say who
             // we are connected to instead of implying nothing happened.
             val peer = holder.peer
@@ -129,7 +136,7 @@ class TransferViewModel @Inject constructor(
                     selector.advertise(name) { peer ->
                         holder.peer = peer
                         sendJob = viewModelScope.launch {
-                            runCatching { holder.session = selector.connect(peer) }
+                            runCatching { holder.session = selector.sessionForAccepted(peer) }
                                 .onSuccess {
                                     _statusLine.postValue("Connected to ${peer.name}")
                                     sendPending()
@@ -199,6 +206,7 @@ class TransferViewModel @Inject constructor(
     fun cancelAll() {
         advertiseJob?.cancel()
         sendJob?.cancel()
+        incomingJob?.cancel()
         holder.pendingOutgoing = emptyList()
         viewModelScope.launch {
             engine.cancelAll()
@@ -213,6 +221,7 @@ class TransferViewModel @Inject constructor(
     override fun onCleared() {
         advertiseJob?.cancel()
         sendJob?.cancel()
+        incomingJob?.cancel()
         super.onCleared()
     }
 

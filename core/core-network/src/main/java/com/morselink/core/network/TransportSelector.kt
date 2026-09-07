@@ -48,6 +48,9 @@ class TransportSelector @Inject constructor(
 
     suspend fun connect(peer: DiscoveredPeer): TransportSession = providerFor(peer).connect(peer)
 
+    suspend fun sessionForAccepted(peer: DiscoveredPeer): TransportSession =
+        providerFor(peer).sessionForAccepted(peer)
+
     suspend fun stop() {
         runCatching { nearby.stopDiscovery() }
         runCatching { legacy.stopDiscovery() }
