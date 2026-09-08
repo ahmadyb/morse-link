@@ -20,6 +20,7 @@
         <item name="tabStyle">@style/Widget.Morselink.Tab</item>
         <item name="bottomNavigationStyle">@style/Widget.Morselink.BottomNav</item>
         <item name="toolbarStyle">@style/Widget.Morselink.Toolbar</item>
+        <item name="switchStyle">@style/Widget.Morselink.Switch</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowNoTitle">true</item>
     </style>

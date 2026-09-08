@@ -31,11 +31,19 @@
             android:textSize="12sp" />
     </LinearLayout>
 
-    <com.google.android.material.materialswitch.MaterialSwitch
+    <!--
+      This must NOT be com.google.android.material.materialswitch.MaterialSwitch.
+      That is the Material 3 widget and resolves its default style through
+      R.attr.materialSwitchStyle, which only Material 3 themes define. The app
+      theme is MaterialComponents (MDC-2), so the attribute resolves to nothing,
+      the thumb and track drawables end up null, and the switch measures zero
+      pixels wide: invisible and impossible to tap. SwitchMaterial reads
+      R.attr.switchStyle, which MDC-2 themes do define. The explicit style is
+      belt and braces so it can never depend on theme resolution again.
+    -->
+    <com.google.android.material.switchmaterial.SwitchMaterial
         android:id="@+id/toggle"
+        style="@style/Widget.Morselink.Switch"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textOff=""
-        android:textOn=""
-        app:showText="false" />
+        android:layout_height="wrap_content" />
 </LinearLayout>

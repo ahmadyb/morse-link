@@ -86,4 +86,16 @@
         <item name="strokeColor">@color/divider</item>
         <item name="strokeWidth">1dp</item>
     </style>
+
+    <!--
+      Applied explicitly by item_settings_switch.xml. SwitchCompat defaults
+      showText to true, and with no textOn/textOff set it builds a layout from
+      a null CharSequence and throws during measure. Turning the text off here
+      keeps that from happening no matter what the theme says.
+    -->
+    <style name="Widget.Morselink.Switch" parent="Widget.MaterialComponents.CompoundButton.Switch">
+        <item name="showText">false</item>
+        <item name="android:textOn"></item>
+        <item name="android:textOff"></item>
+    </style>
 </resources>

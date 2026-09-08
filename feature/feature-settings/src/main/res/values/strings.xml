@@ -15,6 +15,11 @@
     <string name="settings_avatar_hint">Tap to change the colour of your device badge</string>
     <string name="settings_app_log">App log</string>
     <string name="settings_app_log_hint">Record what the app is doing so it can be pasted into a bug report</string>
+    <string name="settings_app_log_on">Recording — tap to switch off</string>
+    <string name="settings_app_log_off">Switched off — tap to switch on</string>
+    <string name="settings_app_log_view">View app log</string>
+    <string name="settings_app_log_view_hint">Read and copy what has been recorded</string>
+    <string name="settings_app_log_view_off">Switch logging on above to record anything</string>
     <string name="settings_crash_log">Crash log</string>
     <string name="settings_crash_log_none">No crashes recorded</string>
     <string name="settings_crash_log_count">%1$d recorded — tap to view</string>

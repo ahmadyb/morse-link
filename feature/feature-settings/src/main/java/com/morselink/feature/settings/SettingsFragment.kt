@@ -173,8 +173,28 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         binding.rowAppLog.toggle.isChecked = on
         binding.rowAppLog.toggle.setOnCheckedChangeListener { _, checked ->
             AppLog.setEnabled(requireContext(), checked)
+            refreshAppLogRows()
         }
-        binding.rowAppLog.root.setOnClickListener { showAppLog() }
+        // Tapping the row has to switch logging on and off, exactly like every
+        // other switch row. It used to open the viewer, which meant there was
+        // no way to ever turn logging on in the first place.
+        binding.rowAppLog.root.setOnClickListener {
+            binding.rowAppLog.toggle.toggle()
+        }
+        binding.rowAppLogView.root.setOnClickListener { showAppLog() }
+        refreshAppLogRows()
+    }
+
+    private fun refreshAppLogRows() {
+        val binding = binding ?: return
+        val on = AppLog.isEnabled(requireContext())
+        binding.rowAppLog.subtitle.text = getString(
+            if (on) R.string.settings_app_log_on else R.string.settings_app_log_off,
+        )
+        binding.rowAppLogView.title.text = getString(R.string.settings_app_log_view)
+        binding.rowAppLogView.subtitle.text = getString(
+            if (on) R.string.settings_app_log_view_hint else R.string.settings_app_log_view_off,
+        )
     }
 
     private fun showAppLog() {

@@ -33,6 +33,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import java.io.DataInputStream
@@ -365,12 +367,19 @@ class LegacyWifiDirectTransport @Inject constructor(
         private var controlSocket: Socket? = null
         private var dataSocket: Socket? = null
         private var preset: Socket? = presetControl
+        private var hadControl: Boolean = false
+        private val sendMutex = Mutex()
 
         override suspend fun sendFile(file: TransferableFile): Flow<TransferProgress> = flow {
             val id = engine.begin(file, TransferDirection.OUTGOING, TransportType.LEGACY_WIFI_DIRECT)
             try {
                 withContext(Dispatchers.IO) {
+                    // One control channel, one file at a time: two concurrent
+                    // sends would interleave their handshakes on the same
+                    // socket and corrupt each other.
+                    sendMutex.withLock {
                     val source = resolveSource(file)
+                    Log.d("Morselink", "tx: ${file.name} size=${file.sizeBytes} from ${source.absolutePath}")
                     val control = openControlSocket()
                     val controlOut = DataOutputStream(control.getOutputStream())
                     val controlIn = DataInputStream(control.getInputStream())
@@ -399,9 +408,14 @@ class LegacyWifiDirectTransport @Inject constructor(
                     openDataSocket()
                     val socketChannel = dataSocket!!.channel
                     streamFile(source, startOffset, id, controlOut, controlIn, socketChannel)
+                    Log.d("Morselink", "tx: ${file.name} streamed")
+                    }
                 }
             } catch (error: Exception) {
-                engine.fail(id, error.message ?: "Wi-Fi Direct transfer failed")
+                Log.d("Morselink", "tx: ${file.name} FAILED ${error.javaClass.simpleName}: ${error.message}")
+                val detail = error.message?.takeIf { it.isNotBlank() }
+                    ?: "Transfer failed (${error.javaClass.simpleName})"
+                engine.fail(id, detail)
             }
             val final = engine.progressFor(id)
             if (final != null) emit(final)
@@ -485,10 +499,36 @@ class LegacyWifiDirectTransport @Inject constructor(
             val control = openControlSocket()
             val controlOut = DataOutputStream(control.getOutputStream())
             val controlIn = DataInputStream(control.getInputStream())
-            val metadata = ChunkProtocol.parseMetadata(controlIn.readUtfLine())
-                ?: return@withContext
             val directory = defaultDownloadDirectory(context)
-            for (meta in metadata.files) {
+            Log.d("Morselink", "rx: receiver loop started")
+
+            // The sender runs one metadata handshake per file, so this has to
+            // keep reading rather than stopping after the first batch. The
+            // sockets also have to stay open between files: closing them after
+            // every file left the sender writing into a dead connection, which
+            // is what produced "Socket closed" from the second file onwards.
+            while (!Thread.currentThread().isInterrupted) {
+                val line = runCatching { controlIn.readUtfLine() }.getOrNull()
+                if (line.isNullOrBlank()) break
+                val metadata = ChunkProtocol.parseMetadata(line)
+                if (metadata == null) {
+                    Log.d("Morselink", "rx: unreadable metadata: ${line.take(80)}")
+                    break
+                }
+                for (meta in metadata.files) {
+                    receiveOne(meta, directory, controlOut, emit)
+                }
+            }
+            Log.d("Morselink", "rx: receiver loop ended")
+            closeSockets()
+        }
+
+        private fun receiveOne(
+            meta: ChunkProtocol.FileMeta,
+            directory: File,
+            controlOut: DataOutputStream,
+            emit: (IncomingFileEvent) -> Unit,
+        ) {
                 val target = File(directory, meta.name)
                 val part = File(directory, meta.name + ".part")
                 val offset = if (part.exists() && part.length() < meta.size) part.length() else 0L
@@ -524,7 +564,7 @@ class LegacyWifiDirectTransport @Inject constructor(
                     )
                     engine.fail(transferId, "Not enough storage on this device")
                     emit(IncomingFileEvent.Failed(transferId, "Not enough storage"))
-                    continue
+                    return
                 }
 
                 val data = openDataSocket()
@@ -551,8 +591,6 @@ class LegacyWifiDirectTransport @Inject constructor(
                     engine.fail(transferId, "Transfer interrupted")
                     emit(IncomingFileEvent.Failed(transferId, "Transfer interrupted"))
                 }
-                closeSockets()
-            }
         }
 
         private fun receiveChunks(
@@ -623,6 +661,11 @@ class LegacyWifiDirectTransport @Inject constructor(
             val socket = if (handedOver != null) {
                 preset = null
                 handedOver
+            } else if (hadControl) {
+                // The session already had a control channel and it has gone
+                // away. Waiting for a fresh inbound connection would hang
+                // until the socket timed out, so report it instead.
+                throw IOException("The connection to ${peer.name} was closed")
             } else if (group.isOwner) {
                 serverSocket(LegacyPorts.CONTROL_PORT).accept()
             } else {
@@ -630,6 +673,7 @@ class LegacyWifiDirectTransport @Inject constructor(
             }
             socket.soTimeout = SOCKET_TIMEOUT_MS
             controlSocket = socket
+            hadControl = true
             return socket
         }
 
