@@ -378,37 +378,37 @@ class LegacyWifiDirectTransport @Inject constructor(
                     // sends would interleave their handshakes on the same
                     // socket and corrupt each other.
                     sendMutex.withLock {
-                    val source = resolveSource(file)
-                    Log.d("Morselink", "tx: ${file.name} size=${file.sizeBytes} from ${source.absolutePath}")
-                    val control = openControlSocket()
-                    val controlOut = DataOutputStream(control.getOutputStream())
-                    val controlIn = DataInputStream(control.getInputStream())
+                        val source = resolveSource(file)
+                        Log.d("Morselink", "tx: ${file.name} size=${file.sizeBytes} from ${source.absolutePath}")
+                        val control = openControlSocket()
+                        val controlOut = DataOutputStream(control.getOutputStream())
+                        val controlIn = DataInputStream(control.getInputStream())
 
-                    controlOut.writeUtfLine(
-                        ChunkProtocol.metadata(
-                            files = listOf(
-                                ChunkProtocol.FileMeta(
-                                    id = file.id,
-                                    name = file.name,
-                                    size = file.sizeBytes,
-                                    sha256 = file.sha256,
-                                    mime = file.mimeType,
-                                )
-                            ),
-                            totalBytes = file.sizeBytes,
-                            dataPort = LegacyPorts.DATA_PORT,
+                        controlOut.writeUtfLine(
+                            ChunkProtocol.metadata(
+                                files = listOf(
+                                    ChunkProtocol.FileMeta(
+                                        id = file.id,
+                                        name = file.name,
+                                        size = file.sizeBytes,
+                                        sha256 = file.sha256,
+                                        mime = file.mimeType,
+                                    )
+                                ),
+                                totalBytes = file.sizeBytes,
+                                dataPort = LegacyPorts.DATA_PORT,
+                            )
                         )
-                    )
 
-                    val reply = ChunkProtocol.parseControl(controlIn.readUtfLine())
-                    val startOffset = if (reply?.type == ChunkProtocol.ControlMessage.TYPE_RESUME) {
-                        reply.value.coerceIn(0, file.sizeBytes)
-                    } else 0L
+                        val reply = ChunkProtocol.parseControl(controlIn.readUtfLine())
+                        val startOffset = if (reply?.type == ChunkProtocol.ControlMessage.TYPE_RESUME) {
+                            reply.value.coerceIn(0, file.sizeBytes)
+                        } else 0L
 
-                    openDataSocket()
-                    val socketChannel = dataSocket!!.channel
-                    streamFile(source, startOffset, id, controlOut, controlIn, socketChannel)
-                    Log.d("Morselink", "tx: ${file.name} streamed")
+                        openDataSocket()
+                        val socketChannel = dataSocket!!.channel
+                        streamFile(source, startOffset, id, controlOut, controlIn, socketChannel)
+                        Log.d("Morselink", "tx: ${file.name} streamed")
                     }
                 }
             } catch (error: Exception) {
@@ -523,74 +523,74 @@ class LegacyWifiDirectTransport @Inject constructor(
             closeSockets()
         }
 
-        private fun receiveOne(
+        private suspend fun receiveOne(
             meta: ChunkProtocol.FileMeta,
             directory: File,
             controlOut: DataOutputStream,
             emit: (IncomingFileEvent) -> Unit,
         ) {
-                val target = File(directory, meta.name)
-                val part = File(directory, meta.name + ".part")
-                val offset = if (part.exists() && part.length() < meta.size) part.length() else 0L
-                controlOut.writeUtfLine(ChunkProtocol.control(ChunkProtocol.ControlMessage.TYPE_RESUME, offset))
+            val target = File(directory, meta.name)
+            val part = File(directory, meta.name + ".part")
+            val offset = if (part.exists() && part.length() < meta.size) part.length() else 0L
+            controlOut.writeUtfLine(ChunkProtocol.control(ChunkProtocol.ControlMessage.TYPE_RESUME, offset))
 
-                val transferId = engine.begin(
-                    TransferableFile(
-                        id = meta.id.ifBlank { meta.name },
+            val transferId = engine.begin(
+                TransferableFile(
+                    id = meta.id.ifBlank { meta.name },
+                    name = meta.name,
+                    sizeBytes = meta.size,
+                    mimeType = meta.mime,
+                    path = target.absolutePath,
+                    sha256 = meta.sha256,
+                ),
+                TransferDirection.INCOMING,
+                TransportType.LEGACY_WIFI_DIRECT,
+            )
+            emit(
+                IncomingFileEvent.Offered(
+                    file = TransferableFile(
+                        id = transferId,
                         name = meta.name,
                         sizeBytes = meta.size,
                         mimeType = meta.mime,
-                        path = target.absolutePath,
-                        sha256 = meta.sha256,
                     ),
-                    TransferDirection.INCOMING,
-                    TransportType.LEGACY_WIFI_DIRECT,
+                    senderName = peer.name,
                 )
-                emit(
-                    IncomingFileEvent.Offered(
-                        file = TransferableFile(
-                            id = transferId,
-                            name = meta.name,
-                            sizeBytes = meta.size,
-                            mimeType = meta.mime,
-                        ),
-                        senderName = peer.name,
-                    )
+            )
+
+            if (!engine.hasSpaceFor(meta.size)) {
+                controlOut.writeUtfLine(
+                    ChunkProtocol.control(ChunkProtocol.ControlMessage.TYPE_REJECT, text = "Not enough storage")
                 )
+                engine.fail(transferId, "Not enough storage on this device")
+                emit(IncomingFileEvent.Failed(transferId, "Not enough storage"))
+                return
+            }
 
-                if (!engine.hasSpaceFor(meta.size)) {
-                    controlOut.writeUtfLine(
-                        ChunkProtocol.control(ChunkProtocol.ControlMessage.TYPE_REJECT, text = "Not enough storage")
-                    )
-                    engine.fail(transferId, "Not enough storage on this device")
-                    emit(IncomingFileEvent.Failed(transferId, "Not enough storage"))
-                    return
+            val data = openDataSocket()
+            val received = receiveChunks(
+                data = data,
+                controlOut = controlOut,
+                part = part,
+                expectedSize = meta.size,
+                startOffset = offset,
+            ) { bytes -> engine.update(transferId, bytes) }
+
+            if (received) {
+                if (part.renameTo(target) || part.copyTo(target, overwrite = true).exists()) {
+                    part.delete()
                 }
-
-                val data = openDataSocket()
-                val received = receiveChunks(
-                    data = data,
-                    controlOut = controlOut,
-                    part = part,
-                    expectedSize = meta.size,
-                    startOffset = offset,
-                ) { bytes -> engine.update(transferId, bytes) }
-
-                if (received) {
-                    if (part.renameTo(target) || part.copyTo(target, overwrite = true).exists()) {
-                        part.delete()
-                    }
-                    engine.complete(
-                        fileId = transferId,
-                        localPath = target.absolutePath,
-                        peerName = peer.name,
-                        publishToMediaStore = true,
-                    )
-                    emit(IncomingFileEvent.Done(transferId, target.absolutePath))
-                } else {
-                    engine.fail(transferId, "Transfer interrupted")
-                    emit(IncomingFileEvent.Failed(transferId, "Transfer interrupted"))
-                }
+                engine.complete(
+                    fileId = transferId,
+                    localPath = target.absolutePath,
+                    peerName = peer.name,
+                    publishToMediaStore = true,
+                )
+                emit(IncomingFileEvent.Done(transferId, target.absolutePath))
+            } else {
+                engine.fail(transferId, "Transfer interrupted")
+                emit(IncomingFileEvent.Failed(transferId, "Transfer interrupted"))
+            }
         }
 
         private fun receiveChunks(
