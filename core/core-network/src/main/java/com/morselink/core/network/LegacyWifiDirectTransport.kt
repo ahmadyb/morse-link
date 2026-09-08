@@ -354,8 +354,16 @@ class LegacyWifiDirectTransport @Inject constructor(
         transport = TransportType.LEGACY_WIFI_DIRECT,
     )
 
+    /**
+     * Binds with SO_REUSEADDR so a port left in TIME_WAIT by a previous
+     * session does not fail the next bind.
+     */
     private fun serverSocket(port: Int, timeoutMs: Int = SOCKET_TIMEOUT_MS): ServerSocket =
-        ServerSocket(port).apply { soTimeout = timeoutMs }
+        ServerSocket().apply {
+            reuseAddress = true
+            bind(java.net.InetSocketAddress(port))
+            soTimeout = timeoutMs
+        }
 
     private inner class LegacySession(
         override val peer: DiscoveredPeer,
@@ -384,6 +392,11 @@ class LegacyWifiDirectTransport @Inject constructor(
                         val controlOut = DataOutputStream(control.getOutputStream())
                         val controlIn = DataInputStream(control.getInputStream())
 
+                        // Bind the data port before announcing the file. The
+                        // receiver dials in as soon as it has read the
+                        // metadata; if nothing is listening yet its first
+                        // connect is refused and it has to back off and retry.
+                        val dataServer = bindDataServer()
                         controlOut.writeUtfLine(
                             ChunkProtocol.metadata(
                                 files = listOf(
@@ -405,8 +418,12 @@ class LegacyWifiDirectTransport @Inject constructor(
                             reply.value.coerceIn(0, file.sizeBytes)
                         } else 0L
 
-                        openDataSocket()
-                        val socketChannel = dataSocket!!.channel
+                        val data = try {
+                            openDataSocket(dataServer)
+                        } finally {
+                            runCatching { dataServer?.close() }
+                        }
+                        val socketChannel = data.channel
                         streamFile(source, startOffset, id, controlOut, controlIn, socketChannel)
                         Log.d("Morselink", "tx: ${file.name} streamed")
                     }
@@ -512,8 +529,13 @@ class LegacyWifiDirectTransport @Inject constructor(
                 if (line.isNullOrBlank()) break
                 val metadata = ChunkProtocol.parseMetadata(line)
                 if (metadata == null) {
-                    Log.d("Morselink", "rx: unreadable metadata: ${line.take(80)}")
-                    break
+                    // Not metadata, so keep reading. The sender writes a DONE
+                    // marker on this channel after every file, and treating
+                    // that as end-of-conversation ended the session after the
+                    // first file: every later file was then left waiting for a
+                    // receiver that had already gone.
+                    Log.d("Morselink", "rx: skipping control line: ${line.take(80)}")
+                    continue
                 }
                 for (meta in metadata.files) {
                     receiveOne(meta, directory, controlOut, emit)
@@ -667,7 +689,8 @@ class LegacyWifiDirectTransport @Inject constructor(
                 // until the socket timed out, so report it instead.
                 throw IOException("The connection to ${peer.name} was closed")
             } else if (group.isOwner) {
-                serverSocket(LegacyPorts.CONTROL_PORT).accept()
+                val server = serverSocket(LegacyPorts.CONTROL_PORT)
+                try { server.accept() } finally { runCatching { server.close() } }
             } else {
                 connectWithRetry(group.ownerIp, LegacyPorts.CONTROL_PORT)
             }
@@ -677,12 +700,23 @@ class LegacyWifiDirectTransport @Inject constructor(
             return socket
         }
 
-        private fun openDataSocket(): Socket {
+        /**
+         * Binds the data port without accepting yet, so the port is already
+         * listening by the time the receiver is told to dial in. Pass the
+         * result to [openDataSocket] and close it afterwards.
+         */
+        private fun bindDataServer(): ServerSocket? =
+            if (dataSocket == null && group.isOwner) serverSocket(LegacyPorts.DATA_PORT) else null
+
+        private fun openDataSocket(prebound: ServerSocket? = null): Socket {
             dataSocket?.takeIf { it.isConnected && !it.isClosed }?.let { return it }
-            val socket = if (group.isOwner) {
-                serverSocket(LegacyPorts.DATA_PORT).accept()
-            } else {
-                connectWithRetry(group.ownerIp, LegacyPorts.DATA_PORT)
+            val socket = when {
+                prebound != null -> prebound.accept()
+                group.isOwner -> {
+                    val server = serverSocket(LegacyPorts.DATA_PORT)
+                    try { server.accept() } finally { runCatching { server.close() } }
+                }
+                else -> connectWithRetry(group.ownerIp, LegacyPorts.DATA_PORT)
             }
             socket.soTimeout = SOCKET_TIMEOUT_MS
             dataSocket = socket

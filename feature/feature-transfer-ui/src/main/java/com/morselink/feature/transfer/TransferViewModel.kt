@@ -11,6 +11,7 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.morselink.core.data.prefs.SettingsStore
 import com.morselink.core.network.ConnectionHolder
+import com.morselink.core.network.IncomingTransferCoordinator
 import com.morselink.core.network.NetworkUtils
 import com.morselink.core.network.PairingPayload
 import com.morselink.core.network.SessionServiceController
@@ -65,6 +66,7 @@ class TransferViewModel @Inject constructor(
     private val network: NetworkUtils,
     private val settings: SettingsStore,
     private val service: SessionServiceController,
+    private val incomingCoordinator: IncomingTransferCoordinator,
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
 
@@ -140,6 +142,11 @@ class TransferViewModel @Inject constructor(
             if (peer != null && holder.hasSession()) {
                 _statusLine.postValue(context.getString(R.string.status_connected_waiting, peer.name))
                 showConnected(peer.name)
+                // Nothing receives until this is running: the receive loop
+                // lives inside the incomingFiles flow, and without a
+                // collector the sender just waits for a reply that never
+                // comes and then times out.
+                holder.session?.let { incomingCoordinator.start(it) }
             }
         }
     }
@@ -274,6 +281,7 @@ class TransferViewModel @Inject constructor(
     fun cancelAll() {
         advertiseJob?.cancel()
         sendJob?.cancel()
+        incomingCoordinator.stop()
         holder.pendingOutgoing = emptyList()
 
         // Let the screen go immediately. Teardown used to run first, and a
