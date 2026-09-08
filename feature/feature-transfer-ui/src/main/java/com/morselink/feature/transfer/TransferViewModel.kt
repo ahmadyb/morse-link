@@ -2,6 +2,7 @@ package com.morselink.feature.transfer
 
 import android.util.Log
 
+import android.content.Context
 import android.graphics.Bitmap
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -23,6 +24,7 @@ import com.morselink.core.transfer.model.label
 import com.morselink.core.ui.Format
 import com.morselink.core.ui.QrCode
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -32,14 +34,28 @@ import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-/** What the pairing panel shows while we wait for a receiver (§14.8). */
+/** Which face the collapsible card at the top of the screen is showing. */
+enum class PairingMode { HIDDEN, QR, CONNECTED }
+
+/**
+ * The collapsible card at the top of the transfer screen (§14.8).
+ *
+ * It has two faces: the pairing QR while we wait for a receiver, and the peer we
+ * are connected to once the session is up — so the receiving phone gets a
+ * connected panel too instead of a bare status line. Both faces collapse down to
+ * the title row, because the card is tall enough to bury the transfer list.
+ */
 data class PairingState(
+    val mode: PairingMode = PairingMode.HIDDEN,
+    val peerName: String? = null,
     val qr: Bitmap? = null,
     val address: String? = null,
     val port: Int? = null,
     val status: String = "",
-    val visible: Boolean = false,
-)
+    val collapsed: Boolean = false,
+) {
+    val visible: Boolean get() = mode != PairingMode.HIDDEN
+}
 
 @HiltViewModel
 class TransferViewModel @Inject constructor(
@@ -49,6 +65,7 @@ class TransferViewModel @Inject constructor(
     private val network: NetworkUtils,
     private val settings: SettingsStore,
     private val service: SessionServiceController,
+    @ApplicationContext private val context: Context,
 ) : ViewModel() {
 
     val rows: LiveData<List<TransferRow>> = engine.state.map { it.toRows() }.asLiveData()
@@ -70,7 +87,7 @@ class TransferViewModel @Inject constructor(
      * bare "waiting for a connection" while the user wonders whether the scan
      * did anything.
      */
-    private val _statusLine = MutableLiveData("Waiting for a connection")
+    private val _statusLine = MutableLiveData(context.getString(R.string.status_waiting_connection))
     val statusLine: LiveData<String> = _statusLine
 
     private val _pairing = MutableLiveData(PairingState())
@@ -83,6 +100,33 @@ class TransferViewModel @Inject constructor(
     private var advertiseJob: Job? = null
     private var sendJob: Job? = null
 
+    /** The card's content as last requested, without the collapse flag. */
+    private var pairingContent = PairingState()
+    private var pairingCollapsed = false
+    private var isSender = false
+
+    /**
+     * Swaps the card to a new face. A change of face re-expands it: someone who
+     * collapsed the QR and then had a receiver connect has new information they
+     * minimised the card to get to, not something to hide for good.
+     */
+    private fun showPairing(state: PairingState) {
+        if (state.mode != pairingContent.mode) pairingCollapsed = false
+        pairingContent = state
+        _pairing.postValue(state.copy(collapsed = pairingCollapsed))
+    }
+
+    private fun hidePairing() {
+        pairingContent = PairingState()
+        pairingCollapsed = false
+        _pairing.postValue(PairingState())
+    }
+
+    fun togglePairingCollapsed() {
+        pairingCollapsed = !pairingCollapsed
+        _pairing.postValue(pairingContent.copy(collapsed = pairingCollapsed))
+    }
+
     init {
         viewModelScope.launch { engine.state.collect { pushStatus() } }
 
@@ -94,7 +138,8 @@ class TransferViewModel @Inject constructor(
             // we are connected to instead of implying nothing happened.
             val peer = holder.peer
             if (peer != null && holder.hasSession()) {
-                _statusLine.postValue("Connected to ${peer.name} — waiting for files")
+                _statusLine.postValue(context.getString(R.string.status_connected_waiting, peer.name))
+                showConnected(peer.name)
             }
         }
     }
@@ -107,19 +152,27 @@ class TransferViewModel @Inject constructor(
             when {
                 active.isNotEmpty() -> {
                     val transport = active.first().transport
-                    "Transferring ${active.size} file(s)" +
-                        (transport?.let { " via ${it.label()}" } ?: "")
+                    if (transport == null) {
+                        context.getString(R.string.status_transferring, active.size)
+                    } else {
+                        context.getString(
+                            R.string.status_transferring_via,
+                            active.size,
+                            transport.label(),
+                        )
+                    }
                 }
                 holder.hasSession() && peer != null ->
-                    "Connected to ${peer.name} — waiting for files"
+                    context.getString(R.string.status_connected_waiting, peer.name)
                 holder.pendingOutgoing.isNotEmpty() ->
-                    "Waiting for a receiver to scan the code"
-                else -> "Waiting for a connection"
+                    context.getString(R.string.status_waiting_receiver)
+                else -> context.getString(R.string.status_waiting_connection)
             }
         )
     }
 
     private fun startSenderPairing() {
+        isSender = true
         service.start()
         pushStatus()
         advertiseJob = viewModelScope.launch {
@@ -131,11 +184,11 @@ class TransferViewModel @Inject constructor(
                 runCatching { network.localIpAddress() }.getOrNull()
             }
             if (address.isNullOrBlank()) {
-                _pairing.postValue(
+                showPairing(
                     PairingState(
+                        mode = PairingMode.QR,
                         address = null,
-                        status = "Connect both phones to the same Wi-Fi or hotspot, then reopen this screen.",
-                        visible = true,
+                        status = context.getString(R.string.transfer_pairing_no_network),
                     )
                 )
                 return@launch
@@ -148,13 +201,13 @@ class TransferViewModel @Inject constructor(
                 port = port,
                 transport = selector.primary().id.name,
             )
-            _pairing.postValue(
+            showPairing(
                 PairingState(
+                    mode = PairingMode.QR,
                     qr = QrCode.bitmap(payload.toJson()),
                     address = address,
                     port = port,
-                    status = "Scan this code, or type the address and port below into the receiver.",
-                    visible = true,
+                    status = context.getString(R.string.pairing_scan_hint),
                 )
             )
 
@@ -162,22 +215,38 @@ class TransferViewModel @Inject constructor(
             // code. This is plain TCP over whatever network the two phones
             // share, so it does not depend on Wi-Fi Direct group formation.
             Log.d("Morselink", "sender: advertising $address:$port, waiting for a receiver")
-            _statusLine.postValue("Waiting for a receiver to scan the code")
+            _statusLine.postValue(context.getString(R.string.status_waiting_receiver))
             sendJob = viewModelScope.launch {
                 val session = selector.hostDirect(name)
                 if (session == null) {
                     Log.w("Morselink", "sender: no receiver dialled in")
-                    _statusLine.postValue("No receiver connected. Check both phones are on the same network.")
+                    _statusLine.postValue(context.getString(R.string.status_no_receiver))
                     return@launch
                 }
                 Log.d("Morselink", "sender: receiver connected from ${session.peer.name}")
                 holder.session = session
                 holder.peer = session.peer
-                _pairing.postValue(PairingState(visible = false))
-                _statusLine.postValue("Connected to ${session.peer.name}")
+                showConnected(session.peer.name)
+                _statusLine.postValue(
+                    context.getString(R.string.status_connected, session.peer.name)
+                )
                 sendPending()
             }
         }
+    }
+
+    /** The connected face of the card, shown on both ends of the transfer. */
+    private fun showConnected(peerName: String) {
+        showPairing(
+            PairingState(
+                mode = PairingMode.CONNECTED,
+                peerName = peerName,
+                status = context.getString(
+                    if (isSender) R.string.pairing_connected_sender_hint
+                    else R.string.pairing_connected_hint
+                ),
+            )
+        )
     }
 
     /** Files queued by the Send flow, sent once a session exists. */
@@ -186,7 +255,6 @@ class TransferViewModel @Inject constructor(
         val transport = holder.peer?.transport ?: TransportType.LEGACY_WIFI_DIRECT
         val files = holder.pendingOutgoing
         Log.d("Morselink", "sender: sending ${files.size} file(s)")
-        _pairing.postValue(PairingState(visible = false))
         files.forEach { file ->
             try {
                 val id = engine.begin(file, TransferDirection.OUTGOING, transport)
@@ -211,8 +279,8 @@ class TransferViewModel @Inject constructor(
         // Let the screen go immediately. Teardown used to run first, and a
         // session blocked on a socket meant Cancel just sat there doing
         // nothing, which is what made it look broken.
-        _pairing.postValue(PairingState(visible = false))
-        _statusLine.postValue("Cancelled")
+        hidePairing()
+        _statusLine.postValue(context.getString(R.string.status_cancelled))
         _dismiss.postValue(true)
 
         viewModelScope.launch {

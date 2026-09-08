@@ -9,4 +9,23 @@
     <string name="transfer_pairing_hint">On the other phone open Morselink and tap Receive, then scan this code.</string>
     <string name="transfer_pairing_waiting">Waiting for a receiver…</string>
     <string name="transfer_pairing_no_network">Connect both phones to the same Wi-Fi or hotspot, then reopen this screen.</string>
+
+    <!-- Collapsible card at the top of the screen -->
+    <string name="transfer_pairing_title">Scan to connect</string>
+    <string name="transfer_connected_title">Connected to %1$s</string>
+    <string name="transfer_panel_collapse">Minimise this panel</string>
+    <string name="transfer_panel_expand">Expand this panel</string>
+    <string name="pairing_scan_hint">Scan this code, or type the address and port below into the receiver.</string>
+    <string name="pairing_connected_hint">You are connected. Files appear in the list below as they arrive.</string>
+    <string name="pairing_connected_sender_hint">Sending your files now. Progress appears in the list below.</string>
+
+    <!-- Status line under the transport label -->
+    <string name="status_waiting_connection">Waiting for a connection</string>
+    <string name="status_waiting_receiver">Waiting for a receiver to scan the code</string>
+    <string name="status_no_receiver">No receiver connected. Check both phones are on the same network.</string>
+    <string name="status_connected">Connected to %1$s</string>
+    <string name="status_connected_waiting">Connected to %1$s — waiting for files</string>
+    <string name="status_transferring">Transferring %1$d file(s)</string>
+    <string name="status_transferring_via">Transferring %1$d file(s) via %2$s</string>
+    <string name="status_cancelled">Cancelled</string>
 </resources>

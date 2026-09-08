@@ -41,8 +41,20 @@ class TransferFragment : Fragment(R.layout.fragment_transfer) {
         viewModel.stats.observe(viewLifecycleOwner) { stats ->
             binding.stats.text = stats
         }
+        binding.pairingHeader.setOnClickListener { viewModel.togglePairingCollapsed() }
+
         viewModel.pairing.observe(viewLifecycleOwner) { pairing ->
             binding.pairingPanel.isVisible = pairing.visible
+            if (!pairing.visible) return@observe
+
+            binding.pairingTitle.text = when (pairing.mode) {
+                PairingMode.QR -> getString(R.string.transfer_pairing_title)
+                PairingMode.CONNECTED ->
+                    getString(R.string.transfer_connected_title, pairing.peerName.orEmpty())
+                PairingMode.HIDDEN -> ""
+            }
+
+            binding.pairingBody.isVisible = !pairing.collapsed
             binding.qr.setImageBitmap(pairing.qr)
             binding.qr.isVisible = pairing.qr != null
             val host = pairing.address
@@ -55,6 +67,14 @@ class TransferFragment : Fragment(R.layout.fragment_transfer) {
             binding.pairingHint.text = pairing.status.ifBlank {
                 getString(R.string.transfer_pairing_waiting)
             }
+
+            // Chevron points up while the card is open and down once it is
+            // collapsed, so the affordance reads as "tap to change this".
+            binding.pairingToggle.rotation = if (pairing.collapsed) 90f else -90f
+            binding.pairingToggle.contentDescription = getString(
+                if (pairing.collapsed) R.string.transfer_panel_expand
+                else R.string.transfer_panel_collapse
+            )
         }
 
         binding.btnCancel.setOnClickListener {
