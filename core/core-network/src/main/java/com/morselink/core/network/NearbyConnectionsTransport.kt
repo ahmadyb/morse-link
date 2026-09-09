@@ -213,6 +213,16 @@ class NearbyConnectionsTransport @Inject constructor(
             withContext(Dispatchers.IO) {
                 Tasks.await(client.sendPayload(peer.id, Payload.fromFile(source)))
             }
+            // Nothing sets a terminal status for an OUTGOING payload: the
+            // SUCCESS branch in the update handler above deals with incoming
+            // ones. So the loop below waited on a completion that never came
+            // and no Sent entry was ever written.
+            engine.complete(
+                fileId = id,
+                localPath = source.absolutePath,
+                peerName = peer.name,
+                publishToMediaStore = false,
+            )
             var last = -1L
             while (true) {
                 val progress = engine.progressFor(id) ?: break

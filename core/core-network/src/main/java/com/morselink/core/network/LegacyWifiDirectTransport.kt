@@ -432,7 +432,20 @@ class LegacyWifiDirectTransport @Inject constructor(
                         )
                         MorselinkLog.d("tx: data socket open, streaming ${file.name}")
                         streamFile(source, startOffset, id, controlOut, controlIn, out)
-                        MorselinkLog.d("tx: ${file.name} streamed")
+                        // Only the failure branch called into the engine, so a
+                        // send that actually worked left its row unfinished and
+                        // wrote no history entry at all. That is why the
+                        // receiving handset had a Sent/Received list and the
+                        // sending one showed nothing for the same transfers.
+                        // publishToMediaStore is false: the file already lives
+                        // in this device's gallery, it only needs recording.
+                        engine.complete(
+                            fileId = id,
+                            localPath = source.absolutePath,
+                            peerName = peer.name,
+                            publishToMediaStore = false,
+                        )
+                        MorselinkLog.d("tx: ${file.name} sent to ${peer.name}")
                     }
                 }
             } catch (error: Exception) {

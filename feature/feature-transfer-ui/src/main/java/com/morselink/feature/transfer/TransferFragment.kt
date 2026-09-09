@@ -85,7 +85,15 @@ class TransferFragment : Fragment(R.layout.fragment_transfer) {
         // Cancel used to stop the transfers but leave the user stranded on a
         // dead screen with no way back but a force-close.
         viewModel.dismiss.observe(viewLifecycleOwner) { done ->
-            if (done) findNavController().navigateUp()
+            if (!done) return@observe
+            val nav = findNavController()
+            // navigateUp() returns false when there is nowhere to go up to,
+            // which happens when this screen was the first one shown after a
+            // crash-restart. Without the fallback Cancel appears to do nothing
+            // and the only way out is to kill the app.
+            if (!nav.navigateUp()) {
+                runCatching { nav.popBackStack() }
+            }
         }
     }
 

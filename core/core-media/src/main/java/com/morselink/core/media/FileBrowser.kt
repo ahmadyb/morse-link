@@ -61,23 +61,30 @@ class FileBrowser @Inject constructor() {
          * /storage/<VOLUME>/Android/data/<pkg>/files — so the volume root has to
          * be recovered by walking back up to /storage.
          */
+        /**
+         * Map.putIfAbsent is API 24; getOrPut is Kotlin's own and runs on 21.
+         */
+        private fun <V> LinkedHashMap<String, V>.putAbsent(key: String, value: V) {
+            getOrPut(key) { value }
+        }
+
         fun storageRoots(context: Context): List<File> {
             val roots = LinkedHashMap<String, File>()
             runCatching {
                 Environment.getExternalStorageDirectory()?.let {
-                    roots.putIfAbsent(it.absolutePath, it)
+                    roots.putAbsent(it.absolutePath, it)
                 }
             }
             runCatching {
                 context.getExternalFilesDirs(null)?.forEach { dir ->
                     val volume = dir?.let { volumeRootOf(it) } ?: return@forEach
-                    roots.putIfAbsent(volume.absolutePath, volume)
+                    roots.putAbsent(volume.absolutePath, volume)
                 }
             }
             runCatching {
                 context.getExternalMediaDirs()?.forEach { dir ->
                     val volume = dir?.let { volumeRootOf(it) } ?: return@forEach
-                    roots.putIfAbsent(volume.absolutePath, volume)
+                    roots.putAbsent(volume.absolutePath, volume)
                 }
             }
             // Last resort for devices that report nothing through the APIs.
@@ -87,14 +94,14 @@ class FileBrowser @Inject constructor() {
                         if (child.isDirectory && child.canRead() &&
                             child.absolutePath != "/storage/emulated"
                         ) {
-                            roots.putIfAbsent(child.absolutePath, child)
+                            roots.putAbsent(child.absolutePath, child)
                         }
                     }
                 }
             }
             runCatching {
                 Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-                    ?.let { roots.putIfAbsent(it.absolutePath, it) }
+                    ?.let { roots.putAbsent(it.absolutePath, it) }
             }
             if (roots.isEmpty()) roots["/storage/emulated/0"] = File("/storage/emulated/0")
             return roots.values.filter { it.exists() }

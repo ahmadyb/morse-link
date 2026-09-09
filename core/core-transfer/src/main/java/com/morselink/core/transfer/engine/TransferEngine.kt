@@ -191,7 +191,14 @@ class TransferEngine @Inject constructor(
     fun progressFor(fileId: String): TransferProgress? = trackers[fileId]?.progress
 
     fun clearFinished() {
-        trackers.entries.removeIf { it.value.progress.isFinished }
+        // Not entries.removeIf { }: Collection.removeIf is a Java 8 default
+        // method, API 24. On the API 23 handset it threw NoClassDefFoundError
+        // on the desugared lambda, from the ViewModel constructor, which took
+        // the whole transfer screen down before it could draw.
+        val iterator = trackers.entries.iterator()
+        while (iterator.hasNext()) {
+            if (iterator.next().value.progress.isFinished) iterator.remove()
+        }
         publish()
     }
 

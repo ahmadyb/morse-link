@@ -41,6 +41,7 @@ dependencies {
     implementation(project(":core:core-media"))
     implementation(project(":core:core-data"))
     implementation(project(":core:core-network"))
+    implementation(project(":core:core-transfer"))
     implementation(libs.androidx.navigation.fragment)
     implementation(libs.nanohttpd)
     implementation(libs.zxing.core)

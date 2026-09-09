@@ -1,6 +1,6 @@
 package com.morselink.feature.webshare
 
-import android.util.Log
+import com.morselink.core.transfer.MorselinkLog
 
 import android.content.Context
 import com.morselink.core.media.AppItem
@@ -43,9 +43,18 @@ class WebShareServer @Inject constructor(
 
     data class Entry(val path: String, val name: String, val size: Long, val mime: String)
 
-    fun startServer(): Boolean = runCatching { start(SOCKET_READ_TIMEOUT, false); true }.getOrDefault(false)
+    fun startServer(): Boolean = runCatching { start(SOCKET_READ_TIMEOUT, false); true }
+        .getOrDefault(false)
+        .also { up ->
+            MorselinkLog.d(
+                if (up) "webshare: server started on port $listeningPort"
+                else "webshare: server failed to start"
+            )
+        }
 
-    fun stopServer() = runCatching { stop() }
+    fun stopServer() = runCatching { stop() }.also {
+        MorselinkLog.d("webshare: server stopped")
+    }
 
     fun index(): String = runCatching {
         context.resources.openRawResource(R.raw.webshare).bufferedReader().use { it.readText() }
@@ -53,6 +62,9 @@ class WebShareServer @Inject constructor(
 
     override fun serve(session: IHTTPSession): Response {
         val uri = session.uri.trimEnd('/').ifEmpty { "/" }
+        // The web UI only fetches on a user action - nothing polls - so every
+        // request is worth a line.
+        MorselinkLog.d("webshare: ${session.method} $uri")
         return when {
             session.method == Method.OPTIONS -> cors(newFixedLengthResponse(Response.Status.OK, MIME_PLAINTEXT, ""))
             session.method == Method.GET && (uri == "" || uri == "/") ->
@@ -192,6 +204,7 @@ class WebShareServer @Inject constructor(
         }.toString()
 
     private fun renameFile(session: IHTTPSession): String {
+        MorselinkLog.d("webshare: rename ${session.parms["path"] ?: "?"} -> ${session.parms["name"] ?: "?"}")
         val path = session.parms["path"] ?: return errorJson("Missing path")
         val name = session.parms["name"]?.trim().orEmpty()
         if (name.isEmpty()) return errorJson("Missing new name")
@@ -212,6 +225,7 @@ class WebShareServer @Inject constructor(
     }
 
     private fun deleteFile(session: IHTTPSession): String {
+        MorselinkLog.d("webshare: delete ${session.parms["path"] ?: "?"}")
         val path = session.parms["path"] ?: return errorJson("Missing path")
         val file = File(path)
         if (!file.exists()) return errorJson("That file no longer exists")
@@ -249,6 +263,7 @@ class WebShareServer @Inject constructor(
     // ------------------------------------------------------------------ download
 
     private fun download(session: IHTTPSession): Response {
+        MorselinkLog.d("webshare: download requested ${session.parms["id"] ?: session.parms["path"] ?: "?"}")
         val id = session.parms["id"] ?: return newFixedLengthResponse(Response.Status.BAD_REQUEST, MIME_PLAINTEXT, "Missing id")
         val entry = entries[id]
             ?: return newFixedLengthResponse(Response.Status.NOT_FOUND, MIME_PLAINTEXT, "Unknown file")
@@ -310,6 +325,7 @@ class WebShareServer @Inject constructor(
                     ?: Regex("""filename\*?=([^;\r\n]+)""").find(partHeaders)
                         ?.groupValues?.get(1)?.trim()?.trim('"')
                 val target = if (name.isNullOrBlank()) null else File(directory, sanitize(name))
+                if (target != null) MorselinkLog.d("webshare: receiving upload ${target.name}")
                 if (target == null) {
                     if (!readUntilBoundary(pushback, marker)) break
                     continue
@@ -322,10 +338,12 @@ class WebShareServer @Inject constructor(
                 runBlocking { fileOps.publishToMediaStore(target, mime) }
                 val written = target.length()
                 // An empty file "exists", so reporting exists() alone claimed
-                // success for an upload that actually streamed nothing.
-                Log.d(
-                    "Morselink",
-                    "webshare: saved ${target.absolutePath} ($written bytes)",
+                // success for an upload that actually streamed nothing. The
+                // browser reaching 100% while this said zero is what made
+                // uploads look like they completed and then vanished.
+                MorselinkLog.d(
+                    if (written > 0) "webshare: saved ${target.name} ($written bytes)"
+                    else "webshare: ${target.name} arrived EMPTY - nothing written"
                 )
                 results.put(JSONObject().apply {
                     put("name", target.name)
@@ -336,6 +354,7 @@ class WebShareServer @Inject constructor(
                 if (isFinalBoundary(pushback)) break
             }
         }.onFailure { error ->
+            MorselinkLog.w("webshare: upload failed - ${error.message ?: error.javaClass.simpleName}")
             return json(errorJson(error.message ?: "Upload failed"))
         }
 

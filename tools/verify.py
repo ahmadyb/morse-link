@@ -494,6 +494,53 @@ def check_xml(errors):
                 errors.append(f"XML MALFORMED {p}: {e}")
 
 
+def check_api24_collection_calls(errors):
+    """Java 8 default methods on Java collections.
+
+    Collection.removeIf and Map.putIfAbsent landed in API 24. They compile
+    cleanly against compileSdk 35 and the build says nothing, then throw on an
+    API 23 handset: removeIf goes looking for a desugared lambda class that
+    is not there. Both have already shipped once. Kotlin's own equivalents
+    (getOrPut, an iterator loop) work back to 21.
+    """
+    # (regex, what to use instead)
+    banned = [
+        (r"\.removeIf\s*[{(\s]", "an iterator loop with iterator.remove()"),
+        (r"\.putIfAbsent\s*\(", "getOrPut or `if (key !in map) map[key] = v`"),
+        (r"\.replaceAll\s*[{(\s]", "a for loop"),
+        (r"\.computeIfAbsent\s*\(", "getOrPut"),
+        (r"\.getOrDefault\s*\(", "the Elvis operator ?:"),
+        (r"\.stream\s*\(\s*\)", "Kotlin's filter/map on the collection"),
+        (r"\.parallelStream\s*\(\s*\)", "Kotlin's filter/map on the collection"),
+    ]
+    # Look-back window for the runCatching check below.
+    LOOKBACK = 4
+
+    for path in kotlin_files():
+        lines = open(path, encoding="utf-8").read().splitlines()
+        for lineno, line in enumerate(lines, 1):
+            code = line.split("//")[0]
+            for pattern, instead in banned:
+                if not re.search(pattern, code):
+                    continue
+                # Kotlin's Result.getOrDefault is stdlib and fine on API 21.
+                # Every use of it in this project is the tail of a runCatching
+                # chain, so a short look-back tells the two apart without
+                # having to resolve receiver types.
+                if "getOrDefault" in pattern:
+                    # A line that opens with } continues a block, and that
+                    # block may be a long one - AppLog's logcat capture wraps
+                    # eighteen lines in a single runCatching.
+                    depth = 40 if code.lstrip().startswith("}") else LOOKBACK
+                    window = lines[max(0, lineno - 1 - depth):lineno]
+                    if any("runCatching" in w for w in window):
+                        continue
+                errors.append(
+                    f"{path}:{lineno}: API 24 Java collection call "
+                    f"({code.strip()[:60]}) - minSdk is 21, use {instead}"
+                )
+
+
 def main():
     errors = []
     mods = load_modules()
@@ -503,6 +550,7 @@ def main():
     check_binding_types(mods, errors)
     check_coroutine_extensions(errors)
     check_companion_objects(errors)
+    check_api24_collection_calls(errors)
     check_resource_refs(errors)
     check_xml(errors)
 
