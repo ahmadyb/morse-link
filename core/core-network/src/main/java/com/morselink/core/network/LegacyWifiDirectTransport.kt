@@ -413,18 +413,24 @@ class LegacyWifiDirectTransport @Inject constructor(
                             )
                         )
 
+                        Log.d("Morselink", "tx: ${file.name} metadata sent, waiting for resume")
                         val reply = ChunkProtocol.parseControl(controlIn.readUtfLine())
                         val startOffset = if (reply?.type == ChunkProtocol.ControlMessage.TYPE_RESUME) {
                             reply.value.coerceIn(0, file.sizeBytes)
                         } else 0L
+                        Log.d("Morselink", "tx: ${file.name} resume=$startOffset (reply=${reply?.type})")
 
                         val data = try {
                             openDataSocket(dataServer)
                         } finally {
                             runCatching { dataServer?.close() }
                         }
-                        val socketChannel = data.channel
-                        streamFile(source, startOffset, id, controlOut, controlIn, socketChannel)
+                        val out = java.io.BufferedOutputStream(
+                            data.getOutputStream(),
+                            ChunkProtocol.CHUNK_SIZE + ChunkProtocol.HEADER_BYTES + ChunkProtocol.TRAILER_BYTES,
+                        )
+                        Log.d("Morselink", "tx: data socket open, streaming ${file.name}")
+                        streamFile(source, startOffset, id, controlOut, controlIn, out)
                         Log.d("Morselink", "tx: ${file.name} streamed")
                     }
                 }
@@ -438,14 +444,14 @@ class LegacyWifiDirectTransport @Inject constructor(
             if (final != null) emit(final)
         }
 
-        /** §5 — chunk headers from a direct buffer, payload copied with transferTo. */
+        /** §5 — chunk headers, payload and trailer written to one buffered stream. */
         private fun streamFile(
             source: File,
             startOffset: Long,
             transferId: String,
             controlOut: DataOutputStream,
             controlIn: DataInputStream,
-            socketChannel: java.nio.channels.SocketChannel,
+            out: java.io.OutputStream,
         ) {
             val retransmitQueue = ConcurrentLinkedQueue<Int>()
             val channel = FileInputStream(source).channel
@@ -459,10 +465,10 @@ class LegacyWifiDirectTransport @Inject constructor(
                     // honour any outstanding retransmission requests first
                     while (retransmitQueue.isNotEmpty()) {
                         val requested = retransmitQueue.poll() ?: break
-                        sendChunk(requested, fileChannel, socketChannel, total)
+                        sendChunk(requested, fileChannel, out, total)
                     }
                     val length = min(ChunkProtocol.CHUNK_SIZE.toLong(), total - position).toInt()
-                    sendChunk(sequence, fileChannel, socketChannel, total, position, length)
+                    sendChunk(sequence, fileChannel, out, total, position, length)
                     position += length
                     sequence++
                     engine.update(transferId, position)
@@ -470,7 +476,7 @@ class LegacyWifiDirectTransport @Inject constructor(
                 }
                 while (retransmitQueue.isNotEmpty()) {
                     val requested = retransmitQueue.poll() ?: break
-                    sendChunk(requested, fileChannel, socketChannel, total)
+                    sendChunk(requested, fileChannel, out, total)
                 }
             }
             runCatching { controlOut.writeUtfLine(ChunkProtocol.control(ChunkProtocol.ControlMessage.TYPE_DONE)) }
@@ -479,7 +485,7 @@ class LegacyWifiDirectTransport @Inject constructor(
         private fun sendChunk(
             sequence: Int,
             fileChannel: FileChannel,
-            socketChannel: java.nio.channels.SocketChannel,
+            out: java.io.OutputStream,
             total: Long,
             position: Long? = null,
             length: Int? = null,
@@ -500,10 +506,9 @@ class LegacyWifiDirectTransport @Inject constructor(
             payload.get(bytes)
             val crc = ChunkProtocol.crc32(bytes, 0, read)
 
-            socketChannel.write(ChunkProtocol.headerBuffer(sequence, read, crc))
-            val body = ByteBuffer.wrap(bytes)
-            while (body.hasRemaining()) socketChannel.write(body)
-            socketChannel.write(ChunkProtocol.trailerBuffer(crc))
+            out.write(ChunkProtocol.headerBytes(sequence, read, crc))
+            out.write(bytes, 0, read)
+            out.write(ChunkProtocol.trailerBytes(crc))
         }
 
         @Suppress("UNUSED_PARAMETER")
@@ -524,26 +529,51 @@ class LegacyWifiDirectTransport @Inject constructor(
             // sockets also have to stay open between files: closing them after
             // every file left the sender writing into a dead connection, which
             // is what produced "Socket closed" from the second file onwards.
-            while (!Thread.currentThread().isInterrupted) {
-                val line = runCatching { controlIn.readUtfLine() }.getOrNull()
-                if (line.isNullOrBlank()) break
-                val metadata = ChunkProtocol.parseMetadata(line)
-                if (metadata == null) {
-                    // Not metadata, so keep reading. The sender writes a DONE
-                    // marker on this channel after every file, and treating
-                    // that as end-of-conversation ended the session after the
-                    // first file: every later file was then left waiting for a
-                    // receiver that had already gone.
-                    Log.d("Morselink", "rx: skipping control line: ${line.take(80)}")
-                    continue
+            try {
+                while (!Thread.currentThread().isInterrupted) {
+                    val line = runCatching { controlIn.readUtfLine() }.getOrNull()
+                    if (line.isNullOrBlank()) {
+                        Log.d("Morselink", "rx: control channel closed")
+                        break
+                    }
+                    val metadata = ChunkProtocol.parseMetadata(line)
+                    if (metadata == null) {
+                        // Not metadata, so keep reading. The sender writes a
+                        // DONE marker on this channel after every file, and
+                        // treating that as end-of-conversation ended the
+                        // session after the first file: every later file was
+                        // then left waiting for a receiver that had gone.
+                        Log.d("Morselink", "rx: skipping control line: ${line.take(80)}")
+                        continue
+                    }
+                    for (meta in metadata.files) {
+                        try {
+                            receiveOne(meta, directory, controlOut, emit)
+                        } catch (error: Exception) {
+                            if (error is kotlinx.coroutines.CancellationException) throw error
+                            // The stream is mid-message and its position is
+                            // unknown, so there is no safe way to carry on with
+                            // the next file on this connection.
+                            Log.w(
+                                "Morselink",
+                                "rx: ${meta.name} failed: ${error.javaClass.simpleName}: ${error.message}",
+                            )
+                            emit(IncomingFileEvent.Failed(meta.id.ifBlank { meta.name }, error.describe()))
+                            throw error
+                        }
+                    }
                 }
-                for (meta in metadata.files) {
-                    receiveOne(meta, directory, controlOut, emit)
-                }
+            } catch (error: Throwable) {
+                if (error is kotlinx.coroutines.CancellationException) throw error
+                Log.w("Morselink", "rx: receive loop stopped: ${error.javaClass.simpleName}: ${error.message}")
+            } finally {
+                Log.d("Morselink", "rx: receiver loop ended")
+                closeSockets()
             }
-            Log.d("Morselink", "rx: receiver loop ended")
-            closeSockets()
         }
+
+        private fun Throwable.describe(): String =
+            message?.takeIf { it.isNotBlank() } ?: javaClass.simpleName
 
         private suspend fun receiveOne(
             meta: ChunkProtocol.FileMeta,
@@ -554,7 +584,9 @@ class LegacyWifiDirectTransport @Inject constructor(
             val target = File(directory, meta.name)
             val part = File(directory, meta.name + ".part")
             val offset = if (part.exists() && part.length() < meta.size) part.length() else 0L
+            Log.d("Morselink", "rx: ${meta.name} metadata ok (${meta.size} B), resuming at $offset")
             controlOut.writeUtfLine(ChunkProtocol.control(ChunkProtocol.ControlMessage.TYPE_RESUME, offset))
+            Log.d("Morselink", "rx: ${meta.name} resume sent")
 
             val transferId = engine.begin(
                 TransferableFile(
@@ -590,6 +622,7 @@ class LegacyWifiDirectTransport @Inject constructor(
             }
 
             val data = openDataSocket()
+            Log.d("Morselink", "rx: ${meta.name} data socket open, reading chunks")
             val received = receiveChunks(
                 data = data,
                 controlOut = controlOut,
@@ -615,6 +648,12 @@ class LegacyWifiDirectTransport @Inject constructor(
             }
         }
 
+        /**
+         * Returns false when the stream ended early or broke, rather than
+         * throwing. A socket timeout escaping from here used to take the whole
+         * app down: the loop runs in the transport's own coroutine, so nothing
+         * upstream was in a position to catch it.
+         */
         private fun receiveChunks(
             data: Socket,
             controlOut: DataOutputStream,
@@ -625,6 +664,30 @@ class LegacyWifiDirectTransport @Inject constructor(
         ): Boolean {
             val input = data.getInputStream()
             val output = FileOutputStream(part, startOffset > 0)
+            var written = startOffset
+            return try {
+                readChunks(input, output, controlOut, part, expectedSize, startOffset, onProgress)
+            } catch (error: java.io.IOException) {
+                Log.w(
+                    "Morselink",
+                    "rx: chunk read failed after $written/$expectedSize B: " +
+                        "${error.javaClass.simpleName}: ${error.message}",
+                )
+                false
+            } finally {
+                runCatching { output.close() }
+            }
+        }
+
+        private fun readChunks(
+            input: java.io.InputStream,
+            output: FileOutputStream,
+            controlOut: DataOutputStream,
+            part: File,
+            expectedSize: Long,
+            startOffset: Long,
+            onProgress: (Long) -> Unit,
+        ): Boolean {
             var written = startOffset
             output.use { stream ->
                 val header = ByteArray(ChunkProtocol.HEADER_BYTES)

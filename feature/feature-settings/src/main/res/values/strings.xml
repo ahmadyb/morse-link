@@ -20,6 +20,11 @@
     <string name="settings_app_log_view">View app log</string>
     <string name="settings_app_log_view_hint">Read and copy what has been recorded</string>
     <string name="settings_app_log_view_off">Switch logging on above to record anything</string>
+    <string name="settings_app_log_export">Export app log to a file</string>
+    <string name="settings_app_log_export_hint">Saves the whole log as a .txt file named by date and time, ready to attach</string>
+    <string name="settings_app_log_export_off">Switch logging on above to record anything</string>
+    <string name="settings_app_log_export_done">Saved as %1$s</string>
+    <string name="settings_app_log_export_failed">Could not write the log file</string>
     <string name="settings_crash_log">Crash log</string>
     <string name="settings_crash_log_none">No crashes recorded</string>
     <string name="settings_crash_log_count">%1$d recorded — tap to view</string>

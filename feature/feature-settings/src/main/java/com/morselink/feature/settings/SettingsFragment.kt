@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import android.net.Uri
+import java.io.File
 import androidx.navigation.fragment.findNavController
 import kotlinx.coroutines.launch
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -182,6 +183,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
             binding.rowAppLog.toggle.toggle()
         }
         binding.rowAppLogView.root.setOnClickListener { showAppLog() }
+        binding.rowAppLogExport.root.setOnClickListener { exportAppLog() }
         refreshAppLogRows()
     }
 
@@ -192,6 +194,11 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
             if (on) R.string.settings_app_log_on else R.string.settings_app_log_off,
         )
         binding.rowAppLogView.title.text = getString(R.string.settings_app_log_view)
+        binding.rowAppLogExport.title.text = getString(R.string.settings_app_log_export)
+        binding.rowAppLogExport.subtitle.text = getString(
+            if (on) R.string.settings_app_log_export_hint
+            else R.string.settings_app_log_export_off
+        )
         binding.rowAppLogView.subtitle.text = getString(
             if (on) R.string.settings_app_log_view_hint else R.string.settings_app_log_view_off,
         )
@@ -225,6 +232,50 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         }
     }
 
+    /**
+     * Writes the log to a dated .txt file and offers it to whatever app can take
+     * it. Copying a few hundred lines out of a dialog in batches is what this
+     * replaces.
+     */
+    private fun exportAppLog() {
+        val context = requireContext()
+        viewLifecycleOwner.lifecycleScope.launch {
+            val file = AppLog.export(context)
+            if (file == null) {
+                Toast.makeText(
+                    context,
+                    R.string.settings_app_log_export_failed,
+                    Toast.LENGTH_LONG,
+                ).show()
+                return@launch
+            }
+            val uri = runCatching {
+                androidx.core.content.FileProvider.getUriForFile(
+                    context,
+                    "${context.packageName}.fileprovider",
+                    file,
+                )
+            }.getOrNull()
+            MaterialAlertDialogBuilder(context)
+                .setTitle(R.string.settings_app_log_export)
+                .setMessage(getString(R.string.settings_app_log_export_done, file.name))
+                .setPositiveButton(com.morselink.core.ui.R.string.action_share) { _, _ ->
+                    if (uri == null) return@setPositiveButton
+                    runCatching {
+                        startActivity(
+                            android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                                type = "text/plain"
+                                putExtra(android.content.Intent.EXTRA_STREAM, uri)
+                                addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            },
+                        )
+                    }
+                }
+                .setNegativeButton(com.morselink.core.ui.R.string.action_close, null)
+                .show()
+        }
+    }
+
     private fun showCrashLog() {
         val context = requireContext()
         val log = CrashLog.read(context)
@@ -250,13 +301,49 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         MaterialAlertDialogBuilder(context)
             .setTitle(R.string.settings_crash_log)
             .setView(scroller)
-            .setPositiveButton(com.morselink.core.ui.R.string.action_close, null)
+            .setPositiveButton(com.morselink.core.ui.R.string.action_export) { _, _ ->
+                exportText("morselink-crash", log)
+            }
             .setNegativeButton(com.morselink.core.ui.R.string.action_clear) { _, _ ->
                 CrashLog.clear(context)
                 refreshCrashLogRow()
             }
             .setNeutralButton(com.morselink.core.ui.R.string.action_copy) { _, _ -> copyCrashLog(log) }
             .show()
+    }
+
+    /** Writes [text] to a dated .txt file and offers it to another app. */
+    private fun exportText(prefix: String, text: String) {
+        val context = requireContext()
+        if (text.isBlank()) return
+        val file = runCatching {
+            val directory = File(context.getExternalFilesDir(null), "logs").apply { mkdirs() }
+            val name = prefix + "-" +
+                java.text.SimpleDateFormat("yyyyMMdd-HHmmss", java.util.Locale.US)
+                    .format(java.util.Date()) + ".txt"
+            File(directory, name).apply { writeText(text) }
+        }.getOrNull() ?: return
+        val uri = runCatching {
+            androidx.core.content.FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.fileprovider",
+                file,
+            )
+        }.getOrNull() ?: return
+        runCatching {
+            startActivity(
+                android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    putExtra(android.content.Intent.EXTRA_STREAM, uri)
+                    addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                },
+            )
+        }
+        Toast.makeText(
+            context,
+            getString(R.string.settings_app_log_export_done, file.name),
+            Toast.LENGTH_LONG,
+        ).show()
     }
 
     private fun copyCrashLog(text: String) {

@@ -20,20 +20,31 @@ object ChunkProtocol {
     const val TRAILER_BYTES = 4
 
     /** Header plus payload are written from a direct buffer to keep copies low (§5). */
-    fun headerBuffer(sequence: Int, payloadLength: Int, crc: Int): ByteBuffer =
-        ByteBuffer.allocateDirect(HEADER_BYTES).apply {
-            putInt(MAGIC)
-            putInt(sequence)
-            putInt(payloadLength)
-            putInt(crc)
-            flip()
+    /**
+     * Chunk framing as plain bytes.
+     *
+     * The DirectByteBuffer forms are only usable through a SocketChannel, and a
+     * Socket only has a channel when it was made by one — a socket from
+     * ServerSocket.accept() or Socket(host, port) has none, so getChannel()
+     * returns null. Framing goes through these instead.
+     */
+    fun headerBytes(sequence: Int, payloadLength: Int, crc: Int): ByteArray =
+        ByteArray(HEADER_BYTES).also { array ->
+            ByteBuffer.wrap(array).apply {
+                putInt(MAGIC)
+                putInt(sequence)
+                putInt(payloadLength)
+                putInt(crc)
+            }
         }
 
-    fun trailerBuffer(crc: Int): ByteBuffer =
-        ByteBuffer.allocateDirect(TRAILER_BYTES).apply {
-            putInt(crc)
-            flip()
-        }
+    fun trailerBytes(crc: Int): ByteArray =
+        ByteArray(TRAILER_BYTES).also { array -> ByteBuffer.wrap(array).putInt(crc) }
+
+    fun headerBuffer(sequence: Int, payloadLength: Int, crc: Int): ByteBuffer =
+        ByteBuffer.wrap(headerBytes(sequence, payloadLength, crc))
+
+    fun trailerBuffer(crc: Int): ByteBuffer = ByteBuffer.wrap(trailerBytes(crc))
 
     fun crc32(bytes: ByteArray, offset: Int, length: Int): Int {
         val crc = CRC32()

@@ -133,5 +133,9 @@
         <include
             android:id="@+id/row_app_log_view"
             layout="@layout/item_settings_row" />
+
+        <include
+            android:id="@+id/row_app_log_export"
+            layout="@layout/item_settings_row" />
     </LinearLayout>
 </ScrollView>
