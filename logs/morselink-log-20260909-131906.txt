@@ -1,0 +1,3 @@
+----- logcat -----
+--------- beginning of main
+09-09 13:18:30.281 D/Morselink( 9346): tx: IMG_20260908_154539_692.jpg FAILED SocketTimeoutException: Read timed out
