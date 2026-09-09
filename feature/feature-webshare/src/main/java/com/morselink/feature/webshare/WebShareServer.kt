@@ -316,7 +316,15 @@ class WebShareServer @Inject constructor(
         val directory = fileOps.defaultDownloadDirectory()
 
         runCatching {
-            val pushback = java.io.PushbackInputStream(session.inputStream, 8192)
+            // The pushback buffer has to hold whatever readUntilBoundary hands
+            // back, and that is up to BUFFER_SIZE. At 8192 it overflowed on
+            // any part whose tail did not fit, which is why larger uploads
+            // reached 100% in the browser and then never appeared:
+            // "webshare: upload failed - Pushback buffer full".
+            val pushback = java.io.PushbackInputStream(
+                session.inputStream,
+                BUFFER_SIZE + 1024,
+            )
             readUntilBoundary(pushback, marker)   // skip the preamble
             while (true) {
                 val partHeaders = readHeaders(pushback) ?: break

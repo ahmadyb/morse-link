@@ -44,7 +44,11 @@ class ReceiveFragment : Fragment(R.layout.fragment_receive) {
             binding.hint.text = status
         }
         viewModel.connected.observe(viewLifecycleOwner) { connected ->
-            if (connected) findNavController().navigate(Uri.parse("morselink://transfer"))
+            if (!connected) return@observe
+            // Consume it first: if this screen is re-created the flag must not
+            // still be set, or we bounce straight back to transfer.
+            viewModel.consumeConnected()
+            findNavController().navigate(Uri.parse("morselink://transfer"))
         }
 
         // Nearby Connections starts BLE scanning as soon as discovery begins,

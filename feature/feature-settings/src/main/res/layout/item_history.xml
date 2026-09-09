@@ -7,13 +7,18 @@
     android:paddingTop="@dimen/list_item_padding_v"
     android:paddingBottom="@dimen/list_item_padding_v">
 
+    <!-- No tint and no fixed src: the tint that used to sit here coloured
+         every thumbnail, which is one reason the list showed nothing but
+         grey file outlines. Bigger than a 32dp slot because a photo at
+         that size is not readable as a photo. -->
     <ImageView
         android:id="@+id/icon"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:layout_gravity="center_vertical"
+        android:background="@drawable/bg_thumb"
         android:contentDescription="@string/action_open"
-        android:src="@drawable/ic_file"
-        android:tint="@color/textSecondary" />
+        android:scaleType="centerCrop" />
 
     <LinearLayout
         android:layout_width="0dp"

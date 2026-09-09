@@ -28,8 +28,18 @@ class ReceiveViewModel @Inject constructor(
     private val _status = MutableLiveData("Scan the QR code on the sender's screen")
     val status: LiveData<String> = _status
 
+    // One-shot, not state. A plain LiveData replays its last value to every
+    // new observer, so cancelling out of the transfer screen - which pops back
+    // to this one - re-fired "connected" and navigated straight back in. Cancel
+    // looked like it did nothing but bounce, and the only way out was to kill
+    // the app. The fragment clears the flag as it consumes it.
     private val _connected = MutableLiveData(false)
     val connected: LiveData<Boolean> = _connected
+
+    /** Clears a consumed connection so returning here does not re-navigate. */
+    fun consumeConnected() {
+        if (_connected.value == true) _connected.value = false
+    }
 
     /** QR payload: {"ip":"192.168.43.1","port":54321,"name":"...","transport":"..."} */
     fun onQrScanned(payload: String) {
