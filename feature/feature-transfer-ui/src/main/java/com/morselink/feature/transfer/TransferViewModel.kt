@@ -180,6 +180,10 @@ class TransferViewModel @Inject constructor(
 
     private fun startSenderPairing() {
         isSender = true
+        // A new send is a new session. Without this the screen opened on the
+        // previous attempt's rows — files long finished or cancelled — while the
+        // status line said it was waiting for a connection.
+        engine.clearFinished()
         service.start()
         pushStatus()
         advertiseJob = viewModelScope.launch {

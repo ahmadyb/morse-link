@@ -14,6 +14,7 @@ import android.os.Build
 import android.os.Looper
 import androidx.core.content.ContextCompat
 import com.morselink.core.transfer.engine.TransferEngine
+import com.morselink.core.transfer.MorselinkLog
 import com.morselink.core.transfer.legacy.ChunkProtocol
 import com.morselink.core.transfer.legacy.LegacyPorts
 import com.morselink.core.transfer.model.IncomingFileEvent
@@ -288,14 +289,14 @@ class LegacyWifiDirectTransport @Inject constructor(
         withContext(Dispatchers.IO) {
             runCatching {
                 val server = ServerSocket(port).apply { soTimeout = DIRECT_ACCEPT_TIMEOUT_MS }
-                Log.d("Morselink", "transport: listening on $port")
+                MorselinkLog.d("transport: listening on $port")
                 val socket = try {
                     server.accept()
                 } finally {
                     runCatching { server.close() }
                 }
                 socket.soTimeout = SOCKET_TIMEOUT_MS
-                Log.d("Morselink", "transport: inbound connection accepted")
+                MorselinkLog.d("transport: inbound connection accepted")
                 val stream = socket.getInputStream()
                 val name = runCatching { DataInputStream(stream).readUtfLine() }
                     .getOrNull()?.trim().orEmpty().ifBlank { "Receiver" }
@@ -322,12 +323,12 @@ class LegacyWifiDirectTransport @Inject constructor(
                 val socket = Socket()
                 socket.connect(java.net.InetSocketAddress(host, port), DIRECT_CONNECT_TIMEOUT_MS)
                 socket.soTimeout = SOCKET_TIMEOUT_MS
-                Log.d("Morselink", "transport: connected to $host:$port")
+                MorselinkLog.d("transport: connected to $host:$port")
                 DataOutputStream(socket.getOutputStream()).writeUtfLine(localName)
                 val remoteName = runCatching {
                     DataInputStream(socket.getInputStream()).readUtfLine()
                 }.getOrNull()?.trim().orEmpty().ifBlank { host }
-                Log.d("Morselink", "transport: sender identified itself as $remoteName")
+                MorselinkLog.d("transport: sender identified itself as $remoteName")
                 DirectConnection(
                     socket = socket,
                     peer = DiscoveredPeer(
@@ -387,7 +388,7 @@ class LegacyWifiDirectTransport @Inject constructor(
                     // socket and corrupt each other.
                     sendMutex.withLock {
                         val source = resolveSource(file)
-                        Log.d("Morselink", "tx: ${file.name} size=${file.sizeBytes} from ${source.absolutePath}")
+                        MorselinkLog.d("tx: ${file.name} size=${file.sizeBytes} from ${source.absolutePath}")
                         val control = openControlSocket()
                         val controlOut = DataOutputStream(control.getOutputStream())
                         val controlIn = DataInputStream(control.getInputStream())
@@ -413,12 +414,12 @@ class LegacyWifiDirectTransport @Inject constructor(
                             )
                         )
 
-                        Log.d("Morselink", "tx: ${file.name} metadata sent, waiting for resume")
+                        MorselinkLog.d("tx: ${file.name} metadata sent, waiting for resume")
                         val reply = ChunkProtocol.parseControl(controlIn.readUtfLine())
                         val startOffset = if (reply?.type == ChunkProtocol.ControlMessage.TYPE_RESUME) {
                             reply.value.coerceIn(0, file.sizeBytes)
                         } else 0L
-                        Log.d("Morselink", "tx: ${file.name} resume=$startOffset (reply=${reply?.type})")
+                        MorselinkLog.d("tx: ${file.name} resume=$startOffset (reply=${reply?.type})")
 
                         val data = try {
                             openDataSocket(dataServer)
@@ -429,13 +430,13 @@ class LegacyWifiDirectTransport @Inject constructor(
                             data.getOutputStream(),
                             ChunkProtocol.CHUNK_SIZE + ChunkProtocol.HEADER_BYTES + ChunkProtocol.TRAILER_BYTES,
                         )
-                        Log.d("Morselink", "tx: data socket open, streaming ${file.name}")
+                        MorselinkLog.d("tx: data socket open, streaming ${file.name}")
                         streamFile(source, startOffset, id, controlOut, controlIn, out)
-                        Log.d("Morselink", "tx: ${file.name} streamed")
+                        MorselinkLog.d("tx: ${file.name} streamed")
                     }
                 }
             } catch (error: Exception) {
-                Log.d("Morselink", "tx: ${file.name} FAILED ${error.javaClass.simpleName}: ${error.message}")
+                MorselinkLog.d("tx: ${file.name} FAILED ${error.javaClass.simpleName}: ${error.message}")
                 val detail = error.message?.takeIf { it.isNotBlank() }
                     ?: "Transfer failed (${error.javaClass.simpleName})"
                 engine.fail(id, detail)
@@ -479,6 +480,7 @@ class LegacyWifiDirectTransport @Inject constructor(
                     sendChunk(requested, fileChannel, out, total)
                 }
             }
+            out.flush()
             runCatching { controlOut.writeUtfLine(ChunkProtocol.control(ChunkProtocol.ControlMessage.TYPE_DONE)) }
         }
 
@@ -509,6 +511,11 @@ class LegacyWifiDirectTransport @Inject constructor(
             out.write(ChunkProtocol.headerBytes(sequence, read, crc))
             out.write(bytes, 0, read)
             out.write(ChunkProtocol.trailerBytes(crc))
+            // Push every chunk onto the wire now. Buffering across chunks
+            // left the tail of each file in memory, so the sender reported
+            // 100% while the receiver was still waiting for bytes that were
+            // never sent.
+            out.flush()
         }
 
         @Suppress("UNUSED_PARAMETER")
@@ -522,7 +529,7 @@ class LegacyWifiDirectTransport @Inject constructor(
             val controlOut = DataOutputStream(control.getOutputStream())
             val controlIn = DataInputStream(control.getInputStream())
             val directory = defaultDownloadDirectory(context)
-            Log.d("Morselink", "rx: receiver loop started")
+            MorselinkLog.d("rx: receiver loop started")
 
             // The sender runs one metadata handshake per file, so this has to
             // keep reading rather than stopping after the first batch. The
@@ -533,7 +540,7 @@ class LegacyWifiDirectTransport @Inject constructor(
                 while (!Thread.currentThread().isInterrupted) {
                     val line = runCatching { controlIn.readUtfLine() }.getOrNull()
                     if (line.isNullOrBlank()) {
-                        Log.d("Morselink", "rx: control channel closed")
+                        MorselinkLog.d("rx: control channel closed")
                         break
                     }
                     val metadata = ChunkProtocol.parseMetadata(line)
@@ -543,7 +550,7 @@ class LegacyWifiDirectTransport @Inject constructor(
                         // treating that as end-of-conversation ended the
                         // session after the first file: every later file was
                         // then left waiting for a receiver that had gone.
-                        Log.d("Morselink", "rx: skipping control line: ${line.take(80)}")
+                        MorselinkLog.d("rx: skipping control line: ${line.take(80)}")
                         continue
                     }
                     for (meta in metadata.files) {
@@ -565,9 +572,9 @@ class LegacyWifiDirectTransport @Inject constructor(
                 }
             } catch (error: Throwable) {
                 if (error is kotlinx.coroutines.CancellationException) throw error
-                Log.w("Morselink", "rx: receive loop stopped: ${error.javaClass.simpleName}: ${error.message}")
+                MorselinkLog.w("rx: receive loop stopped: ${error.javaClass.simpleName}: ${error.message}")
             } finally {
-                Log.d("Morselink", "rx: receiver loop ended")
+                MorselinkLog.d("rx: receiver loop ended")
                 closeSockets()
             }
         }
@@ -584,9 +591,9 @@ class LegacyWifiDirectTransport @Inject constructor(
             val target = File(directory, meta.name)
             val part = File(directory, meta.name + ".part")
             val offset = if (part.exists() && part.length() < meta.size) part.length() else 0L
-            Log.d("Morselink", "rx: ${meta.name} metadata ok (${meta.size} B), resuming at $offset")
+            MorselinkLog.d("rx: ${meta.name} metadata ok (${meta.size} B), resuming at $offset")
             controlOut.writeUtfLine(ChunkProtocol.control(ChunkProtocol.ControlMessage.TYPE_RESUME, offset))
-            Log.d("Morselink", "rx: ${meta.name} resume sent")
+            MorselinkLog.d("rx: ${meta.name} resume sent")
 
             val transferId = engine.begin(
                 TransferableFile(
@@ -622,7 +629,7 @@ class LegacyWifiDirectTransport @Inject constructor(
             }
 
             val data = openDataSocket()
-            Log.d("Morselink", "rx: ${meta.name} data socket open, reading chunks")
+            MorselinkLog.d("rx: ${meta.name} data socket open, reading chunks")
             val received = receiveChunks(
                 data = data,
                 controlOut = controlOut,

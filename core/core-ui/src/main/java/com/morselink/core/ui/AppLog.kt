@@ -54,8 +54,16 @@ object AppLog {
     suspend fun capture(context: Context): String = withContext(Dispatchers.IO) {
         if (!isEnabled(context)) return@withContext "Logging is switched off."
         runCatching {
+            // Deliberately not "*:E". One noisy library (the WebShare server)
+            // produced over a thousand identical stack frames in under a second
+            // and buried every line of ours, leaving an exported log with no
+            // Morselink output in it at all. Crashes are kept because that is
+            // what the in-app crash log is built from.
             val process = Runtime.getRuntime().exec(
-                arrayOf("logcat", "-d", "-v", "time", "-s", "Morselink:*", "*:E")
+                arrayOf(
+                    "logcat", "-d", "-v", "time", "-s",
+                    "Morselink:*", "AndroidRuntime:E", "*:F",
+                )
             )
             val text = process.inputStream.bufferedReader().readText()
             runCatching { process.waitFor(5, TimeUnit.SECONDS) }

@@ -4,6 +4,8 @@ import android.app.Application
 import androidx.appcompat.app.AppCompatDelegate
 import com.morselink.core.data.prefs.SettingsStore
 import com.morselink.core.data.prefs.ThemeMode
+import com.morselink.core.transfer.MorselinkLog
+import com.morselink.core.ui.AppLog
 import com.morselink.core.ui.CrashLog
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.Dispatchers
@@ -20,6 +22,10 @@ class MorselinkApp : Application() {
     override fun onCreate() {
         super.onCreate()
         CrashLog.install(this)
+        // Only writes while the user has recording switched on.
+        MorselinkLog.install { level, message ->
+            if (AppLog.isEnabled(this)) AppLog.log(this, level, message)
+        }
         val mode = runCatching {
             runBlocking(Dispatchers.IO) { settings.settings.first().themeMode }
         }.getOrDefault(ThemeMode.SYSTEM)
