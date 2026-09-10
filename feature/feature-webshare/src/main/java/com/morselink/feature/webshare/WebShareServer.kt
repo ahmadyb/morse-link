@@ -75,6 +75,7 @@ class WebShareServer @Inject constructor(
             session.method == Method.GET && uri.startsWith("/api/rename") -> json(renameFile(session))
             session.method == Method.GET && uri.startsWith("/api/delete") -> json(deleteFile(session))
             session.method == Method.GET && uri.startsWith("/api/stop") -> json(stopSession())
+            session.method == Method.GET && uri.startsWith("/api/zip") -> zipResponse(session)
             session.method == Method.GET && uri.startsWith("/download") -> download(session)
             session.method == Method.POST && uri.startsWith("/upload") -> upload(session)
             else -> newFixedLengthResponse(Response.Status.NOT_FOUND, MIME_PLAINTEXT, "Not found")
@@ -297,6 +298,92 @@ class WebShareServer @Inject constructor(
         return cors(response)
     }
 
+
+    /**
+     * Bundles a selection - or a whole folder - into one zip, so the browser can
+     * take it in a single request instead of the page firing off dozens of
+     * downloads at once, which browsers throttle and often drop.
+     *
+     * The archive is named for when it was made. Every download used to land as
+     * "download" or the last file's name, so a folder of a dozen documents
+     * arrived as a dozen files with no way to tell which pull was which.
+     */
+    private fun zipResponse(session: IHTTPSession): Response {
+        val ids = (session.parms["ids"] ?: "")
+            .split(',').map { it.trim() }.filter { it.isNotBlank() }
+        val folder = session.parms["path"]
+
+        val picked = LinkedHashMap<String, File>()
+        if (!folder.isNullOrBlank()) {
+            val dir = File(folder)
+            if (!dir.isDirectory) return json(errorJson("That is not a folder"))
+            dir.walkTopDown().filter { it.isFile }.forEach { file ->
+                picked[zipName(picked, dir, file)] = file
+            }
+        } else {
+            for (id in ids) {
+                val entry = entries[id] ?: continue
+                val file = File(entry.path)
+                if (file.isFile) picked[zipName(picked, null, file)] = file
+            }
+        }
+        if (picked.isEmpty()) return json(errorJson("Nothing to download"))
+
+        // Only the newest archive is kept; these are handed straight to the
+        // browser and are of no use afterwards.
+        runCatching {
+            context.cacheDir.listFiles()
+                ?.filter { it.name.startsWith(ZIP_PREFIX) && it.extension == "zip" }
+                ?.forEach { it.delete() }
+        }
+
+        val stamp = java.text.SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(java.util.Date())
+        val archive = File(context.cacheDir, "$ZIP_PREFIX$stamp.zip")
+        runCatching {
+            java.util.zip.ZipOutputStream(java.io.FileOutputStream(archive)).use { zip ->
+                for ((name, file) in picked) {
+                    zip.putNextEntry(java.util.zip.ZipEntry(name))
+                    java.io.FileInputStream(file).use { it.copyTo(zip) }
+                    zip.closeEntry()
+                }
+            }
+        }.onFailure { error ->
+            MorselinkLog.w("webshare: zip failed - ${error.message ?: error.javaClass.simpleName}")
+            return json(errorJson("Could not build the archive"))
+        }
+
+        MorselinkLog.d("webshare: zip ${picked.size} file(s) -> ${archive.name} (${archive.length()} B)")
+        val response = newFixedLengthResponse(
+            Response.Status.OK,
+            "application/zip",
+            java.io.FileInputStream(archive),
+            archive.length(),
+        )
+        response.addHeader("Content-Length", archive.length().toString())
+        response.addHeader("Content-Disposition", "attachment; filename=\"${archive.name}\"")
+        return cors(response)
+    }
+
+    /**
+     * A path relative to the folder being zipped, de-duplicated: two files with
+     * the same name in different subfolders would otherwise collide, and a zip
+     * entry that is overwritten silently loses one of them.
+     */
+    private fun zipName(soFar: Map<String, File>, root: File?, file: File): String {
+        val relative = if (root != null) {
+            file.absolutePath.removePrefix(root.absolutePath).trimStart('/')
+        } else file.name
+        if (!soFar.containsKey(relative)) return relative
+        var n = 1
+        while (soFar.containsKey(withSuffix(relative, n))) n++
+        return withSuffix(relative, n)
+    }
+
+    private fun withSuffix(name: String, n: Int): String {
+        val dot = name.lastIndexOf('.')
+        return if (dot <= 0) "$name ($n)" else "${name.substring(0, dot)} ($n)${name.substring(dot)}"
+    }
+
     // -------------------------------------------------------------------- upload
 
     /**
@@ -468,6 +555,7 @@ class WebShareServer @Inject constructor(
         const val PORT = 33455
         private const val SOCKET_READ_TIMEOUT = 20_000
         private const val APK_MIME = "application/vnd.android.package-archive"
+        private const val ZIP_PREFIX = "morselink-"
         private const val HEADER_END = "\r\n\r\n"
         private const val BUFFER_SIZE = 64 * 1024
     }

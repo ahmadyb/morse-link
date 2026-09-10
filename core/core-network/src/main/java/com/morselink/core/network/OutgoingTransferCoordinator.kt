@@ -47,22 +47,38 @@ class OutgoingTransferCoordinator @Inject constructor(
         session: TransportSession,
         files: List<TransferableFile>,
         transport: TransportType,
+        /**
+         * Called once this batch has finished, so the caller can hand the
+         * channel over. The control socket carries both directions, and only
+         * one side may be talking at a time, so whoever was sending has to
+         * start listening afterwards or the other phone can never reply.
+         */
+        onFinished: (() -> Unit)? = null,
     ) {
-        if (files.isEmpty()) return
+        if (files.isEmpty()) {
+            onFinished?.invoke()
+            return
+        }
         MorselinkLog.d("tx: queueing ${files.size} file(s) for ${session.peer.name}")
         scope.launch {
-            files.forEach { file ->
-                try {
-                    val id = engine.begin(file, TransferDirection.OUTGOING, transport)
-                    session.sendFile(file).collect { progress ->
-                        engine.update(progress.fileId.ifBlank { id }, progress.bytesTransferred)
+            try {
+                files.forEach { file ->
+                    try {
+                        val id = engine.begin(file, TransferDirection.OUTGOING, transport)
+                        session.sendFile(file).collect { progress ->
+                            engine.update(progress.fileId.ifBlank { id }, progress.bytesTransferred)
+                        }
+                    } catch (error: Throwable) {
+                        // Cancellation is not a failure: rethrow it or cancelling
+                        // would only ever mark files failed and then keep sending.
+                        if (error is CancellationException) throw error
+                        engine.fail(file.id, error.message ?: "Send failed")
                     }
-                } catch (error: Throwable) {
-                    // Cancellation is not a failure: rethrow it or cancelling
-                    // would only ever mark files failed and then keep sending.
-                    if (error is CancellationException) throw error
-                    engine.fail(file.id, error.message ?: "Send failed")
                 }
+                MorselinkLog.d("tx: batch of ${files.size} finished")
+                onFinished?.invoke()
+            } catch (error: CancellationException) {
+                MorselinkLog.d("tx: batch cancelled")
             }
         }
     }

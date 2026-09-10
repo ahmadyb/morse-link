@@ -155,12 +155,20 @@ class TransferViewModel @Inject constructor(
             // the receiver path below and the new selection sat in the holder
             // unsent, with nothing on screen saying so.
             isSender = true
+            // Works from either end: a receiver that picks files and taps Send
+            // stops its own receive loop and takes the channel over.
+            takeOverToSend()
             service.start()
             val name = existing.peer.name
             showConnected(name)
             _statusLine.postValue(context.getString(R.string.status_connected, name))
             holder.pendingOutgoing = emptyList()
-            outgoing.send(existing, pending, holder.peer?.transport ?: TransportType.LEGACY_WIFI_DIRECT)
+            outgoing.send(
+                existing,
+                pending,
+                holder.peer?.transport ?: TransportType.LEGACY_WIFI_DIRECT,
+                onFinished = ::startListening,
+            )
         } else {
             service.start()
             // Arriving as the receiver: the session is already up, so say who
@@ -173,7 +181,12 @@ class TransferViewModel @Inject constructor(
                 // lives inside the incomingFiles flow, and without a
                 // collector the sender just waits for a reply that never
                 // comes and then times out.
-                holder.session?.let { incomingCoordinator.start(it) }
+                // Only the receiving end. The sender writes to this same
+                // control socket, and a receive loop reading it would take
+                // the resume replies out from under the send.
+                if (!holder.isSender) {
+                    holder.session?.let { incomingCoordinator.start(it) }
+                }
             }
         }
     }
@@ -207,6 +220,7 @@ class TransferViewModel @Inject constructor(
 
     private fun startSenderPairing() {
         isSender = true
+        holder.isSender = true
         // A new send is a new session. Without this the screen opened on the
         // previous attempt's rows — files long finished or cancelled — while the
         // status line said it was waiting for a connection.
@@ -289,6 +303,29 @@ class TransferViewModel @Inject constructor(
     }
 
     /**
+     * Hand the channel over to the other phone.
+     *
+     * The control socket is shared, so whoever has just finished sending has to
+     * start listening, otherwise the other end has no way to send anything back
+     * and a receiver can never reply - it could only ever sit and wait.
+     */
+    private fun startListening() {
+        val session = holder.session ?: return
+        holder.isSender = false
+        if (holder.hasSession()) incomingCoordinator.start(session)
+    }
+
+    /**
+     * Take the channel in order to send. Stops the receive loop first: it reads
+     * the same socket the send writes its handshake to, and would swallow the
+     * replies.
+     */
+    private fun takeOverToSend() {
+        incomingCoordinator.stop()
+        holder.isSender = true
+    }
+
+    /**
      * Files queued by the Send flow, sent once a session exists.
      *
      * Handed to the process-scoped coordinator rather than run here: this
@@ -300,7 +337,7 @@ class TransferViewModel @Inject constructor(
         val transport = holder.peer?.transport ?: TransportType.LEGACY_WIFI_DIRECT
         val files = holder.pendingOutgoing
         holder.pendingOutgoing = emptyList()
-        outgoing.send(session, files, transport)
+        outgoing.send(session, files, transport, onFinished = ::startListening)
     }
 
     /**

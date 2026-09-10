@@ -233,6 +233,18 @@ tr:hover .row-actions { opacity: 1; }
   .dropzone { width: 100%; min-height: 180px; }
   .grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
 }
+  #sort {
+    background: var(--surface); color: var(--text); border: 1px solid var(--border);
+    border-radius: 8px; padding: 6px 8px; font-size: 13px;
+  }
+  #selbar {
+    display: none; align-items: center; gap: 10px;
+    padding: 8px var(--pad); background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  #selbar.open { display: flex; }
+  #sel-count { flex: 1; font-size: 13px; color: var(--text-secondary); }
+  .row-check { width: 15px; height: 15px; accent-color: var(--primary); cursor: pointer; }
 </style>
 </head>
 <body>
@@ -269,6 +281,11 @@ tr:hover .row-actions { opacity: 1; }
     </button>
     <button class="upload-btn" id="action-btn">Upload files</button>
     <input type="text" id="search" placeholder="Search this category" hidden>
+    <select id="sort" hidden title="Sort">
+      <option value="date">Newest first</option>
+      <option value="name">Name</option>
+      <option value="size">Largest first</option>
+    </select>
     <div class="spacer"></div>
     <button class="icon-btn" id="btn-queue" title="Transfers">
       <svg viewBox="0 0 24 24"><path d="M12 5v10"/><path d="M8 11l4 4 4-4"/><path d="M5 20h14"/></svg>
@@ -280,6 +297,12 @@ tr:hover .row-actions { opacity: 1; }
     <button class="icon-btn danger" id="btn-power" title="End WebShare session">
       <svg viewBox="0 0 24 24"><path d="M12 4v8"/><path d="M6.6 7.6a8 8 0 1 0 10.8 0"/></svg>
     </button>
+  </div>
+
+  <div id="selbar">
+    <span id="sel-count"></span>
+    <button class="upload-btn" id="sel-download">Download as zip</button>
+    <button class="icon-btn" id="sel-clear" title="Clear selection">✕</button>
   </div>
 
   <div id="content"></div>
@@ -330,6 +353,7 @@ const state = {
   album: null,
   lightbox: [],
   lightboxIndex: 0,
+  sort: 'date',
 };
 
 const $ = (sel) => document.querySelector(sel);
@@ -370,11 +394,13 @@ const VIEWS = {
 function setView(view) {
   state.view = view;
   state.selection.clear();
+  syncSelBar();
   state.path = '';
   state.album = null;
   document.querySelectorAll('.nav-icon').forEach(b => b.classList.toggle('active', b.dataset.view === view));
   $('#action-btn').textContent = VIEWS[view].label;
   $('#search').hidden = !VIEWS[view].search;
+  $('#sort').hidden = !VIEWS[view].search || view === 'home';
   closePanel();
   load();
 }
@@ -394,7 +420,17 @@ async function load() {
 
 function applyFilter() {
   const q = ($('#search').value || '').toLowerCase();
-  state.filtered = state.items.filter(f => !q || (f.name || '').toLowerCase().includes(q));
+  const rows = state.items.filter(f => !q || (f.name || '').toLowerCase().includes(q));
+  // Photos and videos arrive from MediaStore newest first anyway; the file
+  // listing does not, and a folder of documents in no particular order is
+  // unusable once it runs past a screenful.
+  const key = state.sort;
+  rows.sort((a, b) => {
+    if (key === 'name') return (a.name || '').localeCompare(b.name || '');
+    if (key === 'size') return (b.size || 0) - (a.size || 0);
+    return (b.modified || b.date || 0) - (a.modified || a.date || 0);
+  });
+  state.filtered = rows;
   render();
 }
 
@@ -470,7 +506,10 @@ function cardFor(item, index) {
 }
 
 function renderGrid(rows) {
-  const albumPanel = state.view === 'photos' ? sideAlbums(rows) : '';
+  // Photos were grouped by album and videos were not, so a phone with a few
+    // hundred clips was one flat, unsorted wall.
+    const albumPanel = (state.view === 'photos' || state.view === 'videos')
+      ? sideAlbums(rows) : '';
   state.lightbox = rows;
   content.innerHTML = `
     <div class="split">
@@ -486,6 +525,7 @@ function renderGrid(rows) {
     if (e.target.classList.contains('pick')) {
       state.selection.has(item.id) ? state.selection.delete(item.id) : state.selection.add(item.id);
       card.classList.toggle('selected');
+      syncSelBar();
     } else if (state.view === 'photos' || state.view === 'videos') {
       openLightbox(Number(card.dataset.index));
     } else {
@@ -513,9 +553,10 @@ function sideAlbums(rows) {
 
 function renderMusic(rows) {
   content.innerHTML = `<table>
-    <thead><tr><th style="width:36px"></th><th>Title</th><th>Artist</th><th class="num">Duration</th><th class="num">Size</th><th></th></tr></thead>
+    <thead><tr><th style="width:32px"><input type="checkbox" id="check-all" title="Select all"></th><th style="width:36px"></th><th>Title</th><th>Artist</th><th class="num">Duration</th><th class="num">Size</th><th></th></tr></thead>
     <tbody>
       ${rows.map((r, i) => `<tr data-index="${i}">
+        <td><input type="checkbox" class="row-check" data-check="${i}" ${state.selection.has(r.id) ? 'checked' : ''}></td>
         <td><button class="icon-btn" data-play="${i}">▶</button></td>
         <td>${r.name}</td>
         <td class="muted">${r.artist || 'Unknown'}</td>
@@ -527,6 +568,7 @@ function renderMusic(rows) {
   document.querySelectorAll('[data-play]').forEach(b => b.onclick = () => playTrack(rows[Number(b.dataset.play)]));
   document.querySelectorAll('[data-dl]').forEach(b => b.onclick = () =>
     window.location.href = '/download?id=' + encodeURIComponent(rows[Number(b.dataset.dl)].id));
+  bindRowChecks(rows);
 }
 
 function renderFiles(rows) {
@@ -542,14 +584,17 @@ function renderFiles(rows) {
       <div style="flex:1; min-width:0">
         <div class="breadcrumb">${crumbs.map((c, i) => `<span data-crumb="${i}">${c}</span>`).join('<span>/</span>')}</div>
         <table>
-          <thead><tr><th>Name</th><th class="num">Size</th><th class="num">Modified</th><th></th></tr></thead>
+          <thead><tr><th style="width:32px"><input type="checkbox" id="check-all" title="Select all"></th><th>Name</th><th class="num">Size</th><th class="num">Modified</th><th></th></tr></thead>
           <tbody>
             ${rows.map((r, i) => `<tr data-index="${i}" data-dir="${r.isDirectory ? 1 : 0}">
+              <td><input type="checkbox" class="row-check" data-check="${i}" ${state.selection.has(r.id) ? 'checked' : ''}></td>
               <td>${typeBadge(r)} ${r.name}</td>
               <td class="num muted">${r.isDirectory ? '' : bytes(r.size)}</td>
               <td class="num muted">${r.modified ? dateLabel(r.modified) : ''}</td>
               <td class="num"><span class="row-actions">
-                ${r.isDirectory ? '' : `<button class="icon-btn" data-dl="${i}">↓</button>`}
+                ${r.isDirectory
+                  ? `<button class="icon-btn" data-zipdir="${i}" title="Download folder as zip">⤓</button>`
+                  : `<button class="icon-btn" data-dl="${i}">↓</button>`}
                 <button class="icon-btn" data-rename="${i}">✎</button>
                 <button class="icon-btn" data-delete="${i}">🗑</button>
               </span></td></tr>`).join('')}
@@ -582,6 +627,40 @@ function renderFiles(rows) {
   document.querySelectorAll('#side-panel .tree-item').forEach(t => t.onclick = () => {
     state.path = t.dataset.path; load(); closePanel();
   });
+  bindRowChecks(rows);
+  document.querySelectorAll('[data-zipdir]').forEach(b => b.onclick = (e) => {
+    e.stopPropagation();
+    const item = rows[Number(b.dataset.zipdir)];
+    window.location.href = '/api/zip?path=' + encodeURIComponent(item.path || item.name);
+  });
+}
+
+/* Row selection for the table views. The grid views already had a tick in the
+   corner of each card; the tables had no way to select anything at all, which
+   is why documents could not be downloaded in bulk. */
+function bindRowChecks(rows) {
+  document.querySelectorAll('.row-check').forEach(cb => cb.onclick = (e) => {
+    e.stopPropagation();
+    const item = rows[Number(cb.dataset.check)];
+    if (!item) return;
+    if (cb.checked) state.selection.add(item.id); else state.selection.delete(item.id);
+    syncSelBar();
+  });
+  const all = $('#check-all');
+  if (all) all.onclick = (e) => {
+    e.stopPropagation();
+    const on = all.checked;
+    rows.forEach(r => on ? state.selection.add(r.id) : state.selection.delete(r.id));
+    document.querySelectorAll('.row-check').forEach(cb => cb.checked = on);
+    syncSelBar();
+  };
+  syncSelBar();
+}
+
+function syncSelBar() {
+  const n = state.selection.size;
+  $('#selbar').classList.toggle('open', n > 0);
+  $('#sel-count').textContent = n ? `${n} selected` : '';
 }
 
 function typeBadge(file) {
@@ -681,6 +760,15 @@ $('#btn-power').onclick = () => {
     document.body.innerHTML = '<div style="padding:48px;text-align:center"><h1>Session ended</h1>'
       + '<p class="muted">Close this tab. Start WebShare again on the phone to reconnect.</p></div>';
   });
+};
+let sortSel = $('#sort');
+sortSel.onchange = () => { state.sort = sortSel.value; applyFilter(); };
+document.addEventListener('change', (e) => { if (e.target.matches('.row-check')) syncSelBar(); });
+$('#sel-clear').onclick = () => { state.selection.clear(); applyFilter(); };
+$('#sel-download').onclick = () => {
+  const ids = [...state.selection];
+  if (!ids.length) return;
+  window.location.href = '/api/zip?ids=' + encodeURIComponent(ids.join(','));
 };
 $('#search').oninput = applyFilter;
 $('#hamburger').onclick = () => { $('#side-panel')?.classList.toggle('open'); $('#scrim').classList.toggle('open'); };

@@ -571,15 +571,18 @@ class LegacyWifiDirectTransport @Inject constructor(
                             receiveOne(meta, directory, controlOut, emit)
                         } catch (error: Exception) {
                             if (error is kotlinx.coroutines.CancellationException) throw error
-                            // The stream is mid-message and its position is
-                            // unknown, so there is no safe way to carry on with
-                            // the next file on this connection.
-                            Log.w(
-                                "Morselink",
+                            MorselinkLog.w(
                                 "rx: ${meta.name} failed: ${error.javaClass.simpleName}: ${error.message}",
                             )
                             emit(IncomingFileEvent.Failed(meta.id.ifBlank { meta.name }, error.describe()))
-                            throw error
+                            // This used to rethrow, which ended the loop and
+                            // abandoned every file still queued behind this
+                            // one - one bad file cost the rest of the batch.
+                            // Files are framed independently on the control
+                            // channel, so carrying on is safe; the data stream
+                            // is the part that can be left misaligned, and the
+                            // next file's CRC check catches that.
+                            runCatching { engine.fail(meta.id.ifBlank { meta.name }, error.describe()) }
                         }
                     }
                 }
@@ -661,8 +664,18 @@ class LegacyWifiDirectTransport @Inject constructor(
                     peerName = peer.name,
                     publishToMediaStore = true,
                 )
+                MorselinkLog.d(
+                    "rx: ${meta.name} done (${target.length()}/${meta.size} B)",
+                )
                 emit(IncomingFileEvent.Done(transferId, target.absolutePath))
             } else {
+                // part.length() is how far it actually got, which is the one
+                // number that says whether this was a clean stop or a short read.
+                val got = part.length()
+                MorselinkLog.w(
+                    "rx: ${meta.name} INCOMPLETE - got $got of ${meta.size} B " +
+                        "(${(meta.size - got).coerceAtLeast(0)} B missing)",
+                )
                 engine.fail(transferId, "Transfer interrupted")
                 emit(IncomingFileEvent.Failed(transferId, "Transfer interrupted"))
             }
@@ -684,13 +697,14 @@ class LegacyWifiDirectTransport @Inject constructor(
         ): Boolean {
             val input = data.getInputStream()
             val output = FileOutputStream(part, startOffset > 0)
-            var written = startOffset
             return try {
                 readChunks(input, output, controlOut, part, expectedSize, startOffset, onProgress)
             } catch (error: java.io.IOException) {
-                Log.w(
-                    "Morselink",
-                    "rx: chunk read failed after $written/$expectedSize B: " +
+                // part.length() is the truth here. A local counter was logged
+                // instead, and it was never advanced past startOffset, so every
+                // failure read "0/3351426 B" no matter how much had arrived.
+                MorselinkLog.w(
+                    "rx: ${part.name} read failed after ${part.length()}/$expectedSize B: " +
                         "${error.javaClass.simpleName}: ${error.message}",
                 )
                 false
@@ -727,16 +741,19 @@ class LegacyWifiDirectTransport @Inject constructor(
                     if (!readFully(input, trailer)) return false
                     val actualCrc = ChunkProtocol.crc32(payload, 0, length)
                     if (actualCrc != expectedCrc) {
-                        // ask for this chunk again and keep going
-                        runCatching {
-                            controlOut.writeUtfLine(
-                                ChunkProtocol.control(
-                                    ChunkProtocol.ControlMessage.TYPE_RETRANSMIT,
-                                    sequence.toLong(),
-                                )
-                            )
-                        }
-                        continue
+                        // Asking for the chunk again is worse than stopping.
+                        // The sender appends the repeat to the end of the same
+                        // stream, so it arrives after chunks that belong later
+                        // in the file and is written at the wrong offset - the
+                        // file ends up the right size and silently wrong.
+                        // TCP already guarantees the bytes, so a mismatch means
+                        // the framing slipped, and every chunk after this one
+                        // would land in the wrong place too.
+                        MorselinkLog.w(
+                            "rx: ${part.name} chunk $sequence CRC mismatch " +
+                                "(got $actualCrc, wanted $expectedCrc) - aborting this file",
+                        )
+                        return false
                     }
                     val chunkOffset = sequence.toLong() * ChunkProtocol.CHUNK_SIZE
                     if (chunkOffset != written) {
