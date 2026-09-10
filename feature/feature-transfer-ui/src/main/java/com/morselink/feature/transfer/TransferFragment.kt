@@ -1,5 +1,6 @@
 package com.morselink.feature.transfer
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import androidx.core.view.isVisible
@@ -77,15 +78,33 @@ class TransferFragment : Fragment(R.layout.fragment_transfer) {
             )
         }
 
+        // Only offered once there is a session to come back to. Before that
+        // the QR is the whole point of the screen, and there is nothing to
+        // minimise to.
+        viewModel.canMinimise.observe(viewLifecycleOwner) { allowed ->
+            binding.btnMinimise.isVisible = allowed
+        }
+        binding.btnMinimise.setOnClickListener { viewModel.minimise() }
+
         binding.btnCancel.setOnClickListener {
             binding.btnCancel.isEnabled = false
             viewModel.cancelAll()
+        }
+
+        // Minimise goes somewhere specific: Send, so the user can pick more
+        // files. It has to be checked before the generic dismiss below, which
+        // fires for both Minimise and Cancel.
+        viewModel.minimised.observe(viewLifecycleOwner) { minimised ->
+            if (!minimised) return@observe
+            findNavController().navigate(Uri.parse("morselink://send"))
         }
 
         // Cancel used to stop the transfers but leave the user stranded on a
         // dead screen with no way back but a force-close.
         viewModel.dismiss.observe(viewLifecycleOwner) { done ->
             if (!done) return@observe
+            // Minimise posts dismiss too, and it has already navigated.
+            if (viewModel.minimised.value == true) return@observe
             val nav = findNavController()
             // navigateUp() returns false when there is nowhere to go up to,
             // which happens when this screen was the first one shown after a

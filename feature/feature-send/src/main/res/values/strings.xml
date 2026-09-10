@@ -6,9 +6,13 @@
     <string name="send_select_group">Select everything in this group</string>
     <string name="send_no_selection">Pick at least one file</string>
     <string name="send_action_with_count">Send %1$d · %2$s</string>
+    <string name="send_action_to_peer">Send %1$d · %2$s to %3$s</string>
     <string-array name="send_sort_options">
         <item>Date</item>
         <item>Size</item>
         <item>Name</item>
     </string-array>
+    <!-- Minimised session bar -->
+    <string name="session_bar_title">Connected to %1$s</string>
+    <string name="session_bar_hint">Tap to return to transfers</string>
 </resources>

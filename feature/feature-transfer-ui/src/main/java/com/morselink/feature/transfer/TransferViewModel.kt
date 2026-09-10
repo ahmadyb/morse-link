@@ -1,7 +1,5 @@
 package com.morselink.feature.transfer
 
-import android.util.Log
-
 import android.content.Context
 import android.graphics.Bitmap
 import androidx.lifecycle.LiveData
@@ -13,12 +11,13 @@ import com.morselink.core.data.prefs.SettingsStore
 import com.morselink.core.network.ConnectionHolder
 import com.morselink.core.network.IncomingTransferCoordinator
 import com.morselink.core.network.NetworkUtils
+import com.morselink.core.network.OutgoingTransferCoordinator
 import com.morselink.core.network.PairingPayload
 import com.morselink.core.network.SessionServiceController
 import com.morselink.core.network.TransportSelector
+import com.morselink.core.transfer.MorselinkLog
 import com.morselink.core.transfer.engine.TransferEngine
 import com.morselink.core.transfer.legacy.LegacyPorts
-import com.morselink.core.transfer.model.TransferDirection
 import com.morselink.core.transfer.model.TransportType
 import com.morselink.core.transfer.model.TransferSessionState
 import com.morselink.core.transfer.model.label
@@ -26,7 +25,6 @@ import com.morselink.core.ui.Format
 import com.morselink.core.ui.QrCode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.map
@@ -67,6 +65,7 @@ class TransferViewModel @Inject constructor(
     private val settings: SettingsStore,
     private val service: SessionServiceController,
     private val incomingCoordinator: IncomingTransferCoordinator,
+    private val outgoing: OutgoingTransferCoordinator,
     @ApplicationContext private val context: Context,
 ) : ViewModel() {
 
@@ -99,6 +98,18 @@ class TransferViewModel @Inject constructor(
     private val _dismiss = MutableLiveData(false)
     val dismiss: LiveData<Boolean> = _dismiss
 
+    /**
+     * Minimise has a destination of its own. Cancel pops the back stack, which
+     * is right for giving up; Minimise goes to Send, because the point of it is
+     * to go and pick more files.
+     */
+    private val _minimised = MutableLiveData(false)
+    val minimised: LiveData<Boolean> = _minimised
+
+    /** Minimise is only meaningful with a session to return to. */
+    private val _canMinimise = MutableLiveData(false)
+    val canMinimise: LiveData<Boolean> = _canMinimise
+
     private var advertiseJob: Job? = null
     private var sendJob: Job? = null
 
@@ -122,6 +133,7 @@ class TransferViewModel @Inject constructor(
         pairingContent = PairingState()
         pairingCollapsed = false
         _pairing.postValue(PairingState())
+        _canMinimise.postValue(false)
     }
 
     fun togglePairingCollapsed() {
@@ -132,8 +144,23 @@ class TransferViewModel @Inject constructor(
     init {
         viewModelScope.launch { engine.state.collect { pushStatus() } }
 
-        if (holder.pendingOutgoing.isNotEmpty() && holder.session == null) {
+        val pending = holder.pendingOutgoing
+        val existing = holder.session
+
+        if (pending.isNotEmpty() && existing == null) {
             startSenderPairing()
+        } else if (pending.isNotEmpty() && existing != null) {
+            // Minimised, then more files picked: the session is still up, so
+            // send straight over it. Without this branch the screen fell into
+            // the receiver path below and the new selection sat in the holder
+            // unsent, with nothing on screen saying so.
+            isSender = true
+            service.start()
+            val name = existing.peer.name
+            showConnected(name)
+            _statusLine.postValue(context.getString(R.string.status_connected, name))
+            holder.pendingOutgoing = emptyList()
+            outgoing.send(existing, pending, holder.peer?.transport ?: TransportType.LEGACY_WIFI_DIRECT)
         } else {
             service.start()
             // Arriving as the receiver: the session is already up, so say who
@@ -225,16 +252,16 @@ class TransferViewModel @Inject constructor(
             // Bind the control port and wait for the receiver that scanned the
             // code. This is plain TCP over whatever network the two phones
             // share, so it does not depend on Wi-Fi Direct group formation.
-            Log.d("Morselink", "sender: advertising $address:$port, waiting for a receiver")
+            MorselinkLog.d("sender: advertising $address:$port, waiting for a receiver")
             _statusLine.postValue(context.getString(R.string.status_waiting_receiver))
             sendJob = viewModelScope.launch {
                 val session = selector.hostDirect(name)
                 if (session == null) {
-                    Log.w("Morselink", "sender: no receiver dialled in")
+                    MorselinkLog.w("sender: no receiver dialled in")
                     _statusLine.postValue(context.getString(R.string.status_no_receiver))
                     return@launch
                 }
-                Log.d("Morselink", "sender: receiver connected from ${session.peer.name}")
+                MorselinkLog.d("sender: receiver connected from ${session.peer.name}")
                 holder.session = session
                 holder.peer = session.peer
                 showConnected(session.peer.name)
@@ -248,6 +275,7 @@ class TransferViewModel @Inject constructor(
 
     /** The connected face of the card, shown on both ends of the transfer. */
     private fun showConnected(peerName: String) {
+        _canMinimise.postValue(true)
         showPairing(
             PairingState(
                 mode = PairingMode.CONNECTED,
@@ -260,32 +288,38 @@ class TransferViewModel @Inject constructor(
         )
     }
 
-    /** Files queued by the Send flow, sent once a session exists. */
-    private suspend fun sendPending() {
+    /**
+     * Files queued by the Send flow, sent once a session exists.
+     *
+     * Handed to the process-scoped coordinator rather than run here: this
+     * scope dies with the screen, and a send that stops when you look away
+     * is what made minimising useless.
+     */
+    private fun sendPending() {
         val session = holder.session ?: return
         val transport = holder.peer?.transport ?: TransportType.LEGACY_WIFI_DIRECT
         val files = holder.pendingOutgoing
-        Log.d("Morselink", "sender: sending ${files.size} file(s)")
-        files.forEach { file ->
-            try {
-                val id = engine.begin(file, TransferDirection.OUTGOING, transport)
-                session.sendFile(file).collect { progress ->
-                    engine.update(progress.fileId.ifBlank { id }, progress.bytesTransferred)
-                }
-            } catch (error: Throwable) {
-                // Cancellation is not a failure — let it propagate or cancel
-                // would only ever mark files as failed and keep sending.
-                if (error is CancellationException) throw error
-                engine.fail(file.id, error.message ?: "Send failed")
-            }
-        }
         holder.pendingOutgoing = emptyList()
+        outgoing.send(session, files, transport)
+    }
+
+    /**
+     * Leave the screen without ending the session, so the user can go and pick
+     * more files and send them over the connection that is already up.
+     *
+     * Deliberately not [cancelAll]: that closes the session, which is the one
+     * thing Minimise must not do.
+     */
+    fun minimise() {
+        _dismiss.postValue(true)
+        _minimised.postValue(true)
     }
 
     fun cancelAll() {
         advertiseJob?.cancel()
         sendJob?.cancel()
         incomingCoordinator.stop()
+        outgoing.stop()
         holder.pendingOutgoing = emptyList()
 
         // Let the screen go immediately. Teardown used to run first, and a
@@ -305,8 +339,10 @@ class TransferViewModel @Inject constructor(
     }
 
     override fun onCleared() {
+        // Only the advertising coroutine belongs to this screen. Sends and the
+        // receive loop are at process scope and must survive, or returning here
+        // would find a session that had been quietly killed on the way out.
         advertiseJob?.cancel()
-        sendJob?.cancel()
         super.onCleared()
     }
 

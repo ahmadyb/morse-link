@@ -70,7 +70,7 @@
         android:paddingStart="@dimen/screen_padding"
         android:paddingEnd="@dimen/screen_padding"
         android:paddingBottom="@dimen/unit_2"
-        app:layout_constraintBottom_toTopOf="@id/selection_bar"
+        app:layout_constraintBottom_toTopOf="@id/session_bar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/sort_spinner" />
@@ -96,6 +96,71 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/list" />
+
+    <!-- Live session, minimised from the transfer screen. Lets you keep
+         browsing and pick more files to send over a connection that is
+         already up. -->
+    <LinearLayout
+        android:id="@+id/session_bar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@color/surface"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/screen_padding"
+        android:paddingEnd="@dimen/screen_padding"
+        android:paddingTop="@dimen/unit"
+        android:paddingBottom="@dimen/unit"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/selection_bar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <View
+            android:id="@+id/session_dot"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:background="@drawable/bg_selection_check" />
+
+        <LinearLayout
+            android:id="@+id/session_body"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/unit"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackground"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/session_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="@color/textPrimary"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/session_subtitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="@color/textSecondary"
+                android:textSize="12sp"
+                android:text="@string/session_bar_hint" />
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/session_toggle"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/transfer_panel_collapse"
+            android:src="@drawable/ic_chevron_right"
+            android:tint="@color/textSecondary" />
+    </LinearLayout>
 
     <!-- Selection footer (§14.2) -->
     <LinearLayout

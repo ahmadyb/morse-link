@@ -140,6 +140,14 @@
             android:textSize="13sp" />
 
         <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_minimise"
+            style="@style/Widget.Morselink.Button.Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/action_minimise"
+            android:visibility="gone" />
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_cancel"
             style="@style/Widget.Morselink.Button.Outlined"
             android:layout_width="wrap_content"

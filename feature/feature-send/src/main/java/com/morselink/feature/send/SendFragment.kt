@@ -41,6 +41,9 @@ class SendFragment : Fragment(R.layout.fragment_send) {
     /** Spinner fires a selection callback as soon as it is laid out. */
     private var suppressSortCallback = true
 
+    /** Whether the minimised session bar is showing its detail line. */
+    private var sessionBarCollapsed = false
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val binding = FragmentSendBinding.bind(view)
         this.binding = binding
@@ -139,8 +142,23 @@ class SendFragment : Fragment(R.layout.fragment_send) {
             findNavController().navigate(Uri.parse("morselink://transfer"))
         }
 
+        binding.sessionToggle.setOnClickListener {
+            sessionBarCollapsed = !sessionBarCollapsed
+            refreshSessionBar()
+        }
+        binding.sessionBody.setOnClickListener {
+            findNavController().navigate(Uri.parse("morselink://transfer"))
+        }
+
         viewModel.consumeExternalFiles()
         refreshSelectionBar()
+        refreshSessionBar()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // The session can come up or end while we are in the background.
+        refreshSessionBar()
     }
 
     /** Empty only once a load has finished and genuinely returned nothing. */
@@ -150,13 +168,42 @@ class SendFragment : Fragment(R.layout.fragment_send) {
         binding.empty.isVisible = empty && !loading
     }
 
+    /**
+     * The minimised session. Shown only while a session is actually up, and
+     * tappable so the user can get back to the transfer screen. The subtitle
+     * collapses away to leave a one-line strip.
+     */
+    private fun refreshSessionBar() {
+        val binding = binding ?: return
+        val peer = connection.peer
+        if (!connection.hasSession() || peer == null) {
+            binding.sessionBar.isVisible = false
+            return
+        }
+        binding.sessionBar.isVisible = true
+        binding.sessionTitle.text = getString(R.string.session_bar_title, peer.name)
+        binding.sessionSubtitle.isVisible = !sessionBarCollapsed
+        binding.sessionToggle.rotation = if (sessionBarCollapsed) 90f else -90f
+        binding.sessionToggle.contentDescription = getString(
+            if (sessionBarCollapsed) com.morselink.core.ui.R.string.action_expand
+            else com.morselink.core.ui.R.string.action_collapse
+        )
+    }
+
     private fun refreshSelectionBar() {
         val binding = binding ?: return
         val count = viewModel.selection.size()
         binding.selectionBar.isVisible = count > 0
-        binding.btnSend.text = if (count > 0) {
-            getString(R.string.send_action_with_count, count, Format.bytes(viewModel.selectedBytes()))
-        } else getString(com.morselink.core.ui.R.string.action_send)
+        // With a session already up this adds to it rather than starting a new
+        // one, so say where the files are going.
+        binding.btnSend.text = when {
+            count == 0 -> getString(com.morselink.core.ui.R.string.action_send)
+            connection.hasSession() && connection.peer != null ->
+                getString(R.string.send_action_to_peer, count,
+                    Format.bytes(viewModel.selectedBytes()), connection.peer!!.name)
+            else -> getString(R.string.send_action_with_count, count,
+                Format.bytes(viewModel.selectedBytes()))
+        }
         // Selection lives outside the row model, so rebind the visible rows.
         adapter.notifyDataSetChanged()
     }
