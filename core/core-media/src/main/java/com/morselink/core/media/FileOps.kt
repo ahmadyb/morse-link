@@ -107,13 +107,45 @@ class FileOps @Inject constructor(
         defaultDownloadDirectory().usableSpace
     }.getOrDefault(0L)
 
-    /** Insert a received file into MediaStore so other apps can see it (§2.1). */
+    /**
+     * Insert a received file into MediaStore so other apps can see it (§2.1).
+     *
+     * Every date column has to be filled in. Received photos were showing in
+     * the gallery as 1 January 1970, 01:00 - which is epoch zero read in
+     * UTC+1 - because the legacy path went through
+     * MediaStore.Images.Media.insertImage, whose Bitmap overload never sets
+     * DATE_TAKEN, and the newer path set only DATE_ADDED. Galleries sort and
+     * group by DATE_TAKEN, so an unset column is a photo dated 1970.
+     *
+     * DATE_TAKEN is in milliseconds; DATE_ADDED and DATE_MODIFIED are in
+     * seconds. Mixing them up is its own way to land in 1970.
+     */
     suspend fun publishToMediaStore(file: File, mimeType: String?): Uri? = withContext(Dispatchers.IO) {
+        val nowMillis = System.currentTimeMillis()
+        // Keep the file's own timestamp in step with what we tell MediaStore,
+        // or file managers and MediaStore disagree about when it arrived.
+        runCatching { file.setLastModified(nowMillis) }
+
         if (Build.VERSION.SDK_INT < 29) {
+            val values = ContentValues().apply {
+                put(MediaStore.MediaColumns.DATA, file.absolutePath)
+                put(MediaStore.MediaColumns.DISPLAY_NAME, file.name)
+                put(MediaStore.MediaColumns.TITLE, file.nameWithoutExtension)
+                put(MediaStore.MediaColumns.MIME_TYPE, mimeType ?: "application/octet-stream")
+                put(MediaStore.MediaColumns.SIZE, file.length())
+                put(MediaStore.MediaColumns.DATE_ADDED, nowMillis / 1000)
+                put(MediaStore.MediaColumns.DATE_MODIFIED, nowMillis / 1000)
+                if (mimeType?.startsWith("image") == true) {
+                    put(MediaStore.Images.ImageColumns.DATE_TAKEN, nowMillis)
+                }
+                if (mimeType?.startsWith("video") == true) {
+                    put(MediaStore.Video.VideoColumns.DATE_TAKEN, nowMillis)
+                }
+            }
             val legacy = runCatching {
-                MediaStore.Images.Media.insertImage(resolver, file.absolutePath, file.name, null)
+                resolver.insert(legacyCollection(mimeType), values)
             }.getOrNull()
-            if (legacy != null) return@withContext Uri.parse(legacy)
+            if (legacy != null) return@withContext legacy
             MediaScannerConnection.scanFile(context, arrayOf(file.absolutePath), null, null)
             return@withContext Uri.fromFile(file)
         }
@@ -128,7 +160,14 @@ class FileOps @Inject constructor(
             put(MediaStore.MediaColumns.DISPLAY_NAME, file.name)
             put(MediaStore.MediaColumns.MIME_TYPE, mimeType ?: "application/octet-stream")
             put(MediaStore.MediaColumns.SIZE, file.length())
-            put(MediaStore.MediaColumns.DATE_ADDED, System.currentTimeMillis() / 1000)
+            put(MediaStore.MediaColumns.DATE_ADDED, nowMillis / 1000)
+            put(MediaStore.MediaColumns.DATE_MODIFIED, nowMillis / 1000)
+            if (mimeType?.startsWith("image") == true) {
+                put(MediaStore.Images.ImageColumns.DATE_TAKEN, nowMillis)
+            }
+            if (mimeType?.startsWith("video") == true) {
+                put(MediaStore.Video.VideoColumns.DATE_TAKEN, nowMillis)
+            }
             put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/Morselink")
             put(MediaStore.MediaColumns.IS_PENDING, 1)
         }
@@ -143,6 +182,14 @@ class FileOps @Inject constructor(
             runCatching { resolver.delete(uri, null, null) }
         }
         uri
+    }
+
+    /** Below API 29 MediaStore is addressed by file path rather than by collection. */
+    private fun legacyCollection(mimeType: String?): Uri = when {
+        mimeType?.startsWith("video") == true -> MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+        mimeType?.startsWith("audio") == true -> MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+        mimeType?.startsWith("image") == true -> MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+        else -> MediaStore.Files.getContentUri("external")
     }
 
     suspend fun contentUriForMedia(item: MediaItem): Uri =

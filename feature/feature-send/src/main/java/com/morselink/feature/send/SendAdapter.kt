@@ -139,6 +139,21 @@ class SendAdapter(
                     binding.root.setOnClickListener { onToggle(row) }
                 }
             }
+
+            // The grid cells showed a tick and a ring; these rows only ever
+            // had their tick hidden in resetSelection and never shown again.
+            // Music and Files therefore counted selections that had no visible
+            // mark at all - the row looked exactly the same tapped or not.
+            // Headers and category shortcuts are not selectable.
+            val selectable = row !is SendRow.Header && row !is SendRow.Category
+            val selected = selectable && isSelected(row)
+            binding.check.visibility =
+                if (selected) android.view.View.VISIBLE else android.view.View.GONE
+            binding.root.isSelected = selected
+            binding.root.setBackgroundResource(
+                if (selected) com.morselink.core.ui.R.drawable.bg_row_selected
+                else android.R.color.transparent
+            )
         }
     }
 
