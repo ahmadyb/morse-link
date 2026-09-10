@@ -541,6 +541,53 @@ def check_api24_collection_calls(errors):
                 )
 
 
+def res_strings_defined(root):
+    """Every <string name=> declared anywhere under a module's res/."""
+    names = set()
+    for f in glob.glob(os.path.join(root, "src", "main", "res", "values*", "*.xml")):
+        names |= set(re.findall(r'<string\s+name="([^"]+)"', open(f, encoding="utf-8").read()))
+    return names
+
+
+def check_res_string_refs(mods, errors):
+    """A layout cannot reference another module's strings.
+
+    Resources are merged per module, so @string/foo in feature-send resolves
+    against feature-send and the modules it depends on - not against a sibling
+    feature that happens to declare it. aapt2 "compile" does not catch this
+    (only the link step does, and that needs android.jar), so it reached CI:
+    AAPT: error: resource string/transfer_panel_collapse not found.
+    """
+    for mod, info in mods.items():
+        available = res_strings_defined(mod)
+        # Transitive: a module sees its own strings plus those of everything
+        # it depends on, and their dependencies in turn.
+        seen, queue = set(), list(info["deps"])
+        while queue:
+            dep = queue.pop()
+            if dep in seen:
+                continue
+            seen.add(dep)
+            dep_path = os.path.join(ROOT, dep)
+            if not os.path.isdir(dep_path):
+                continue
+            available |= res_strings_defined(dep_path)
+            for nested in mods.get(dep_path, {}).get("deps", set()):
+                queue.append(nested)
+
+        for f in glob.glob(os.path.join(mod, "src", "main", "res", "**", "*.xml"), recursive=True):
+            if os.sep + "values" in f:
+                continue
+            src = open(f, encoding="utf-8").read()
+            for m in re.finditer(r'"@string/([A-Za-z_][\w]*)"', src):
+                name = m.group(1)
+                if name not in available:
+                    errors.append(
+                        f"{f}: @string/{name} is not visible to this module - "
+                        f"define it here or in a module it depends on"
+                    )
+
+
 def main():
     errors = []
     mods = load_modules()
@@ -551,6 +598,7 @@ def main():
     check_coroutine_extensions(errors)
     check_companion_objects(errors)
     check_api24_collection_calls(errors)
+    check_res_string_refs(mods, errors)
     check_resource_refs(errors)
     check_xml(errors)
 

@@ -157,7 +157,7 @@
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/transfer_panel_collapse"
+            android:contentDescription="@string/action_collapse"
             android:src="@drawable/ic_chevron_right"
             android:tint="@color/textSecondary" />
     </LinearLayout>

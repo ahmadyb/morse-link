@@ -83,9 +83,14 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # A build log is only committed when a build fails, and nothing
+          # ever removed it, so one failure left a log on the branch for
+          # good - reading as though the build were still broken.
+          git rm -f --ignore-unmatch build.log
+          rm -f build.log
           git add -f app/release/morse-link.apk
           if git diff --cached --quiet; then
-            echo "APK is unchanged"
+            echo "Nothing to commit"
           else
             git commit -m "build: refresh MorseLink APK [skip ci]"
             git push origin HEAD:"${GITHUB_REF_NAME}"
