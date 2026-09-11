@@ -123,6 +123,10 @@
             android:text="DIAGNOSTICS" />
 
         <include
+            android:id="@+id/row_diagnostics"
+            layout="@layout/item_settings_switch" />
+
+        <include
             android:id="@+id/row_crash_log"
             layout="@layout/item_settings_row" />
 

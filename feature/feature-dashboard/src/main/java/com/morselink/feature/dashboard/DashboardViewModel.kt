@@ -3,6 +3,7 @@ package com.morselink.feature.dashboard
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.map
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.morselink.core.data.prefs.SettingsStore
@@ -20,9 +21,9 @@ class DashboardViewModel @Inject constructor(
     private val selector: TransportSelector,
 ) : ViewModel() {
 
-    val deviceName: LiveData<String> = settings.settings
-        .map { it.deviceName }
-        .asLiveData()
+    val deviceSettings = settings.settings.asLiveData()
+    val deviceName: LiveData<String> = deviceSettings.map { it.deviceName }
+    val avatarSeed: LiveData<Int> = deviceSettings.map { it.avatarSeed }
 
     private val _peers = MutableLiveData<List<DiscoveredPeer>>(emptyList())
     val peers: LiveData<List<DiscoveredPeer>> = _peers

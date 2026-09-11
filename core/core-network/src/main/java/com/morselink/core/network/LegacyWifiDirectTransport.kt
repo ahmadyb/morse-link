@@ -198,6 +198,11 @@ class LegacyWifiDirectTransport @Inject constructor(
         runCatching { manager?.removeGroup(p2pChannel, null) }
     }
 
+    override suspend fun sessionForAccepted(peer: DiscoveredPeer): TransportSession = LegacySession(
+        peer,
+        GroupHandle(lastGroupOwner ?: peer.address.orEmpty(), weAreOwner),
+    )
+
     override suspend fun connect(peer: DiscoveredPeer): TransportSession {
         val wifiManager = manager ?: error("Wi-Fi Direct unavailable")
         val p2pChannel = ensureChannel() ?: error("Wi-Fi Direct unavailable")

@@ -1,6 +1,7 @@
 package com.morselink.feature.dashboard
 
 import android.os.Bundle
+import android.graphics.Color
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -29,9 +30,14 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
         val binding = FragmentDashboardBinding.bind(view)
         this.binding = binding
 
-        viewModel.deviceName.observe(viewLifecycleOwner) { name ->
+                viewModel.deviceName.observe(viewLifecycleOwner) { name ->
             binding.deviceName.text = name
             binding.avatar.text = name.firstOrNull()?.uppercaseChar()?.toString() ?: "M"
+        }
+        viewModel.avatarSeed.observe(viewLifecycleOwner) { seed ->
+            val colors = arrayOf("#1FA36B", "#2D9CDB", "#9B6DE5", "#E5A23D", "#E5484D", "#00897B", "#7E57C2", "#546E7A")
+            binding.avatar.setBackgroundColor(Color.parseColor(colors[seed.coerceIn(0, colors.lastIndex)]))
+            binding.avatar.contentDescription = "Device badge colour ${seed + 1} of ${colors.size}"
         }
 
         // §7 — no sweep animation on low-end devices, just the static rings.
