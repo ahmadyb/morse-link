@@ -55,7 +55,10 @@ class AddressBarView @JvmOverloads constructor(
         orientation = LinearLayout.HORIZONTAL
         gravity = Gravity.CENTER_VERTICAL
     }
-    private val spacer = View(context)
+    /** Fills the tail of the trail; tapping it is how you type a path. */
+    private val spacer = View(context).apply {
+        importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+    }
     private val editor = EditText(context).apply {
         visibility = GONE
         setSingleLine(true)
@@ -81,7 +84,11 @@ class AddressBarView @JvmOverloads constructor(
         val pad = (12 * resources.displayMetrics.density).toInt()
         setPadding(pad, pad / 2, pad, pad / 2)
 
-        trail.addView(spacer, LinearLayout.LayoutParams(0, 1, 1f))
+        // A minimum height, because with no segments the trail measured only
+        // the spacer - one pixel - and the bar vanished. Without it there is
+        // nothing to tap, so no way to type a path and no way back up.
+        trail.minimumHeight = (36 * resources.displayMetrics.density).toInt()
+        trail.addView(spacer, spacerParams())
         trailScroll.addView(
             trail,
             // FrameLayout.LayoutParams, not HorizontalScrollView.LayoutParams:
@@ -164,9 +171,17 @@ class AddressBarView @JvmOverloads constructor(
             if (index > 0) trail.addView(caretFor(index, segment))
             trail.addView(segmentButton(index, segment))
         }
-        trail.addView(spacer, LinearLayout.LayoutParams(0, 1, 1f))
+        trail.addView(spacer, spacerParams())
         trailScroll.post { trailScroll.fullScroll(View.FOCUS_RIGHT) }
     }
+
+    /**
+     * Width 0 with the weight, so the spacer takes the slack, but full height
+     * so the tap target for typing a path covers the whole bar rather than a
+     * one-pixel strip.
+     */
+    private fun spacerParams(): LinearLayout.LayoutParams =
+        LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f)
 
     /** Child position of the caret that precedes segment [depth]. */
     private fun caretPositionFor(depth: Int): Int = (depth * 2) - 1

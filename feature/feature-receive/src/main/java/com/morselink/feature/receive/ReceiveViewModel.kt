@@ -73,6 +73,9 @@ class ReceiveViewModel @Inject constructor(
             }
             Log.d("Morselink", "receiver: connected to $ip")
             holder.attach(session, session.peer)
+            // This end is receiving. Stated here rather than assumed, so a
+            // session that follows one where this device sent starts clean.
+            holder.isSender = false
             _status.postValue("Connected to $ip — waiting for files")
             _connected.postValue(true)
         }

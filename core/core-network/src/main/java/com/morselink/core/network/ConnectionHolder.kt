@@ -50,11 +50,18 @@ class ConnectionHolder @Inject constructor() {
     private val _alive = MutableStateFlow(false)
     val alive: StateFlow<Boolean> = _alive.asStateFlow()
 
-    /** Publishes the session and announces it in one step. */
+    /**
+     * Publishes the session and announces it in one step.
+     *
+     * Deliberately leaves [isSender] alone. The sender decides its role before
+     * pairing, long before the receiver dials in, so clearing the flag here
+     * silently turned the sender back into a receiver - and a Minimise during
+     * a send then started a receive loop on top of the send that was still
+     * running.
+     */
     fun attach(session: TransportSession, peer: DiscoveredPeer) {
         this.session = session
         this.peer = peer
-        isSender = false
         _alive.value = true
     }
 
