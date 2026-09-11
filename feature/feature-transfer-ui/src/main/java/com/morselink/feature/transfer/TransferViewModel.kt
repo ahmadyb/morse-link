@@ -2,6 +2,8 @@ package com.morselink.feature.transfer
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.media.AudioManager
+import android.media.ToneGenerator
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -31,6 +33,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.delay
 import javax.inject.Inject
 
 /** Which face the collapsible card at the top of the screen is showing. */
@@ -147,7 +150,8 @@ class TransferViewModel @Inject constructor(
         val pending = holder.pendingOutgoing
         val existing = holder.session
 
-        if (pending.isNotEmpty() && existing == null) {
+        if ((pending.isNotEmpty() || holder.requestSenderPairing) && existing == null) {
+            holder.requestSenderPairing = false
             startSenderPairing()
         } else if (pending.isNotEmpty() && existing != null) {
             // Minimised, then more files picked: the session is still up, so
@@ -157,18 +161,20 @@ class TransferViewModel @Inject constructor(
             isSender = true
             // Works from either end: a receiver that picks files and taps Send
             // stops its own receive loop and takes the channel over.
-            takeOverToSend()
-            service.start()
-            val name = existing.peer.name
-            showConnected(name)
-            _statusLine.postValue(context.getString(R.string.status_connected, name))
-            holder.pendingOutgoing = emptyList()
-            outgoing.send(
-                existing,
-                pending,
-                holder.peer?.transport ?: TransportType.LEGACY_WIFI_DIRECT,
-                onFinished = ::startListening,
-            )
+            viewModelScope.launch {
+                takeOverToSend()
+                service.start()
+                val name = existing.peer.name
+                showConnected(name)
+                _statusLine.postValue(context.getString(R.string.status_connected, name))
+                holder.pendingOutgoing = emptyList()
+                outgoing.send(
+                    existing,
+                    pending,
+                    holder.peer?.transport ?: TransportType.LEGACY_WIFI_DIRECT,
+                    onFinished = ::startListening,
+                )
+            }
         } else {
             service.start()
             // Arriving as the receiver: the session is already up, so say who
@@ -289,6 +295,7 @@ class TransferViewModel @Inject constructor(
 
     /** The connected face of the card, shown on both ends of the transfer. */
     private fun showConnected(peerName: String) {
+        playFeedback(ToneGenerator.TONE_PROP_ACK)
         _canMinimise.postValue(true)
         showPairing(
             PairingState(
@@ -300,6 +307,19 @@ class TransferViewModel @Inject constructor(
                 ),
             )
         )
+    }
+
+    private fun playFeedback(tone: Int) {
+        viewModelScope.launch {
+            if (!runCatching { settings.current().soundsEnabled }.getOrDefault(true)) return@launch
+            val generator = runCatching { ToneGenerator(AudioManager.STREAM_NOTIFICATION, 70) }.getOrNull() ?: return@launch
+            try {
+                generator.startTone(tone, 140)
+                delay(180)
+            } finally {
+                generator.release()
+            }
+        }
     }
 
     /**
@@ -320,8 +340,11 @@ class TransferViewModel @Inject constructor(
      * the same socket the send writes its handshake to, and would swallow the
      * replies.
      */
-    private fun takeOverToSend() {
-        incomingCoordinator.stop()
+    private suspend fun takeOverToSend() {
+        // Do not start writing until the receiver has fully released the
+        // shared control socket. Cancelling without joining caused the next
+        // batch to race the old receive coroutine and fail intermittently.
+        incomingCoordinator.stopAndJoin()
         holder.isSender = true
     }
 
@@ -337,6 +360,7 @@ class TransferViewModel @Inject constructor(
         val transport = holder.peer?.transport ?: TransportType.LEGACY_WIFI_DIRECT
         val files = holder.pendingOutgoing
         holder.pendingOutgoing = emptyList()
+        if (files.isEmpty()) return
         outgoing.send(session, files, transport, onFinished = ::startListening)
     }
 

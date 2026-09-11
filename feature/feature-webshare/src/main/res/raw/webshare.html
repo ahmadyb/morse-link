@@ -492,8 +492,10 @@ function render() {
 
 function cardFor(item, index) {
   const selected = state.selection.has(item.id);
-  const thumb = (state.view === 'photos' || state.view === 'videos')
-    ? `<img loading="lazy" src="/download?id=${encodeURIComponent(item.id)}" alt="${item.name}">`
+  const thumb = state.view === 'videos'
+    ? `<video muted preload="metadata" playsinline src="/download?id=${encodeURIComponent(item.id)}"></video>`
+    : state.view === 'photos'
+      ? `<img loading="lazy" src="/download?id=${encodeURIComponent(item.id)}" alt="${item.name}">`
     : `<div style="height:130px;display:flex;align-items:center;justify-content:center;color:var(--text-secondary)">
          <svg viewBox="0 0 24 24" style="width:44px;height:44px;fill:none;stroke:currentColor;stroke-width:1.6">
            <path d="M4 8l8-4 8 4v8l-8 4-8-4z"/><path d="M12 12v8M12 12l8-4M12 12L4 8"/></svg></div>`;
@@ -537,8 +539,8 @@ function renderGrid(rows) {
 function sideAlbums(rows) {
   const albums = {};
   rows.forEach(r => {
-    const key = (r.uri || '').replace(/\/[^/]+$/, '');
-    albums[key] = albums[key] || { name: key.split('/').pop() || 'All', count: 0, first: r };
+    const key = r.folder || (r.uri || '').replace(/\/[^/]+$/, '') || 'All media';
+    albums[key] = albums[key] || { name: key.split('/').pop() || 'All media', count: 0, first: r };
     albums[key].count++;
   });
   const list = Object.values(albums).slice(0, 12);

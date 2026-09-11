@@ -11,6 +11,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -33,6 +35,9 @@ class OutgoingTransferCoordinator @Inject constructor(
 ) {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    // A control socket is a single bidirectional byte stream. Separate send jobs
+    // must never write metadata at the same time or the receiver sees garbled JSON.
+    private val sessionMutex = Mutex()
 
     /**
      * Sends [files] over [session].
@@ -62,7 +67,8 @@ class OutgoingTransferCoordinator @Inject constructor(
         MorselinkLog.d("tx: queueing ${files.size} file(s) for ${session.peer.name}")
         scope.launch {
             try {
-                files.forEach { file ->
+                sessionMutex.withLock {
+                    files.forEach { file ->
                     try {
                         val id = engine.begin(file, TransferDirection.OUTGOING, transport)
                         session.sendFile(file).collect { progress ->
@@ -73,6 +79,7 @@ class OutgoingTransferCoordinator @Inject constructor(
                         // would only ever mark files failed and then keep sending.
                         if (error is CancellationException) throw error
                         engine.fail(file.id, error.message ?: "Send failed")
+                    }
                     }
                 }
                 MorselinkLog.d("tx: batch of ${files.size} finished")

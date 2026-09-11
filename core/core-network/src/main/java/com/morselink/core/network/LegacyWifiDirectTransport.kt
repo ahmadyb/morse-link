@@ -538,7 +538,17 @@ class LegacyWifiDirectTransport @Inject constructor(
 
         @Suppress("UNUSED_PARAMETER")
         override fun incomingFiles(): Flow<IncomingFileEvent> = callbackFlow {
-            val job = scope.launch { receiveLoop { trySend(it) } }
+            val job = scope.launch {
+                // A peer is allowed to close a session while this flow is
+                // waiting for its first handshake. That is a normal transfer
+                // failure, not an uncaught exception that should kill the app.
+                runCatching { receiveLoop { trySend(it) } }
+                    .onFailure { error ->
+                        if (error !is kotlinx.coroutines.CancellationException) {
+                            MorselinkLog.w("rx: flow stopped safely: ${error.describe()}")
+                        }
+                    }
+            }
             awaitClose { job.cancel() }
         }
 
@@ -556,7 +566,17 @@ class LegacyWifiDirectTransport @Inject constructor(
             // is what produced "Socket closed" from the second file onwards.
             try {
                 while (!Thread.currentThread().isInterrupted) {
-                    val line = runCatching { controlIn.readUtfLine() }.getOrNull()
+                    val line = try {
+                        controlIn.readUtfLine()
+                    } catch (_: java.net.SocketTimeoutException) {
+                        // soTimeout is also used to make cancellation responsive;
+                        // an idle session is still usable for a later send.
+                        MorselinkLog.d("rx: idle, keeping control channel open")
+                        continue
+                    } catch (error: java.io.IOException) {
+                        MorselinkLog.d("rx: control channel closed: ${error.message}")
+                        break
+                    }
                     if (line.isNullOrBlank()) {
                         MorselinkLog.d("rx: control channel closed")
                         break

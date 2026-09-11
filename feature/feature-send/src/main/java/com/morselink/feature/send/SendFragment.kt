@@ -139,6 +139,11 @@ class SendFragment : Fragment(R.layout.fragment_send) {
                 return@setOnClickListener
             }
             connection.pendingOutgoing = picked
+            // The batch now belongs to the transfer coordinator. Leaving the
+            // rows selected made the next batch accidentally resend the old
+            // files; clear the picker while preserving the queued snapshot.
+            viewModel.clearSelection()
+            refreshSelectionBar()
             findNavController().navigate(Uri.parse("morselink://transfer"))
         }
 

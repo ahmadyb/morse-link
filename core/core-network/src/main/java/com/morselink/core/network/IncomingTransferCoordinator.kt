@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.cancelAndJoin
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -61,6 +62,12 @@ class IncomingTransferCoordinator @Inject constructor() {
 
     fun stop() {
         job?.cancel()
+        job = null
+    }
+
+    /** Stop and wait until the socket-owning receive coroutine has closed. */
+    suspend fun stopAndJoin() {
+        job?.cancelAndJoin()
         job = null
     }
 

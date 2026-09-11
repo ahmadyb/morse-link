@@ -20,6 +20,10 @@ class ConnectionHolder @Inject constructor() {
     @Volatile
     var pendingOutgoing: List<TransferableFile> = emptyList()
 
+    /** Set when Connect's Send action should open the QR pairing screen first. */
+    @Volatile
+    var requestSenderPairing: Boolean = false
+
     /**
      * Whether this device is the one pushing files in this session.
      *

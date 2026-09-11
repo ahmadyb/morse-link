@@ -8,6 +8,7 @@ import androidx.fragment.app.viewModels
 import android.net.Uri
 import androidx.navigation.fragment.findNavController
 import com.morselink.core.ui.DeviceTier
+import com.morselink.core.network.ConnectionHolder
 import com.morselink.core.ui.RadarView
 import com.morselink.feature.dashboard.databinding.FragmentDashboardBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -23,6 +24,9 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
     }
 
     private val viewModel: DashboardViewModel by viewModels()
+
+    @javax.inject.Inject
+    lateinit var connection: ConnectionHolder
 
     private var binding: FragmentDashboardBinding? = null
 
@@ -55,7 +59,10 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
         }
 
         binding.btnSend.setOnClickListener {
-            findNavController().navigate(Uri.parse(NAV_SEND))
+            // Connect > Send establishes the pairing first. Once connected the
+            // QR card can be minimised and the user can browse for files.
+            connection.requestSenderPairing = true
+            findNavController().navigate(Uri.parse("morselink://transfer"))
         }
         binding.btnReceive.setOnClickListener {
             findNavController().navigate(Uri.parse(NAV_RECEIVE))

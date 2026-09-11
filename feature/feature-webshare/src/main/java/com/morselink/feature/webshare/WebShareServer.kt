@@ -41,7 +41,7 @@ class WebShareServer @Inject constructor(
      *  also release the hotspot and the foreground service. */
     var onStopRequest: (() -> Unit)? = null
 
-    data class Entry(val path: String, val name: String, val size: Long, val mime: String)
+    data class Entry(val path: String, val name: String, val size: Long, val mime: String, val uri: String? = null)
 
     fun startServer(): Boolean = runCatching { start(SOCKET_READ_TIMEOUT, false); true }
         .getOrDefault(false)
@@ -104,10 +104,12 @@ class WebShareServer @Inject constructor(
                         name = item.displayName,
                         size = item.sizeBytes,
                         mime = item.mimeType ?: "application/octet-stream",
+                        uri = item.uri.toString(),
                     )
                     array.put(jsonFor(id, item.displayName, item.sizeBytes, item.mimeType ?: "",
                         extra = JSONObject().apply {
                             put("uri", item.uri.toString())
+                            put("folder", item.bucketName ?: "All media")
                             put("date", item.dateModified)
                             if (item.durationMs > 0) put("duration", item.durationMs)
                             item.artist?.let { put("artist", it) }
@@ -170,7 +172,10 @@ class WebShareServer @Inject constructor(
         return JSONObject().apply {
             put("device", theme.deviceName)
             put("android", "Android ${android.os.Build.VERSION.RELEASE}")
-            put("version", "1.0.0")
+            put("version", runCatching {
+                @Suppress("DEPRECATION")
+                context.packageManager.getPackageInfo(context.packageName, 0).versionName
+            }.getOrDefault("1.1.0"))
             put("counts", JSONObject().apply {
                 totals.forEach { (key, value) -> put(key, value) }
             })
@@ -268,31 +273,32 @@ class WebShareServer @Inject constructor(
         val id = session.parms["id"] ?: return newFixedLengthResponse(Response.Status.BAD_REQUEST, MIME_PLAINTEXT, "Missing id")
         val entry = entries[id]
             ?: return newFixedLengthResponse(Response.Status.NOT_FOUND, MIME_PLAINTEXT, "Unknown file")
-        val file = File(entry.path)
-        if (!file.exists()) {
-            return newFixedLengthResponse(Response.Status.NOT_FOUND, MIME_PLAINTEXT, "File unavailable")
-        }
+        val file = entry.path.takeIf { it.isNotBlank() }?.let(::File)
+        val stream = if (file?.exists() == true) FileInputStream(file)
+            else entry.uri?.let { runCatching { context.contentResolver.openInputStream(android.net.Uri.parse(it)) }.getOrNull() }
+        if (stream == null) return newFixedLengthResponse(Response.Status.NOT_FOUND, MIME_PLAINTEXT, "File unavailable")
+        val totalLength = file?.length() ?: entry.size
         val rangeHeader = session.headers["range"] ?: session.headers["Range"]
         var start = 0L
-        var end = file.length() - 1
+        var end = totalLength - 1
         var status = Response.Status.OK
-        if (!rangeHeader.isNullOrBlank()) {
+        if (!rangeHeader.isNullOrBlank() && file != null) {
             val match = Regex("bytes=(\\d*)-(\\d*)").find(rangeHeader)
             if (match != null) {
                 val from = match.groupValues[1].toLongOrNull()
                 val to = match.groupValues[2].toLongOrNull()
-                start = from ?: (file.length() - (to ?: 0))
-                end = to ?: (file.length() - 1)
+                start = from ?: (totalLength - (to ?: 0))
+                end = (to ?: (totalLength - 1)).coerceAtMost(totalLength - 1)
                 status = Response.Status.PARTIAL_CONTENT
             }
         }
+        if (start > 0) stream.skip(start)
         val length = (end - start + 1).coerceAtLeast(0)
-        val stream = FileInputStream(file).apply { skip(start) }
         val response = newFixedLengthResponse(status, entry.mime.ifBlank { "application/octet-stream" }, stream, length)
         response.addHeader("Accept-Ranges", "bytes")
         response.addHeader("Content-Length", length.toString())
         if (status == Response.Status.PARTIAL_CONTENT) {
-            response.addHeader("Content-Range", "bytes $start-$end/${file.length()}")
+            response.addHeader("Content-Range", "bytes $start-$end/$totalLength")
         }
         response.addHeader("Content-Disposition", "attachment; filename=\"${entry.name}\"")
         return cors(response)
