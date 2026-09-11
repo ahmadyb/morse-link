@@ -314,6 +314,7 @@ tr:hover .row-actions { opacity: 1; }
     <button class="icon-btn" id="player-play"><svg viewBox="0 0 24 24"><path d="M8 6l10 6-10 6z"/></svg></button>
     <span class="muted" id="player-time">00:00</span>
     <div class="bar"><div id="player-bar"></div></div>
+    <button class="icon-btn" id="player-close" title="Stop and close">✕</button>
     <audio id="audio" style="display:none"></audio>
   </div>
 </div>
@@ -712,12 +713,37 @@ $('#modal-next').onclick = () => openLightbox((state.lightboxIndex + 1) % state.
 
 /* ------------------------------------------------------------------ player */
 const audio = $('#audio');
+const PLAY_ICON = '<svg viewBox="0 0 24 24"><path d="M8 6l10 6-10 6z"/></svg>';
+const PAUSE_ICON = '<svg viewBox="0 0 24 24"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>';
+
+/** The play/pause glyph has to follow the audio, not the last thing clicked. */
+function syncPlayerIcon() {
+  $('#player-play').innerHTML = audio.paused ? PLAY_ICON : PAUSE_ICON;
+}
+
+function stopPlayer() {
+  audio.pause();
+  audio.removeAttribute('src');
+  audio.load();
+  $('#player').classList.remove('open');
+  $('#player-bar').style.width = '0';
+  $('#player-time').textContent = '00:00';
+  syncPlayerIcon();
+}
+
 function playTrack(item) {
   $('#player').classList.add('open');
   $('#player-title').textContent = item.name;
+  // Starting another track left the previous one's progress on the bar until
+  // the new one caught up.
+  $('#player-bar').style.width = '0';
+  $('#player-time').textContent = '00:00';
   audio.src = '/download?id=' + encodeURIComponent(item.id);
   audio.play();
-  $('#player-play').onclick = () => audio.paused ? audio.play() : audio.pause();
+  $('#player-play').onclick = () => { audio.paused ? audio.play() : audio.pause(); syncPlayerIcon(); };
+  audio.onplay = syncPlayerIcon;
+  audio.onpause = syncPlayerIcon;
+  audio.onended = syncPlayerIcon;
   audio.ontimeupdate = () => {
     if (!audio.duration) return;
     $('#player-bar').style.width = (audio.currentTime / audio.duration * 100) + '%';
@@ -725,6 +751,8 @@ function playTrack(item) {
     $('#player-time').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
   };
 }
+
+$('#player-close').onclick = stopPlayer;
 
 /* ------------------------------------------------------------------ uploads */
 function uploadFiles(fileList) {

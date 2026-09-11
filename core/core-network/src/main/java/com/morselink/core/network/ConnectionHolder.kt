@@ -1,6 +1,9 @@
 package com.morselink.core.network
 
 import com.morselink.core.transfer.model.TransferableFile
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -36,10 +39,30 @@ class ConnectionHolder @Inject constructor() {
 
     fun hasSession(): Boolean = session != null
 
+    /**
+     * Whether a session is up, as something that can be watched.
+     *
+     * The session was a plain field, so nothing heard about it going away. A
+     * connection that died on its own - the other phone leaving, or Stop being
+     * pressed on the notification - left the screen still showing its green
+     * "Connected" card and still offering to send, with no session behind it.
+     */
+    private val _alive = MutableStateFlow(false)
+    val alive: StateFlow<Boolean> = _alive.asStateFlow()
+
+    /** Publishes the session and announces it in one step. */
+    fun attach(session: TransportSession, peer: DiscoveredPeer) {
+        this.session = session
+        this.peer = peer
+        isSender = false
+        _alive.value = true
+    }
+
     suspend fun close() {
         runCatching { session?.close() }
         session = null
         peer = null
         isSender = false
+        _alive.value = false
     }
 }

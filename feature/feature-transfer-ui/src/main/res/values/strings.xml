@@ -28,6 +28,7 @@
     <string name="status_transferring">Transferring %1$d file(s)</string>
     <string name="status_transferring_via">Transferring %1$d file(s) via %2$s</string>
     <string name="status_cancelled">Cancelled</string>
+    <string name="status_disconnected">Connection closed</string>
 
     <!-- Minimise leaves the session up; Cancel ends it. -->
     <string name="action_minimise">Minimise</string>

@@ -72,8 +72,7 @@ class ReceiveViewModel @Inject constructor(
                 return@launch
             }
             Log.d("Morselink", "receiver: connected to $ip")
-            holder.session = session
-            holder.peer = session.peer
+            holder.attach(session, session.peer)
             _status.postValue("Connected to $ip — waiting for files")
             _connected.postValue(true)
         }

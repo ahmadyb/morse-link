@@ -12,6 +12,7 @@ import com.morselink.app.MainActivity
 import com.morselink.app.Notifications
 import com.morselink.app.R
 import com.morselink.core.data.prefs.SettingsStore
+import com.morselink.core.network.ConnectionHolder
 import com.morselink.core.transfer.engine.TransferEngine
 import com.morselink.core.transfer.model.IncomingFileEvent
 import com.morselink.core.ui.SoundEffects
@@ -39,13 +40,26 @@ class ConnectionService : Service() {
     @Inject
     lateinit var settings: SettingsStore
 
+    @Inject
+    lateinit var holder: ConnectionHolder
+
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+
+    /** Outlives onDestroy: the teardown it runs is what triggers onDestroy. */
+    private val teardownScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == ACTION_STOP) {
-            stopSelf()
+            // Stop has to stop the transfer, not just the notification. This
+            // used to only tear down the service, so pressing Stop left the
+            // sockets open and the files still moving - with nothing on
+            // screen to say so, and no way to get back to it.
+            teardownScope.launch {
+                runCatching { holder.close() }
+                runCatching { stopSelf() }
+            }
             return START_NOT_STICKY
         }
         ServiceCompat.startForeground(

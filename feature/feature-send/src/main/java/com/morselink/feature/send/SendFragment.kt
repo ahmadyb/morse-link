@@ -7,6 +7,7 @@ import android.widget.ArrayAdapter
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import android.net.Uri
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
@@ -163,6 +164,13 @@ class SendFragment : Fragment(R.layout.fragment_send) {
         }
         binding.sessionBody.setOnClickListener {
             findNavController().navigate(Uri.parse("morselink://transfer"))
+        }
+
+        // The minimised bar was only refreshed on resume, so a connection that
+        // dropped while this screen was sitting open left it claiming a session
+        // that no longer existed - and offering to send into it.
+        viewLifecycleOwner.lifecycleScope.launch {
+            connection.alive.collect { refreshSessionBar() }
         }
 
         viewModel.consumeExternalFiles()

@@ -143,6 +143,23 @@ class TransferViewModel @Inject constructor(
     }
 
     init {
+        // A session can end without this screen asking it to: the other phone
+        // walks away, or Stop is pressed on the notification. Either way the
+        // green Connected card has to go, or the screen keeps offering to send
+        // into a connection that is not there.
+        viewModelScope.launch {
+            // The flow starts false, so reacting to every false would put
+            // "Connection closed" on the screen the moment it opened. Only a
+            // session we have actually seen go away counts.
+            var wasUp = holder.hasSession()
+            holder.alive.collect { up ->
+                if (wasUp && !up) {
+                    hidePairing()
+                    _statusLine.postValue(context.getString(R.string.status_disconnected))
+                }
+                wasUp = up
+            }
+        }
         viewModelScope.launch { engine.state.collect { pushStatus() } }
 
         val pending = holder.pendingOutgoing
@@ -277,8 +294,7 @@ class TransferViewModel @Inject constructor(
                     return@launch
                 }
                 MorselinkLog.d("sender: receiver connected from ${session.peer.name}")
-                holder.session = session
-                holder.peer = session.peer
+                holder.attach(session, session.peer)
                 showConnected(session.peer.name)
                 _statusLine.postValue(
                     context.getString(R.string.status_connected, session.peer.name)
