@@ -1,0 +1,42 @@
+----- in-app log -----
+09-11 17:39:42.435 D: sender: advertising 192.168.25.242:54321, waiting for a receiver
+09-11 17:39:42.439 D: transport: listening on 54321
+09-11 17:40:06.470 D: transport: inbound connection accepted
+09-11 17:40:06.506 D: sender: receiver connected from Alien Phone
+09-11 20:15:41.062 D: transport: connected to 192.168.43.1:54321
+09-11 20:15:41.071 D: transport: sender identified itself as Alien Phone
+09-11 20:15:41.199 D: rx: receiver loop started
+09-11 20:16:11.218 D: rx: idle, keeping control channel open
+09-11 20:17:25.168 D: rx: control channel closed: Software caused connection abort
+09-11 20:17:25.175 D: rx: receiver loop ended
+09-11 20:20:03.065 D: transport: connected to 192.168.43.1:54321
+09-11 20:20:03.071 D: transport: sender identified itself as Alien Phone
+09-11 20:20:03.126 D: rx: receiver loop started
+09-11 20:20:03.135 D: rx: morse-link-apk.zip metadata ok (7546376 B), resuming at 0
+09-11 20:20:03.136 D: rx: morse-link-apk.zip resume sent
+09-11 20:20:03.148 D: rx: morse-link-apk.zip data socket open, reading chunks
+09-11 20:20:04.821 D: rx: morse-link-apk.zip done (7546376/7546376 B)
+09-11 20:20:18.506 D: rx: control channel closed
+09-11 20:20:18.507 D: rx: receiver loop ended
+09-11 20:22:05.079 D: transport: connected to 192.168.43.1:54321
+09-11 20:22:05.088 D: transport: sender identified itself as Alien Phone
+09-11 20:22:05.170 D: rx: receiver loop started
+09-11 20:23:03.109 D: rx: control channel closed: Software caused connection abort
+09-11 20:23:03.110 D: rx: receiver loop ended
+09-11 20:23:50.355 D: tx: queueing 1 file(s) for Alien Phone
+09-11 20:23:50.362 D: tx: KudiX Wallet size=55158077 from /data/app/~~Ajh1fPq_GNuFdxIuzJoS_w==/app.kudix.mobile-5uMI75PrBeJXc4S9KqbdAg==/base.apk
+09-11 20:23:50.365 D: tx: KudiX Wallet FAILED IOException: The connection to Alien Phone was closed
+09-11 20:23:50.387 D: tx: batch of 1 finished
+09-11 20:23:50.393 W: rx: flow stopped safely: The connection to Alien Phone was closed
+
+----- logcat -----
+09-11 20:23:50.341 W/Morselink(14077): rx: receive loop ended: StandaloneCoroutine was cancelled
+09-11 20:23:50.341 D/Morselink(14077): rx: receive loop finished
+09-11 20:23:50.355 D/Morselink(14077): tx: queueing 1 file(s) for Alien Phone
+09-11 20:23:50.361 D/Morselink(14077): tx: KudiX Wallet size=55158077 from /data/app/~~Ajh1fPq_GNuFdxIuzJoS_w==/app.kudix.mobile-5uMI75PrBeJXc4S9KqbdAg==/base.apk
+09-11 20:23:50.364 D/Morselink(14077): tx: KudiX Wallet FAILED IOException: The connection to Alien Phone was closed
+09-11 20:23:50.387 D/Morselink(14077): tx: batch of 1 finished
+09-11 20:23:50.388 D/Morselink(14077): rx: starting receive loop for Alien Phone
+09-11 20:23:50.392 W/Morselink(14077): rx: flow stopped safely: The connection to Alien Phone was closed
+09-11 20:24:00.300 W/Morselink(14077): rx: receive loop ended: StandaloneCoroutine was cancelled
+09-11 20:24:00.300 D/Morselink(14077): rx: receive loop finished

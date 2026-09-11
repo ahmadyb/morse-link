@@ -1,0 +1,50 @@
+----- in-app log -----
+09-09 20:36:24.198 D: transport: listening on 54321
+09-09 20:36:50.174 D: transport: inbound connection accepted
+09-09 20:36:50.220 D: tx: IMG-20260907-WA0000.jpg size=42597 from /storage/emulated/0/Pictures/WhatsApp/IMG-20260907-WA0000.jpg
+09-09 20:36:50.224 D: tx: IMG-20260907-WA0000.jpg metadata sent, waiting for resume
+09-09 20:36:50.472 D: tx: IMG-20260907-WA0000.jpg resume=0 (reply=resume)
+09-09 20:36:50.489 D: tx: data socket open, streaming IMG-20260907-WA0000.jpg
+09-09 20:36:50.537 D: tx: IMG-20260907-WA0000.jpg sent to Morselink Phone
+09-09 20:36:50.549 D: tx: IMG_20260905_172338_261.jpg size=3258954 from /storage/emulated/0/DCIM/Camera/IMG_20260905_172338_261.jpg
+09-09 20:36:50.551 D: tx: IMG_20260905_172338_261.jpg metadata sent, waiting for resume
+09-09 20:36:51.498 D: tx: IMG_20260905_172338_261.jpg resume=0 (reply=resume)
+09-09 20:36:51.499 D: tx: data socket open, streaming IMG_20260905_172338_261.jpg
+09-09 20:36:52.056 D: tx: IMG_20260905_172338_261.jpg sent to Morselink Phone
+09-09 20:36:52.076 D: tx: IMG_20260905_172223_524.jpg size=3446890 from /storage/emulated/0/DCIM/Camera/IMG_20260905_172223_524.jpg
+09-09 20:36:52.078 D: tx: IMG_20260905_172223_524.jpg metadata sent, waiting for resume
+09-09 20:36:53.545 D: tx: IMG_20260905_172223_524.jpg resume=0 (reply=resume)
+09-09 20:36:53.547 D: tx: data socket open, streaming IMG_20260905_172223_524.jpg
+09-09 20:36:54.093 D: tx: IMG_20260905_172223_524.jpg sent to Morselink Phone
+09-09 20:36:54.109 D: tx: IMG_20260905_172233_505.jpg size=3582594 from /storage/emulated/0/DCIM/Camera/IMG_20260905_172233_505.jpg
+09-09 20:36:54.111 D: tx: IMG_20260905_172233_505.jpg metadata sent, waiting for resume
+09-09 20:36:55.799 D: tx: IMG_20260905_172233_505.jpg resume=0 (reply=resume)
+09-09 20:36:55.800 D: tx: data socket open, streaming IMG_20260905_172233_505.jpg
+09-09 20:36:56.279 D: tx: IMG_20260905_172233_505.jpg sent to Morselink Phone
+09-09 20:36:56.295 D: tx: IMG_20260905_172055_640.jpg size=3827218 from /storage/emulated/0/DCIM/Camera/IMG_20260905_172055_640.jpg
+09-09 20:36:56.297 D: tx: IMG_20260905_172055_640.jpg metadata sent, waiting for resume
+09-09 20:36:57.949 D: tx: IMG_20260905_172055_640.jpg resume=0 (reply=resume)
+09-09 20:36:57.951 D: tx: data socket open, streaming IMG_20260905_172055_640.jpg
+09-09 20:36:58.480 D: tx: IMG_20260905_172055_640.jpg sent to Morselink Phone
+09-09 20:36:58.493 D: tx: IMG_20260905_172014_457.jpg size=5583577 from /storage/emulated/0/DCIM/Camera/IMG_20260905_172014_457.jpg
+09-09 20:36:58.494 D: tx: IMG_20260905_172014_457.jpg metadata sent, waiting for resume
+09-09 20:37:00.202 D: tx: IMG_20260905_172014_457.jpg resume=0 (reply=resume)
+09-09 20:37:00.203 D: tx: data socket open, streaming IMG_20260905_172014_457.jpg
+09-09 20:37:00.992 D: tx: IMG_20260905_172014_457.jpg sent to Morselink Phone
+09-09 20:39:01.729 D: transport: connected to 192.168.43.1:54321
+09-09 20:39:01.734 D: transport: sender identified itself as Alien Phone
+09-09 20:39:01.775 D: rx: receiver loop started
+09-09 20:39:01.780 D: rx: VID-20260828-WA0005.mp4 metadata ok (5874774 B), resuming at 0
+09-09 20:39:01.782 D: rx: VID-20260828-WA0005.mp4 resume sent
+09-09 20:39:01.791 D: rx: VID-20260828-WA0005.mp4 data socket open, reading chunks
+09-09 20:39:03.391 D: rx: 3ddae0baa28a3899272e9b126d48f93f_1787688748740.mp4 metadata ok (2308368 B), resuming at 0
+09-09 20:39:03.393 D: rx: 3ddae0baa28a3899272e9b126d48f93f_1787688748740.mp4 resume sent
+09-09 20:39:03.397 D: rx: 3ddae0baa28a3899272e9b126d48f93f_1787688748740.mp4 data socket open, reading chunks
+09-09 20:39:03.981 D: rx: VID-20260824-WA0003.mp4 metadata ok (11701940 B), resuming at 0
+09-09 20:39:03.981 D: rx: VID-20260824-WA0003.mp4 resume sent
+09-09 20:39:03.985 D: rx: VID-20260824-WA0003.mp4 data socket open, reading chunks
+09-09 20:39:20.800 D: rx: control channel closed
+09-09 20:39:20.800 D: rx: receiver loop ended
+
+----- logcat -----
+(empty)

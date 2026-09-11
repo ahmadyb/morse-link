@@ -1,0 +1,398 @@
+package com.morselink.feature.settings
+
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.graphics.Color
+import android.graphics.Typeface
+import android.os.Bundle
+import android.view.View
+import android.widget.ScrollView
+import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import android.net.Uri
+import java.io.File
+import androidx.navigation.fragment.findNavController
+import kotlinx.coroutines.launch
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.morselink.core.data.prefs.ThemeMode
+import com.morselink.core.ui.AppLog
+import com.morselink.core.ui.CrashLog
+import com.morselink.core.ui.Dialogs
+import com.morselink.feature.settings.databinding.FragmentSettingsBinding
+import dagger.hilt.android.AndroidEntryPoint
+
+/** §14.7 — grouped preferences with the protocol knobs demoted into Advanced. */
+@AndroidEntryPoint
+class SettingsFragment : Fragment(R.layout.fragment_settings) {
+
+    private val viewModel: SettingsViewModel by viewModels()
+
+    private var binding: FragmentSettingsBinding? = null
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        val binding = FragmentSettingsBinding.bind(view)
+        this.binding = binding
+
+        viewModel.state.observe(viewLifecycleOwner) { settings ->
+            binding.rowDeviceName.title.text = getString(R.string.settings_device_name)
+            binding.rowDeviceName.value.text = settings.deviceName
+
+            binding.rowAvatar.title.text = getString(R.string.settings_avatar)
+            binding.rowAvatar.subtitle.text = getString(R.string.settings_avatar_hint)
+            // The seed was cycled but never drawn anywhere, so the control
+            // looked dead. Show the colour it selects.
+            binding.rowAvatar.value.text = "\u25CF"
+            binding.rowAvatar.value.textSize = 22f
+            binding.rowAvatar.value.setTextColor(
+                AVATAR_COLORS[settings.avatarSeed % AVATAR_COLORS.size]
+            )
+
+            binding.rowDownloadDir.title.text = getString(R.string.settings_download_dir)
+            binding.rowDownloadDir.value.text = settings.downloadDirectory
+                ?: viewModel.defaultDownloadPath()
+
+            binding.rowPreferWifiDirect.title.text = getString(R.string.settings_prefer_wifi_direct)
+            binding.rowPreferWifiDirect.toggle.isChecked = settings.preferWifiDirectOverHotspot
+
+            binding.rowTheme.title.text = getString(R.string.settings_theme)
+            binding.rowTheme.value.text = settings.themeMode.name.lowercase().replaceFirstChar { it.uppercase() }
+
+            binding.rowNotifications.title.text = getString(R.string.settings_notifications)
+            binding.rowNotifications.toggle.isChecked = settings.transferNotifications
+
+            binding.rowSounds.title.text = getString(R.string.settings_sounds)
+            binding.rowSounds.toggle.isChecked = settings.soundsEnabled
+
+            binding.rowTimeout.title.text = getString(R.string.settings_timeout)
+            binding.rowTimeout.value.text = settings.connectionTimeoutSeconds.toString()
+
+            binding.rowReconnect.title.text = getString(R.string.settings_reconnect)
+            binding.rowReconnect.value.text = settings.maxReconnectAttempts.toString()
+
+            binding.rowWebshare.title.text = getString(R.string.settings_webshare)
+            binding.rowWebshare.subtitle.text = "Transfer between this phone and a PC browser"
+
+            binding.rowVersion.title.text = getString(R.string.settings_version)
+            binding.rowVersion.value.text = viewModel.versionName()
+
+            binding.rowPrivacy.title.text = getString(R.string.settings_privacy)
+            binding.rowPrivacy.subtitle.text = "Offline by design"
+        }
+
+        setupCrashLogRow()
+        setupAppLogRow()
+
+        binding.rowDeviceName.root.setOnClickListener {
+            Dialogs.input(requireContext(), getString(R.string.settings_device_name), viewModel.deviceName()) {
+                if (it.isNotBlank()) viewModel.setDeviceName(it)
+            }
+        }
+        binding.rowAvatar.root.setOnClickListener { viewModel.cycleAvatar() }
+
+        // Tapping the row should do the same as tapping the switch: the switch
+        // alone is a small target and felt unresponsive.
+        binding.rowPreferWifiDirect.root.setOnClickListener {
+            binding.rowPreferWifiDirect.toggle.toggle()
+        }
+        binding.rowNotifications.root.setOnClickListener {
+            binding.rowNotifications.toggle.toggle()
+        }
+        binding.rowSounds.root.setOnClickListener {
+            binding.rowSounds.toggle.toggle()
+        }
+        binding.rowDownloadDir.root.setOnClickListener {
+            Dialogs.input(
+                requireContext(),
+                getString(R.string.settings_download_dir),
+                viewModel.downloadDirectory(),
+            ) { if (it.isNotBlank()) viewModel.setDownloadDirectory(it) }
+        }
+        binding.rowPreferWifiDirect.toggle.setOnCheckedChangeListener { _, checked ->
+            viewModel.setPreferWifiDirect(checked)
+        }
+        binding.rowTheme.root.setOnClickListener { showThemePicker() }
+        binding.rowNotifications.toggle.setOnCheckedChangeListener { _, checked ->
+            viewModel.setNotifications(checked)
+        }
+        binding.rowSounds.toggle.setOnCheckedChangeListener { _, checked ->
+            viewModel.setSounds(checked)
+        }
+        binding.rowTimeout.root.setOnClickListener {
+            Dialogs.input(requireContext(), getString(R.string.settings_timeout), viewModel.timeout().toString()) {
+                it.toIntOrNull()?.let(viewModel::setTimeout)
+            }
+        }
+        binding.rowReconnect.root.setOnClickListener {
+            Dialogs.input(requireContext(), getString(R.string.settings_reconnect), viewModel.reconnect().toString()) {
+                it.toIntOrNull()?.let(viewModel::setReconnect)
+            }
+        }
+        binding.rowWebshare.root.setOnClickListener {
+            findNavController().navigate(Uri.parse("morselink://webshare"))
+        }
+        binding.rowPrivacy.root.setOnClickListener {
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.history_privacy_title)
+                .setMessage(R.string.history_privacy_body)
+                .setPositiveButton(com.morselink.core.ui.R.string.action_ok, null)
+                .show()
+        }
+    }
+
+    /**
+     * The crash log is how a crash gets reported without a USB cable: the
+     * handler writes the trace to a private file during process death, and this
+     * row surfaces it so it can be read or copied out.
+     */
+    private fun setupCrashLogRow() {
+        val binding = binding ?: return
+        binding.rowCrashLog.title.text = getString(R.string.settings_crash_log)
+        refreshCrashLogRow()
+        binding.rowCrashLog.root.setOnClickListener { showCrashLog() }
+    }
+
+    private fun refreshCrashLogRow() {
+        val binding = binding ?: return
+        val log = CrashLog.read(requireContext())
+        binding.rowCrashLog.subtitle.text = if (log == null) {
+            getString(R.string.settings_crash_log_none)
+        } else {
+            getString(R.string.settings_crash_log_count, CrashLog.entryCount(log))
+        }
+    }
+
+    private fun setupAppLogRow() {
+        val binding = binding ?: return
+        binding.rowAppLog.title.text = getString(R.string.settings_app_log)
+        binding.rowAppLog.subtitle.text = getString(R.string.settings_app_log_hint)
+        val on = AppLog.isEnabled(requireContext())
+        binding.rowAppLog.toggle.isChecked = on
+        binding.rowAppLog.toggle.setOnCheckedChangeListener { _, checked ->
+            AppLog.setEnabled(requireContext(), checked)
+            refreshAppLogRows()
+        }
+        // Tapping the row has to switch logging on and off, exactly like every
+        // other switch row. It used to open the viewer, which meant there was
+        // no way to ever turn logging on in the first place.
+        binding.rowAppLog.root.setOnClickListener {
+            binding.rowAppLog.toggle.toggle()
+        }
+        binding.rowAppLogView.root.setOnClickListener { showAppLog() }
+        binding.rowAppLogExport.root.setOnClickListener { exportAppLog() }
+        refreshAppLogRows()
+    }
+
+    private fun refreshAppLogRows() {
+        val binding = binding ?: return
+        val on = AppLog.isEnabled(requireContext())
+        binding.rowAppLog.subtitle.text = getString(
+            if (on) R.string.settings_app_log_on else R.string.settings_app_log_off,
+        )
+        binding.rowAppLogView.title.text = getString(R.string.settings_app_log_view)
+        binding.rowAppLogExport.title.text = getString(R.string.settings_app_log_export)
+        binding.rowAppLogExport.subtitle.text = getString(
+            if (on) R.string.settings_app_log_export_hint
+            else R.string.settings_app_log_export_off
+        )
+        binding.rowAppLogView.subtitle.text = getString(
+            if (on) R.string.settings_app_log_view_hint else R.string.settings_app_log_view_off,
+        )
+    }
+
+    private fun showAppLog() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val text = AppLog.capture(requireContext())
+            val pad = (16 * resources.displayMetrics.density).toInt()
+            val body = TextView(requireContext()).apply {
+                this.text = text
+                typeface = Typeface.MONOSPACE
+                textSize = 10f
+                setTextIsSelectable(true)
+            }
+            val scroller = ScrollView(requireContext()).apply {
+                setPadding(pad, pad / 2, pad, 0)
+                addView(body)
+            }
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.settings_app_log)
+                .setView(scroller)
+                .setPositiveButton(com.morselink.core.ui.R.string.action_copy) { _, _ ->
+                    copyCrashLog(text)
+                }
+                .setNegativeButton(com.morselink.core.ui.R.string.action_clear) { _, _ ->
+                    AppLog.clear(requireContext())
+                }
+                .setNeutralButton(com.morselink.core.ui.R.string.action_close, null)
+                .show()
+        }
+    }
+
+    /**
+     * Writes the log to a dated .txt file and offers it to whatever app can take
+     * it. Copying a few hundred lines out of a dialog in batches is what this
+     * replaces.
+     */
+    private fun exportAppLog() {
+        val context = requireContext()
+        viewLifecycleOwner.lifecycleScope.launch {
+            val file = AppLog.export(context)
+            if (file == null) {
+                Toast.makeText(
+                    context,
+                    R.string.settings_app_log_export_failed,
+                    Toast.LENGTH_LONG,
+                ).show()
+                return@launch
+            }
+            val uri = runCatching {
+                androidx.core.content.FileProvider.getUriForFile(
+                    context,
+                    "${context.packageName}.fileprovider",
+                    file,
+                )
+            }.getOrNull()
+            MaterialAlertDialogBuilder(context)
+                .setTitle(R.string.settings_app_log_export)
+                .setMessage(getString(R.string.settings_app_log_export_done, file.name))
+                .setPositiveButton(com.morselink.core.ui.R.string.action_share) { _, _ ->
+                    if (uri == null) return@setPositiveButton
+                    runCatching {
+                        startActivity(
+                            android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                                type = "text/plain"
+                                putExtra(android.content.Intent.EXTRA_STREAM, uri)
+                                addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            },
+                        )
+                    }
+                }
+                .setNegativeButton(com.morselink.core.ui.R.string.action_close, null)
+                .show()
+        }
+    }
+
+    private fun showCrashLog() {
+        val context = requireContext()
+        val log = CrashLog.read(context)
+        if (log == null) {
+            MaterialAlertDialogBuilder(context)
+                .setTitle(R.string.settings_crash_log)
+                .setMessage(R.string.settings_crash_log_empty)
+                .setPositiveButton(com.morselink.core.ui.R.string.action_ok, null)
+                .show()
+            return
+        }
+        val pad = (16 * context.resources.displayMetrics.density).toInt()
+        val body = TextView(context).apply {
+            text = log
+            typeface = Typeface.MONOSPACE
+            textSize = 11f
+            setTextIsSelectable(true)
+        }
+        val scroller = ScrollView(context).apply {
+            setPadding(pad, pad / 2, pad, 0)
+            addView(body)
+        }
+        MaterialAlertDialogBuilder(context)
+            .setTitle(R.string.settings_crash_log)
+            .setView(scroller)
+            .setPositiveButton(com.morselink.core.ui.R.string.action_export) { _, _ ->
+                exportText("morselink-crash", log)
+            }
+            .setNegativeButton(com.morselink.core.ui.R.string.action_clear) { _, _ ->
+                CrashLog.clear(context)
+                refreshCrashLogRow()
+            }
+            .setNeutralButton(com.morselink.core.ui.R.string.action_copy) { _, _ -> copyCrashLog(log) }
+            .show()
+    }
+
+    /** Writes [text] to a dated .txt file and offers it to another app. */
+    private fun exportText(prefix: String, text: String) {
+        val context = requireContext()
+        if (text.isBlank()) return
+        val file = runCatching {
+            val directory = File(context.getExternalFilesDir(null), "logs").apply { mkdirs() }
+            val name = prefix + "-" +
+                java.text.SimpleDateFormat("yyyyMMdd-HHmmss", java.util.Locale.US)
+                    .format(java.util.Date()) + ".txt"
+            File(directory, name).apply { writeText(text) }
+        }.getOrNull() ?: return
+        val uri = runCatching {
+            androidx.core.content.FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.fileprovider",
+                file,
+            )
+        }.getOrNull() ?: return
+        runCatching {
+            startActivity(
+                android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    putExtra(android.content.Intent.EXTRA_STREAM, uri)
+                    addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                },
+            )
+        }
+        Toast.makeText(
+            context,
+            getString(R.string.settings_app_log_export_done, file.name),
+            Toast.LENGTH_LONG,
+        ).show()
+    }
+
+    private fun copyCrashLog(text: String) {
+        val manager = requireContext().getSystemService(Context.CLIPBOARD_SERVICE)
+            as? ClipboardManager
+        manager?.setPrimaryClip(ClipData.newPlainText("morselink-crash", text))
+        Toast.makeText(
+            requireContext(),
+            com.morselink.core.ui.R.string.copied,
+            Toast.LENGTH_SHORT,
+        ).show()
+    }
+
+    private val AVATAR_COLORS = intArrayOf(
+        Color.parseColor("#1FA36B"),
+        Color.parseColor("#2F80ED"),
+        Color.parseColor("#9B51E0"),
+        Color.parseColor("#EB5757"),
+        Color.parseColor("#F2994A"),
+        Color.parseColor("#00B8D9"),
+        Color.parseColor("#F2C94C"),
+        Color.parseColor("#8D6E63"),
+    )
+
+    private fun showThemePicker() {
+        val options = arrayOf("Light", "Dark", "System")
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.settings_theme)
+            .setItems(options) { _, which ->
+                viewModel.setTheme(
+                    when (which) {
+                        0 -> ThemeMode.LIGHT
+                        1 -> ThemeMode.DARK
+                        else -> ThemeMode.SYSTEM
+                    }
+                )
+                AppCompatDelegate.setDefaultNightMode(
+                    when (which) {
+                        0 -> AppCompatDelegate.MODE_NIGHT_NO
+                        1 -> AppCompatDelegate.MODE_NIGHT_YES
+                        else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+                    }
+                )
+            }
+            .show()
+    }
+
+    override fun onDestroyView() {
+        binding = null
+        super.onDestroyView()
+    }
+}

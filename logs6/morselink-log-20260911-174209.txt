@@ -1,0 +1,12 @@
+----- in-app log -----
+09-11 17:40:05.439 D: transport: connected to 192.168.25.242:54321
+09-11 17:40:05.458 D: transport: sender identified itself as Mo Phone
+09-11 17:40:06.029 D: rx: receiver loop started
+09-11 17:40:36.030 D: rx: idle, keeping control channel open
+09-11 17:41:06.024 D: rx: idle, keeping control channel open
+09-11 17:41:36.022 D: rx: idle, keeping control channel open
+09-11 17:42:06.024 D: rx: idle, keeping control channel open
+
+----- logcat -----
+09-11 17:41:36.022 D/Morselink(22996): rx: idle, keeping control channel open
+09-11 17:42:06.023 D/Morselink(22996): rx: idle, keeping control channel open

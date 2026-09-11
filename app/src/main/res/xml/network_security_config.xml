@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  §4.5 / API 28: cleartext is blocked by default. Morselink only ever speaks
+  HTTP to a device on the same local network (WebShare server, hotspot gateway),
+  so cleartext is scoped to loopback and private addresses and nowhere else.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">localhost</domain>
+        <domain includeSubdomains="false">127.0.0.1</domain>
+        <domain includeSubdomains="false">192.168.43.1</domain>
+        <domain includeSubdomains="false">192.168.49.1</domain>
+        <domain includeSubdomains="false">10.0.0.1</domain>
+        <domain includeSubdomains="false">172.16.0.1</domain>
+    </domain-config>
+</network-security-config>

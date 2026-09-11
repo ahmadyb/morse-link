@@ -1,0 +1,8 @@
+----- in-app log -----
+09-11 17:39:42.435 D: sender: advertising 192.168.25.242:54321, waiting for a receiver
+09-11 17:39:42.439 D: transport: listening on 54321
+09-11 17:40:06.470 D: transport: inbound connection accepted
+09-11 17:40:06.506 D: sender: receiver connected from Alien Phone
+
+----- logcat -----
+(empty)
