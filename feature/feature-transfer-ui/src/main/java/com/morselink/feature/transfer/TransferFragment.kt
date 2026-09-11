@@ -96,7 +96,7 @@ class TransferFragment : Fragment(R.layout.fragment_transfer) {
         // fires for both Minimise and Cancel.
         viewModel.minimised.observe(viewLifecycleOwner) { minimised ->
             if (!minimised) return@observe
-            findNavController().navigate(Uri.parse("morselink://send"))
+            findNavController().navigate(Uri.parse("morselink://files"))
         }
 
         // Cancel used to stop the transfers but leave the user stranded on a

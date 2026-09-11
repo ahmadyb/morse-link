@@ -1,6 +1,7 @@
 package com.morselink.feature.filemanager
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -9,9 +10,12 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import kotlinx.coroutines.launch
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.morselink.core.media.DirectoryState
+import com.morselink.core.network.ConnectionHolder
+import com.morselink.core.transfer.model.TransferableFile
 import com.morselink.core.media.FileItem
 import com.morselink.core.media.SmartCategory
 import com.morselink.core.ui.AddressSegment
@@ -32,6 +36,9 @@ class FileManagerFragment : Fragment(R.layout.fragment_file_manager) {
 
     @Inject
     lateinit var permissions: Permissions
+
+    @Inject
+    lateinit var connection: ConnectionHolder
 
     private val viewModel: FileManagerViewModel by viewModels()
 
@@ -82,6 +89,7 @@ class FileManagerFragment : Fragment(R.layout.fragment_file_manager) {
             binding.storageText.text = "${Format.bytes(info.usedBytes)} / ${Format.bytes(info.totalBytes)}"
         }
 
+        binding.actionSend.setOnClickListener { sendSelection() }
         binding.actionShare.setOnClickListener { shareSelection() }
         binding.actionDelete.setOnClickListener { deleteSelection() }
         binding.actionRename.setOnClickListener { renameSelection() }
@@ -153,6 +161,27 @@ class FileManagerFragment : Fragment(R.layout.fragment_file_manager) {
         binding.actionBar.isVisible = count > 0
         adapter.notifyDataSetChanged()
         if (count == 0) viewModel.clearSelection()
+    }
+
+    private fun sendSelection() {
+        val items = viewModel.selectedItems()
+        val files = items.filterNot { it.isDirectory }.map { item ->
+            TransferableFile(
+                id = item.path,
+                name = item.name,
+                sizeBytes = item.sizeBytes,
+                mimeType = item.mimeType,
+                path = item.path,
+            )
+        }
+        if (files.isEmpty()) {
+            Toast.makeText(requireContext(), R.string.files_send_folders, Toast.LENGTH_SHORT).show()
+            return
+        }
+        connection.pendingOutgoing = files
+        viewModel.clearSelection()
+        renderSelection()
+        findNavController().navigate(Uri.parse("morselink://transfer"))
     }
 
     private fun shareSelection() {

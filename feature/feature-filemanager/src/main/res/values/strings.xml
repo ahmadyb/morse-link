@@ -7,6 +7,8 @@ Size: %2$s
 Modified: %3$s
 Path: %4$s</string>
     <string name="files_deleted">Deleted %1$d item(s)</string>
+    <string name="files_send">Send</string>
+    <string name="files_send_folders">Open folders or select files inside them before sending</string>
     <string name="files_compressed">Saved %1$s</string>
     <string name="files_move_to">Move to…</string>
     <string name="files_copy_to">Copy to…</string>
