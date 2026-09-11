@@ -139,12 +139,24 @@
             android:textColor="@color/textSecondary"
             android:textSize="13sp" />
 
+        <!-- Icon only: it sits beside the labelled Cancel button, so a second
+             word here reads as clutter rather than as help. -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_minimise"
             style="@style/Widget.Morselink.Button.Text"
-            android:layout_width="wrap_content"
+            android:layout_width="48dp"
             android:layout_height="wrap_content"
-            android:text="@string/action_minimise"
+            android:minWidth="48dp"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
+            android:insetLeft="0dp"
+            android:insetRight="0dp"
+            android:text="@null"
+            android:contentDescription="@string/action_minimise"
+            android:tooltipText="@string/minimise_hint"
+            app:icon="@drawable/ic_minimise"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
             android:visibility="gone" />
 
         <com.google.android.material.button.MaterialButton

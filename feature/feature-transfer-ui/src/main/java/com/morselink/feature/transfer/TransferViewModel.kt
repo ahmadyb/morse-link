@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.withContext
+import com.morselink.core.ui.SoundEffects
 import javax.inject.Inject
 
 /** Which face the collapsible card at the top of the screen is showing. */
@@ -290,6 +291,13 @@ class TransferViewModel @Inject constructor(
     /** The connected face of the card, shown on both ends of the transfer. */
     private fun showConnected(peerName: String) {
         _canMinimise.postValue(true)
+        // The connection is the one moment worth announcing: pairing has no
+        // other confirmation on the receiving handset.
+        viewModelScope.launch {
+            if (runCatching { settings.current().soundsEnabled }.getOrDefault(false)) {
+                SoundEffects.play(context, SoundEffects.Kind.CONNECTED)
+            }
+        }
         showPairing(
             PairingState(
                 mode = PairingMode.CONNECTED,

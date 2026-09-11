@@ -25,6 +25,7 @@ class SendAdapter(
     private val onToggle: (SendRow) -> Unit,
     private val isSelected: (SendRow) -> Boolean,
     private val onOpenCategory: ((SendRow.Category) -> Unit)? = null,
+    private val onOpenMediaGroup: ((MediaGroup) -> Unit)? = null,
 ) : ListAdapter<SendRow, RecyclerView.ViewHolder>(Diff) {
 
     /** Grid or list, switched in place so the adapter is never recreated. */
@@ -43,7 +44,8 @@ class SendAdapter(
         val row = getItem(position)
         return when {
             row is SendRow.Header -> TYPE_HEADER
-            useGrid && row !is SendRow.Category -> TYPE_GRID
+            useGrid && row !is SendRow.Category &&
+                row !is SendRow.MediaGroupRow -> TYPE_GRID
             else -> TYPE_LIST
         }
     }
@@ -111,6 +113,13 @@ class SendAdapter(
                     binding.thumb.setImageResource(android.R.drawable.ic_menu_agenda)
                     binding.root.setOnClickListener { onOpenCategory?.invoke(row) }
                 }
+                is SendRow.MediaGroupRow -> {
+                    binding.title.text = row.group.label()
+                    binding.subtitle.text = row.group.subtitle()
+                    binding.trailing.text = row.count.takeIf { it > 0 }?.toString() ?: ""
+                    binding.thumb.setImageResource(row.group.icon())
+                    binding.root.setOnClickListener { onOpenMediaGroup?.invoke(row.group) }
+                }
                 is SendRow.Media -> {
                     binding.title.text = row.item.displayName
                     binding.subtitle.text = row.item.artist?.takeIf { it.isNotBlank() }
@@ -145,7 +154,8 @@ class SendAdapter(
             // Music and Files therefore counted selections that had no visible
             // mark at all - the row looked exactly the same tapped or not.
             // Headers and category shortcuts are not selectable.
-            val selectable = row !is SendRow.Header && row !is SendRow.Category
+            val selectable = row !is SendRow.Header &&
+                row !is SendRow.Category && row !is SendRow.MediaGroupRow
             val selected = selectable && isSelected(row)
             binding.check.visibility =
                 if (selected) android.view.View.VISIBLE else android.view.View.GONE
@@ -195,6 +205,7 @@ class SendAdapter(
             is SendRow.App -> loadAppIcon(image, row)
             is SendRow.File -> loadFileThumb(image, row.file)
             is SendRow.Category -> image.setImageResource(android.R.drawable.ic_menu_agenda)
+            is SendRow.MediaGroupRow -> image.setImageResource(row.group.icon())
             is SendRow.Header -> Unit
         }
     }
@@ -291,13 +302,8 @@ class SendAdapter(
     }
 }
 
-private fun com.morselink.core.media.SmartCategory.label(): String = when (this) {
-    com.morselink.core.media.SmartCategory.DOCUMENTS -> "Documents"
-    com.morselink.core.media.SmartCategory.EBOOKS -> "Ebooks"
-    com.morselink.core.media.SmartCategory.APKS -> "APKs"
-    com.morselink.core.media.SmartCategory.ARCHIVES -> "Archives"
-    com.morselink.core.media.SmartCategory.LARGE_FILES -> "Large files"
-}
+// label() now lives in SendModels.kt, shared with the view model, which needs
+// the same names for the breadcrumb. Two copies of one translation drift apart.
 
 private fun com.morselink.core.media.SmartCategory.subtitle(): String = when (this) {
     com.morselink.core.media.SmartCategory.DOCUMENTS -> "Word, Excel, PPT, PDF, etc."

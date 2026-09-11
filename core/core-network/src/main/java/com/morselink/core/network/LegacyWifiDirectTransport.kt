@@ -390,6 +390,12 @@ class LegacyWifiDirectTransport @Inject constructor(
                         val source = resolveSource(file)
                         MorselinkLog.d("tx: ${file.name} size=${file.sizeBytes} from ${source.absolutePath}")
                         val control = openControlSocket()
+                        // The same socket the receive loop borrows, and that
+                        // loop raises the timeout so it can wait while the
+                        // other end picks files. Put it back before waiting on
+                        // a reply: a send that gets no answer should give up
+                        // promptly rather than sit for ten minutes.
+                        control.soTimeout = SOCKET_TIMEOUT_MS
                         val controlOut = DataOutputStream(control.getOutputStream())
                         val controlIn = DataInputStream(control.getInputStream())
 
@@ -431,7 +437,18 @@ class LegacyWifiDirectTransport @Inject constructor(
                             ChunkProtocol.CHUNK_SIZE + ChunkProtocol.HEADER_BYTES + ChunkProtocol.TRAILER_BYTES,
                         )
                         MorselinkLog.d("tx: data socket open, streaming ${file.name}")
-                        streamFile(source, startOffset, id, controlOut, controlIn, out)
+                        try {
+                            streamFile(source, startOffset, id, controlOut, controlIn, out)
+                        } finally {
+                            // A stream that is flushed but not closed truncates
+                            // the file: the last buffer is dropped and the
+                            // transfer is reported complete short of full size.
+                            runCatching { out.close() }
+                            // Each file has its own connection now, so it ends
+                            // here rather than being carried into the next one.
+                            runCatching { data.close() }
+                            if (dataSocket === data) dataSocket = null
+                        }
                         // Only the failure branch called into the engine, so a
                         // send that actually worked left its row unfinished and
                         // wrote no history entry at all. That is why the
@@ -538,21 +555,50 @@ class LegacyWifiDirectTransport @Inject constructor(
         }
 
         private suspend fun receiveLoop(emit: (IncomingFileEvent) -> Unit) = withContext(Dispatchers.IO) {
-            val control = openControlSocket()
+            // The socket has to be opened inside the guarded region. It throws
+            // when the session has already gone, and from here that escaped the
+            // coroutine entirely - every "The connection to <peer> was closed"
+            // crash in the log came from this one line.
+            val control = try {
+                openControlSocket()
+            } catch (error: Exception) {
+                MorselinkLog.w("rx: cannot start receiving - ${error.message ?: error.javaClass.simpleName}")
+                return@withContext
+            }
             val controlOut = DataOutputStream(control.getOutputStream())
             val controlIn = DataInputStream(control.getInputStream())
             val directory = defaultDownloadDirectory(context)
             MorselinkLog.d("rx: receiver loop started")
 
-            // The sender runs one metadata handshake per file, so this has to
-            // keep reading rather than stopping after the first batch. The
-            // sockets also have to stay open between files: closing them after
-            // every file left the sender writing into a dead connection, which
-            // is what produced "Socket closed" from the second file onwards.
+            // One metadata handshake per file, so this keeps reading rather
+            // than stopping after the first batch. Only the control channel
+            // persists across the batch; each file's payload has its own
+            // connection, opened and closed around it.
             try {
-                while (!Thread.currentThread().isInterrupted) {
-                    val line = runCatching { controlIn.readUtfLine() }.getOrNull()
-                    if (line.isNullOrBlank()) {
+                // Polled rather than blocked. Cancelling a coroutine does
+                // nothing to a thread parked in a socket read, so a loop that
+                // simply blocked would keep hold of the control channel after
+                // it was asked to stop - and then read the very line the
+                // sender was about to write, which is how a batch lost its
+                // handshake. Checking in every CONTROL_POLL_MS means a cancel
+                // actually takes effect.
+                while (kotlinx.coroutines.currentCoroutineContext().isActive) {
+                    // Idle is not the same as closed. readLine() throws on the
+                    // socket timeout, and that used to be reported as "control
+                    // channel closed" - so a receiver that waited more than the
+                    // timeout for the other phone to pick some files tore the
+                    // whole session down, and every send after that failed with
+                    // "The connection to <peer> was closed".
+                    control.soTimeout = CONTROL_POLL_MS
+                    val line = try {
+                        controlIn.readUtfLine()
+                    } catch (timeout: java.net.SocketTimeoutException) {
+                        continue          // nothing yet; keep waiting
+                    } catch (error: java.io.IOException) {
+                        MorselinkLog.d("rx: control channel closed (${error.javaClass.simpleName})")
+                        break
+                    }
+                    if (line.isBlank()) {
                         MorselinkLog.d("rx: control channel closed")
                         break
                     }
@@ -646,13 +692,18 @@ class LegacyWifiDirectTransport @Inject constructor(
 
             val data = openDataSocket()
             MorselinkLog.d("rx: ${meta.name} data socket open, reading chunks")
-            val received = receiveChunks(
-                data = data,
-                controlOut = controlOut,
-                part = part,
-                expectedSize = meta.size,
-                startOffset = offset,
-            ) { bytes -> engine.update(transferId, bytes) }
+            val received = try {
+                receiveChunks(
+                    data = data,
+                    controlOut = controlOut,
+                    part = part,
+                    expectedSize = meta.size,
+                    startOffset = offset,
+                ) { bytes -> engine.update(transferId, bytes) }
+            } finally {
+                runCatching { data.close() }
+                if (dataSocket === data) dataSocket = null
+            }
 
             if (received) {
                 if (part.renameTo(target) || part.copyTo(target, overwrite = true).exists()) {
@@ -805,11 +856,28 @@ class LegacyWifiDirectTransport @Inject constructor(
          * listening by the time the receiver is told to dial in. Pass the
          * result to [openDataSocket] and close it afterwards.
          */
+        /**
+         * Bind before announcing a file, so the other end always has something
+         * to dial into. This used to be skipped whenever a socket from an
+         * earlier file was still around, which is what tied every file in a
+         * batch to one connection that had already carried traffic.
+         */
         private fun bindDataServer(): ServerSocket? =
-            if (dataSocket == null && group.isOwner) serverSocket(LegacyPorts.DATA_PORT) else null
+            if (group.isOwner) serverSocket(LegacyPorts.DATA_PORT) else null
 
+        /**
+         * A fresh connection per file, never a cached one.
+         *
+         * Reusing one socket across a batch meant a single leftover byte put
+         * every later file out of step, and reusing it across a change of
+         * direction was worse: the receiving phone opened a socket that was
+         * open but silent, read nothing for thirty seconds, and the file was
+         * recorded as interrupted with zero bytes. A connection per file costs
+         * one handshake and confines any fault to the file that hit it.
+         *
+         * The field is kept only so closeSockets() can still tidy up.
+         */
         private fun openDataSocket(prebound: ServerSocket? = null): Socket {
-            dataSocket?.takeIf { it.isConnected && !it.isClosed }?.let { return it }
             val socket = when {
                 prebound != null -> prebound.accept()
                 group.isOwner -> {
@@ -904,6 +972,12 @@ class LegacyWifiDirectTransport @Inject constructor(
 
     companion object {
         private const val SOCKET_TIMEOUT_MS = 30_000
+        /**
+         * How long the listening end blocks before checking whether it has been
+         * asked to stop. Short enough that handing the channel over to a send
+         * is near-instant, long enough that an idle wait costs almost nothing.
+         */
+        private const val CONTROL_POLL_MS = 1_000
         private const val GROUP_TIMEOUT_MS = 20_000L
 
         /** How long the sender holds the port open waiting for a scan. */

@@ -37,6 +37,10 @@ class WebShareServer @Inject constructor(
 
     private val entries = LinkedHashMap<String, Entry>()
 
+    /** Decoded previews, keyed by entry id. Bounded so a long browse cannot
+     *  hold hundreds of bitmaps in memory. */
+    private val thumbCache = LinkedHashMap<String, ByteArray>()
+
     /** Invoked when a browser asks the server to stop, so the view model can
      *  also release the hotspot and the foreground service. */
     var onStopRequest: (() -> Unit)? = null
@@ -76,6 +80,7 @@ class WebShareServer @Inject constructor(
             session.method == Method.GET && uri.startsWith("/api/delete") -> json(deleteFile(session))
             session.method == Method.GET && uri.startsWith("/api/stop") -> json(stopSession())
             session.method == Method.GET && uri.startsWith("/api/zip") -> zipResponse(session)
+            session.method == Method.GET && uri.startsWith("/api/thumb") -> thumbResponse(session)
             session.method == Method.GET && uri.startsWith("/download") -> download(session)
             session.method == Method.POST && uri.startsWith("/upload") -> upload(session)
             else -> newFixedLengthResponse(Response.Status.NOT_FOUND, MIME_PLAINTEXT, "Not found")
@@ -299,6 +304,96 @@ class WebShareServer @Inject constructor(
     }
 
 
+
+    /**
+     * A small JPEG preview for one entry.
+     *
+     * The grid used the download URL as an <img> source, so every video card
+     * pointed a browser image decoder at a full-length video file and rendered
+     * nothing at all - the videos had no thumbnails. Photos were served the
+     * same way, which pulled whole multi-megapixel originals just to draw a
+     * tile.
+     */
+    private fun thumbResponse(session: IHTTPSession): Response {
+        val id = session.parms["id"]
+            ?: return newFixedLengthResponse(Response.Status.BAD_REQUEST, MIME_PLAINTEXT, "Missing id")
+        thumbCache[id]?.let { bytes -> return cors(jpeg(bytes)) }
+        val entry = entries[id]
+            ?: return newFixedLengthResponse(Response.Status.NOT_FOUND, MIME_PLAINTEXT, "Unknown file")
+        val bytes = runCatching { makeThumbnail(entry) }.getOrNull()
+            ?: return newFixedLengthResponse(Response.Status.NOT_FOUND, MIME_PLAINTEXT, "No preview")
+        if (thumbCache.size > THUMB_CACHE_MAX) thumbCache.clear()
+        thumbCache[id] = bytes
+        return cors(jpeg(bytes))
+    }
+
+    private fun jpeg(bytes: ByteArray): Response =
+        newFixedLengthResponse(
+            Response.Status.OK, "image/jpeg",
+            java.io.ByteArrayInputStream(bytes), bytes.size.toLong(),
+        )
+
+    private fun makeThumbnail(entry: Entry): ByteArray? {
+        val file = File(entry.path)
+        if (!file.exists()) return null
+        val bitmap = when {
+            entry.path.endsWith(".apk", ignoreCase = true) -> appIcon(entry.path)
+            entry.mime.startsWith("video/") -> videoFrame(file)
+            entry.mime.startsWith("image/") -> scaledImage(file)
+            else -> null
+        } ?: return null
+        return runCatching {
+            val stream = java.io.ByteArrayOutputStream()
+            bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, THUMB_QUALITY, stream)
+            if (!bitmap.isRecycled) bitmap.recycle()
+            stream.toByteArray()
+        }.getOrNull()
+    }
+
+    private fun videoFrame(file: File): android.graphics.Bitmap? =
+        runCatching {
+            android.media.ThumbnailUtils.createVideoThumbnail(
+                file.absolutePath, android.provider.MediaStore.Images.Thumbnails.MINI_KIND,
+            )
+        }.getOrNull()
+
+    /**
+     * Decodes at a fraction of the resolution rather than loading the original:
+     * a full-size photo is several megabytes of bitmap per tile, which is
+     * enough to exhaust the heap when a folder of them is on screen.
+     */
+    private fun scaledImage(file: File): android.graphics.Bitmap? = runCatching {
+        val bounds = android.graphics.BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        android.graphics.BitmapFactory.decodeFile(file.absolutePath, bounds)
+        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
+        var sample = 1
+        while (maxOf(bounds.outWidth, bounds.outHeight) / sample > THUMB_SIZE * 2) sample *= 2
+        android.graphics.BitmapFactory.decodeFile(
+            file.absolutePath,
+            android.graphics.BitmapFactory.Options().apply { inSampleSize = sample },
+        )
+    }.getOrNull()
+
+    private fun appIcon(path: String): android.graphics.Bitmap? = runCatching {
+        val info = context.packageManager.getPackageArchiveInfo(path, 0)
+        val app = info?.applicationInfo
+        if (app != null) {
+            app.sourceDir = path
+            app.publicSourceDir = path
+        }
+        val drawable = app?.loadIcon(context.packageManager)
+        if (drawable == null) null
+        else {
+            val bitmap = android.graphics.Bitmap.createBitmap(
+                THUMB_SIZE, THUMB_SIZE, android.graphics.Bitmap.Config.ARGB_8888,
+            )
+            val canvas = android.graphics.Canvas(bitmap)
+            drawable.setBounds(0, 0, THUMB_SIZE, THUMB_SIZE)
+            drawable.draw(canvas)
+            bitmap
+        }
+    }.getOrNull()
+
     /**
      * Bundles a selection - or a whole folder - into one zip, so the browser can
      * take it in a single request instead of the page firing off dozens of
@@ -329,39 +424,40 @@ class WebShareServer @Inject constructor(
         }
         if (picked.isEmpty()) return json(errorJson("Nothing to download"))
 
-        // Only the newest archive is kept; these are handed straight to the
-        // browser and are of no use afterwards.
-        runCatching {
-            context.cacheDir.listFiles()
-                ?.filter { it.name.startsWith(ZIP_PREFIX) && it.extension == "zip" }
-                ?.forEach { it.delete() }
-        }
-
         val stamp = java.text.SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(java.util.Date())
-        val archive = File(context.cacheDir, "$ZIP_PREFIX$stamp.zip")
-        runCatching {
-            java.util.zip.ZipOutputStream(java.io.FileOutputStream(archive)).use { zip ->
-                for ((name, file) in picked) {
-                    zip.putNextEntry(java.util.zip.ZipEntry(name))
-                    java.io.FileInputStream(file).use { it.copyTo(zip) }
-                    zip.closeEntry()
-                }
-            }
-        }.onFailure { error ->
-            MorselinkLog.w("webshare: zip failed - ${error.message ?: error.javaClass.simpleName}")
-            return json(errorJson("Could not build the archive"))
-        }
+        val name = "$ZIP_PREFIX$stamp.zip"
+        MorselinkLog.d("webshare: zipping ${picked.size} file(s) as $name")
 
-        MorselinkLog.d("webshare: zip ${picked.size} file(s) -> ${archive.name} (${archive.length()} B)")
-        val response = newFixedLengthResponse(
-            Response.Status.OK,
-            "application/zip",
-            java.io.FileInputStream(archive),
-            archive.length(),
-        )
-        response.addHeader("Content-Length", archive.length().toString())
-        response.addHeader("Content-Disposition", "attachment; filename=\"${archive.name}\"")
-        return cors(response)
+        // Streamed rather than written to a cache file first. Building the
+        // whole archive before answering meant a large folder kept the browser
+        // waiting with nothing at all - no progress, no dialog, just a click
+        // that appeared to do nothing for as long as the zip took to build.
+        // A pipe lets the first entries reach the browser while the rest are
+        // still being added.
+        val pipeIn = java.io.PipedInputStream(ZIP_PIPE_BUFFER)
+        val pipeOut = java.io.PipedOutputStream(pipeIn)
+        val producer = java.lang.Thread({
+            runCatching {
+                java.util.zip.ZipOutputStream(
+                    java.io.BufferedOutputStream(pipeOut, ZIP_PIPE_BUFFER),
+                ).use { zip ->
+                    for ((entry, file) in picked) {
+                        zip.putNextEntry(java.util.zip.ZipEntry(entry))
+                        java.io.FileInputStream(file).use { it.copyTo(zip) }
+                        zip.closeEntry()
+                    }
+                }
+            }.onFailure { error ->
+                // Almost always the browser walking away mid-download, which
+                // closes the pipe under the writer. Not worth reporting.
+                MorselinkLog.d("webshare: zip stream ended - ${error.javaClass.simpleName}")
+                runCatching { pipeIn.close() }
+            }
+        }, "morselink-zip").apply { isDaemon = true; start() }
+
+        val response = newChunkedResponse(Response.Status.OK, "application/zip", pipeIn)
+        response.addHeader("Content-Disposition", "attachment; filename=\"$name\"")
+        return cors(response).also { producer.name = "$name-producer" }
     }
 
     /**
@@ -556,6 +652,10 @@ class WebShareServer @Inject constructor(
         private const val SOCKET_READ_TIMEOUT = 20_000
         private const val APK_MIME = "application/vnd.android.package-archive"
         private const val ZIP_PREFIX = "morselink-"
+        private const val ZIP_PIPE_BUFFER = 64 * 1024
+        private const val THUMB_SIZE = 320
+        private const val THUMB_QUALITY = 80
+        private const val THUMB_CACHE_MAX = 400
         private const val HEADER_END = "\r\n\r\n"
         private const val BUFFER_SIZE = 64 * 1024
     }

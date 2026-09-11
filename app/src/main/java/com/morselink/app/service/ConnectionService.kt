@@ -11,6 +11,10 @@ import androidx.core.app.ServiceCompat
 import com.morselink.app.MainActivity
 import com.morselink.app.Notifications
 import com.morselink.app.R
+import com.morselink.core.data.prefs.SettingsStore
+import com.morselink.core.transfer.engine.TransferEngine
+import com.morselink.core.transfer.model.IncomingFileEvent
+import com.morselink.core.ui.SoundEffects
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -28,6 +32,12 @@ class ConnectionService : Service() {
 
     @Inject
     lateinit var updater: TransferNotificationUpdater
+
+    @Inject
+    lateinit var engine: TransferEngine
+
+    @Inject
+    lateinit var settings: SettingsStore
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
@@ -48,6 +58,7 @@ class ConnectionService : Service() {
             } else 0,
         )
         observeProgress()
+        observeEvents()
         return START_STICKY
     }
 
@@ -57,6 +68,28 @@ class ConnectionService : Service() {
                 if (android.os.Build.VERSION.SDK_INT >= 26) {
                     val manager = getSystemService(android.app.NotificationManager::class.java)
                     manager?.notify(Notifications.ID_TRANSFER, buildNotification(text))
+                }
+            }
+        }
+    }
+
+    /**
+     * Plays the completion tones. This lives in the service rather than in a
+     * screen because it is the only thing that survives Minimise: transfers run
+     * on past the Transfer screen, and a sound that stops when you leave the
+     * screen is no use at all.
+     */
+    private fun observeEvents() {
+        scope.launch {
+            engine.events.collect { event ->
+                val on = runCatching { settings.current().soundsEnabled }.getOrDefault(false)
+                if (!on) return@collect
+                when (event) {
+                    is IncomingFileEvent.Done ->
+                        SoundEffects.play(this@ConnectionService, SoundEffects.Kind.COMPLETE)
+                    is IncomingFileEvent.Failed ->
+                        SoundEffects.play(this@ConnectionService, SoundEffects.Kind.FAILED)
+                    else -> Unit
                 }
             }
         }
@@ -90,6 +123,7 @@ class ConnectionService : Service() {
 
     override fun onDestroy() {
         scope.cancel()
+        SoundEffects.release()
         super.onDestroy()
     }
 

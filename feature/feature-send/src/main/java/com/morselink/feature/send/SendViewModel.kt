@@ -21,7 +21,7 @@ class SendViewModel @Inject constructor(
 ) : ViewModel() {
 
     /** The single source of truth: the tab label and the dataset both read this. */
-    private val _tab = MutableLiveData(SendTab.PHOTOS)
+    private val _tab = MutableLiveData(SendTab.FILES)
     val tab: LiveData<SendTab> = _tab
 
     private val _sort = MutableLiveData(SortOrder.DATE)
@@ -34,13 +34,19 @@ class SendViewModel @Inject constructor(
     val loading: LiveData<Boolean> = _loading
 
     private var query: String = ""
-    private var activeCategory: SmartCategory? = null
+    private var opened: Opened? = null
     private var flatRows: List<SendRow> = emptyList()
+
+    /** What the Files list is currently showing. Null is the top level. */
+    sealed interface Opened {
+        data class Library(val group: MediaGroup) : Opened
+        data class Category(val category: SmartCategory) : Opened
+    }
 
     private var loadJob: Job? = null
 
     init {
-        setTab(SendTab.PHOTOS)
+        reload()
     }
 
     fun consumeExternalFiles() {
@@ -52,10 +58,10 @@ class SendViewModel @Inject constructor(
 
     fun setTab(value: SendTab) {
         _tab.value = value
-        activeCategory = null
-        // Drop the previous tab's rows straight away. Previously the old dataset
-        // stayed on screen while the new tab's data loaded, so the active tab
-        // label and the visible content disagreed.
+        opened = null
+        // Drop the previous rows straight away. Previously the old dataset
+        // stayed on screen while the new one loaded, so the label and the
+        // visible content disagreed.
         flatRows = emptyList()
         _rows.value = emptyList()
         reload()
@@ -75,8 +81,28 @@ class SendViewModel @Inject constructor(
     }
 
     fun openCategory(category: SmartCategory) {
-        activeCategory = category
+        opened = Opened.Category(category)
         reload()
+    }
+
+    fun openMediaGroup(group: MediaGroup) {
+        opened = Opened.Library(group)
+        reload()
+    }
+
+    /** Back to the top level, or false when already there. */
+    fun navigateUp(): Boolean {
+        if (opened == null) return false
+        opened = null
+        reload()
+        return true
+    }
+
+    /** A label for the level below the top, so the screen can say where you are. */
+    fun openedLabel(): String? = when (val it = opened) {
+        null -> null
+        is Opened.Library -> it.group.label()
+        is Opened.Category -> it.category.label()
     }
 
     fun toggle(row: SendRow) {
@@ -114,22 +140,24 @@ class SendViewModel @Inject constructor(
         loadJob?.cancel()
         loadJob = viewModelScope.launch {
             _loading.postValue(true)
-            val tabValue = _tab.value ?: SendTab.PHOTOS
             val sortValue = _sort.value ?: SortOrder.DATE
-            val loaded: List<SendRow> = when (tabValue) {
-                SendTab.PHOTOS -> media.photos(sortValue).map { SendRow.Media(it) }
-                SendTab.VIDEOS -> media.videos(sortValue).map { SendRow.Media(it) }
-                SendTab.MUSIC -> media.music(sortValue).map { SendRow.Media(it) }
-                SendTab.APPS -> media.apps().map { SendRow.App(it) }
-                SendTab.FILES -> {
-                    val category = activeCategory
-                    if (category == null) {
-                        val counts = runCatching { media.categoryCounts() }.getOrDefault(emptyMap())
-                        SmartCategory.values().map { SendRow.Category(it, counts[it] ?: 0) }
-                    } else {
-                        media.category(category).map { SendRow.File(it) }
-                    }
+            val loaded: List<SendRow> = when (val state = opened) {
+                null -> {
+                    // The media libraries first - they are what people look for
+                    // - then the smart categories, then nothing else to scan.
+                    val totals = runCatching { media.categoryTotals() }.getOrDefault(emptyMap())
+                    val counts = runCatching { media.categoryCounts() }.getOrDefault(emptyMap())
+                    MediaGroup.values().map { group ->
+                        SendRow.MediaGroupRow(group, totals[group.key()] ?: 0)
+                    } + SmartCategory.values().map { SendRow.Category(it, counts[it] ?: 0) }
                 }
+                is Opened.Library -> when (state.group) {
+                    MediaGroup.PHOTOS -> media.photos(sortValue).map { SendRow.Media(it) }
+                    MediaGroup.VIDEOS -> media.videos(sortValue).map { SendRow.Media(it) }
+                    MediaGroup.MUSIC -> media.music(sortValue).map { SendRow.Media(it) }
+                    MediaGroup.APPS -> media.apps().map { SendRow.App(it) }
+                }
+                is Opened.Category -> media.category(state.category).map { SendRow.File(it) }
             }
             flatRows = sortRows(loaded, sortValue)
             _loading.postValue(false)
@@ -158,7 +186,10 @@ class SendViewModel @Inject constructor(
     /** Inserts a selectable date header before each group. */
     private fun withHeaders(source: List<SendRow>): List<SendRow> {
         if (source.isEmpty()) return emptyList()
-        if (source.first() is SendRow.Category) return source
+        // Shortcut rows are not dated and must not be grouped under a date.
+        if (source.first() is SendRow.Category ||
+            source.first() is SendRow.MediaGroupRow
+        ) return source
 
         val out = mutableListOf<SendRow>()
         var currentKey: String? = null

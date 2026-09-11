@@ -245,6 +245,8 @@ tr:hover .row-actions { opacity: 1; }
   #selbar.open { display: flex; }
   #sel-count { flex: 1; font-size: 13px; color: var(--text-secondary); }
   .row-check { width: 15px; height: 15px; accent-color: var(--primary); cursor: pointer; }
+  .side-panel .album.active { background: var(--surface-hover); border-radius: 8px; }
+  .breadcrumb .crumb { cursor: pointer; color: var(--primary); margin-left: 8px; }
 </style>
 </head>
 <body>
@@ -492,8 +494,11 @@ function render() {
 
 function cardFor(item, index) {
   const selected = state.selection.has(item.id);
-  const thumb = (state.view === 'photos' || state.view === 'videos')
-    ? `<img loading="lazy" src="/download?id=${encodeURIComponent(item.id)}" alt="${item.name}">`
+  // Videos used to point at the download URL, so the browser was asked to draw
+  // an entire video file as an image and showed nothing. The preview endpoint
+  // decodes a real frame, and spares photos the cost of loading in full too.
+  const thumb = (state.view === 'photos' || state.view === 'videos' || state.view === 'apps')
+    ? `<img loading="lazy" src="/api/thumb?id=${encodeURIComponent(item.id)}" alt="${item.name}">`
     : `<div style="height:130px;display:flex;align-items:center;justify-content:center;color:var(--text-secondary)">
          <svg viewBox="0 0 24 24" style="width:44px;height:44px;fill:none;stroke:currentColor;stroke-width:1.6">
            <path d="M4 8l8-4 8 4v8l-8 4-8-4z"/><path d="M12 12v8M12 12l8-4M12 12L4 8"/></svg></div>`;
@@ -510,18 +515,32 @@ function renderGrid(rows) {
     // hundred clips was one flat, unsorted wall.
     const albumPanel = (state.view === 'photos' || state.view === 'videos')
       ? sideAlbums(rows) : '';
-  state.lightbox = rows;
+  // Choosing a folder narrows the grid. Without this the list of albums was
+  // only a label: it counted the folders but clicking one did nothing.
+  const shown = state.album
+    ? rows.filter(r => albumKey(r) === state.album) : rows;
+  state.lightbox = shown;
   content.innerHTML = `
     <div class="split">
       ${albumPanel}
       <div style="flex:1; min-width:0">
-        <div class="breadcrumb"><span>${state.view}</span></div>
-        <div class="grid">${rows.map(cardFor).join('')}</div>
+        <div class="breadcrumb">
+          <span>${state.view}</span>
+          ${state.album ? `<span class="crumb" data-album="">← ${state.album.split('/').pop() || 'All'}</span>` : ''}
+        </div>
+        <div class="grid">${shown.map(cardFor).join('')}</div>
       </div>
     </div>`;
 
+  document.querySelectorAll('.album').forEach(a => a.onclick = () => {
+    state.album = a.dataset.key || null;
+    render();
+  });
+  document.querySelectorAll('[data-album]').forEach(c => c.onclick = () => {
+    state.album = null; render();
+  });
   document.querySelectorAll('.card').forEach(card => card.onclick = (e) => {
-    const item = rows[Number(card.dataset.index)];
+    const item = shown[Number(card.dataset.index)];
     if (e.target.classList.contains('pick')) {
       state.selection.has(item.id) ? state.selection.delete(item.id) : state.selection.add(item.id);
       card.classList.toggle('selected');
@@ -534,18 +553,20 @@ function renderGrid(rows) {
   });
 }
 
+function albumKey(r) { return (r.uri || '').replace(/\/[^/]+$/, ''); }
+
 function sideAlbums(rows) {
   const albums = {};
   rows.forEach(r => {
-    const key = (r.uri || '').replace(/\/[^/]+$/, '');
-    albums[key] = albums[key] || { name: key.split('/').pop() || 'All', count: 0, first: r };
+    const key = albumKey(r);
+    albums[key] = albums[key] || { key, name: key.split('/').pop() || 'All', count: 0, first: r };
     albums[key].count++;
   });
-  const list = Object.values(albums).slice(0, 12);
+  const list = Object.values(albums);
   return `<div class="side-panel" id="side-panel">
-      <h2 class="section" style="margin-top:0">Albums</h2>
-      ${list.map(a => `<div class="album" data-key="${a.first ? (a.first.uri || '') : ''}">
-          <img class="thumb" src="${a.first ? '/download?id=' + encodeURIComponent(a.first.id) : ''}" alt="">
+      <h2 class="section" style="margin-top:0">Folders</h2>
+      ${list.map(a => `<div class="album ${state.album === a.key ? 'active' : ''}" data-key="${a.key}">
+          <img class="thumb" src="${a.first ? '/api/thumb?id=' + encodeURIComponent(a.first.id) : ''}" alt="">
           <div><div>${a.name}</div><div class="muted">${a.count}</div></div>
         </div>`).join('')}
     </div>`;

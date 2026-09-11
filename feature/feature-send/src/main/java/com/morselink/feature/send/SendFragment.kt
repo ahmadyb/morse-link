@@ -51,6 +51,10 @@ class SendFragment : Fragment(R.layout.fragment_send) {
         SendTab.values().forEach { tab ->
             binding.tabs.addTab(binding.tabs.newTab().setText(tab.title))
         }
+        // One tab is not a choice, and a lone tab strip reads as though
+        // something is missing beside it. The libraries it used to hold are
+        // rows in this list now.
+        binding.tabs.isVisible = SendTab.values().size > 1
 
         adapter = SendAdapter(
             onToggle = { row ->
@@ -62,6 +66,7 @@ class SendFragment : Fragment(R.layout.fragment_send) {
             },
             isSelected = { viewModel.isSelected(it) },
             onOpenCategory = { viewModel.openCategory(it.category) },
+            onOpenMediaGroup = { viewModel.openMediaGroup(it) },
         )
         binding.list.adapter = adapter
 
@@ -75,7 +80,7 @@ class SendFragment : Fragment(R.layout.fragment_send) {
             override fun onTabReselected(tab: TabLayout.Tab) = Unit
         })
 
-        val initial = viewModel.tab.value ?: SendTab.PHOTOS
+        val initial = viewModel.tab.value ?: SendTab.FILES
         applyLayoutMode(initial.useGrid)
         binding.tabs.getTabAt(initial.ordinal)?.select()
 
@@ -114,6 +119,7 @@ class SendFragment : Fragment(R.layout.fragment_send) {
         viewModel.rows.observe(viewLifecycleOwner) { rows ->
             adapter.submitList(rows)
             updateEmptyState(rows.isEmpty())
+            refreshLevel()
         }
         viewModel.loading.observe(viewLifecycleOwner) { loading ->
             binding.progress.isVisible = loading
@@ -130,6 +136,10 @@ class SendFragment : Fragment(R.layout.fragment_send) {
 
         binding.btnClear.setOnClickListener {
             viewModel.clearSelection()
+            // Anything already queued goes too. A batch left behind here is
+            // invisible on this screen but still in line to be sent, so the
+            // next send would pick up the files the user had just discarded.
+            connection.pendingOutgoing = emptyList()
             refreshSelectionBar()
         }
         binding.btnSend.setOnClickListener {
@@ -139,6 +149,11 @@ class SendFragment : Fragment(R.layout.fragment_send) {
                 return@setOnClickListener
             }
             connection.pendingOutgoing = picked
+            // The queue owns them now. Leaving them ticked meant coming back
+            // to a screen that still showed every file selected, where the
+            // next tap removed one from a batch that was already on its way.
+            viewModel.clearSelection()
+            refreshSelectionBar()
             findNavController().navigate(Uri.parse("morselink://transfer"))
         }
 
@@ -155,10 +170,41 @@ class SendFragment : Fragment(R.layout.fragment_send) {
         refreshSessionBar()
     }
 
+    override fun onStart() {
+        super.onStart()
+        // Deeper than the top level, Back should step out of the folder rather
+        // than leave the screen, or there is no way back to the categories
+        // short of restarting the app.
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner,
+            object : androidx.activity.OnBackPressedCallback(false) {
+                override fun handleOnBackPressed() {
+                    if (!viewModel.navigateUp()) {
+                        isEnabled = false
+                        requireActivity().onBackPressedDispatcher.onBackPressed()
+                    }
+                }
+            }.also { backCallback = it },
+        )
+    }
+
+    private var backCallback: androidx.activity.OnBackPressedCallback? = null
+
     override fun onResume() {
         super.onResume()
         // The session can come up or end while we are in the background.
         refreshSessionBar()
+    }
+
+    /**
+     * Where the list currently is. The tab strip is gone, so this is the only
+     * thing that says the rows on screen are Photos and not everything.
+     */
+    private fun refreshLevel() {
+        val binding = binding ?: return
+        val label = viewModel.openedLabel()
+        backCallback?.isEnabled = label != null
+        binding.search.hint = if (label == null) "Search files" else "Search $label"
     }
 
     /** Empty only once a load has finished and genuinely returned nothing. */
