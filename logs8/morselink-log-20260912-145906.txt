@@ -1,0 +1,42 @@
+----- in-app log -----
+09-12 14:53:37.441 D: transport: connected to 192.168.43.1:54321
+09-12 14:53:37.445 D: transport: sender identified itself as Alien Phone
+09-12 14:53:37.515 D: rx: receiver loop started
+09-12 14:53:37.521 D: rx: IMG-20260912-WA0004.jpg metadata ok (28088 B), resuming at 0
+09-12 14:53:37.522 D: rx: IMG-20260912-WA0004.jpg resume sent
+09-12 14:53:37.530 D: rx: IMG-20260912-WA0004.jpg data socket open, reading chunks
+09-12 14:53:37.708 D: rx: IMG-20260912-WA0004.jpg done (28088/28088 B)
+09-12 14:54:20.587 D: tx: queueing 1 file(s) for Alien Phone
+09-12 14:54:20.591 D: tx: IMG_20260905_083716_552.jpg size=2531195 from /storage/emulated/0/DCIM/Camera/IMG_20260905_083716_552.jpg
+09-12 14:54:20.593 D: tx: IMG_20260905_083716_552.jpg metadata sent, waiting for resume
+09-12 14:54:50.644 D: rx: receiver loop ended
+09-12 14:54:50.644 D: tx: IMG_20260905_083716_552.jpg FAILED SocketTimeoutException: Read timed out
+09-12 14:54:50.677 D: tx: batch of 1 finished
+09-12 14:54:50.690 W: rx: cannot start receiving - The connection to Alien Phone was closed
+09-12 14:56:57.350 D: sender: advertising 192.168.43.173:54321, waiting for a receiver
+09-12 14:56:57.355 D: transport: listening on 54321
+09-12 14:57:26.894 D: transport: inbound connection accepted
+09-12 14:57:26.898 D: sender: receiver connected from Alien Phone
+09-12 14:57:26.902 D: tx: queueing 1 file(s) for Alien Phone
+09-12 14:57:26.906 D: tx: pm_1787738568902_cmp.jpg size=295961 from /storage/emulated/0/Download/Quick Share/pm_1787738568902_cmp.jpg
+09-12 14:57:26.909 D: tx: pm_1787738568902_cmp.jpg metadata sent, waiting for resume
+09-12 14:57:26.968 D: tx: pm_1787738568902_cmp.jpg resume=0 (reply=resume)
+09-12 14:57:26.976 D: tx: data socket open, streaming pm_1787738568902_cmp.jpg
+09-12 14:57:27.018 D: tx: pm_1787738568902_cmp.jpg sent to Alien Phone
+09-12 14:57:27.020 D: tx: batch of 1 finished
+09-12 14:57:27.039 D: rx: receiver loop started
+09-12 14:57:41.642 D: rx: Screenshot_2026-09-12-14-56-11.png metadata ok (88671 B), resuming at 0
+09-12 14:57:41.644 D: rx: Screenshot_2026-09-12-14-56-11.png resume sent
+09-12 14:57:42.063 D: rx: Screenshot_2026-09-12-14-56-11.png data socket open, reading chunks
+09-12 14:57:42.227 D: rx: Screenshot_2026-09-12-14-56-11.png done (88671/88671 B)
+09-12 14:57:51.400 D: tx: queueing 1 file(s) for Alien Phone
+09-12 14:57:51.403 D: tx: Screenshot_20260912-071625.png size=185255 from /storage/emulated/0/Pictures/Screenshots/Screenshot_20260912-071625.png
+09-12 14:57:51.407 D: tx: Screenshot_20260912-071625.png metadata sent, waiting for resume
+09-12 14:57:51.424 D: rx: control channel closed
+09-12 14:57:51.424 D: tx: Screenshot_20260912-071625.png resume=0 (reply=null)
+09-12 14:57:51.425 D: rx: receiver loop ended
+09-12 14:58:21.456 D: tx: Screenshot_20260912-071625.png FAILED SocketTimeoutException: Poll timed out
+09-12 14:58:21.459 D: tx: batch cancelled
+
+----- logcat -----
+(empty)
