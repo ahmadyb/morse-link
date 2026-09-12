@@ -25,6 +25,15 @@ import javax.inject.Inject
 
 data class Breadcrumb(val label: String, val path: String)
 
+/**
+ * The tabs across the top of the Files screen.
+ *
+ * The libraries are tabs rather than gallery tiles: they are a way to narrow a
+ * list, not a set of destinations, and one list that changes is quicker to read
+ * than four grids you have to leave and re-enter.
+ */
+enum class FilesTab { PHOTOS, VIDEOS, MUSIC, APPS, FILES }
+
 @HiltViewModel
 class FileManagerViewModel @Inject constructor(
     private val media: MediaRepository,
@@ -64,6 +73,128 @@ class FileManagerViewModel @Inject constructor(
      *  gallery rather than as file rows. */
     private val _gallery = MutableLiveData(false)
     val gallery: LiveData<Boolean> = _gallery
+
+    private val _tab = MutableLiveData(FilesTab.FILES)
+    val tab: LiveData<FilesTab> = _tab
+
+    private var query: String = ""
+    private var sort: SortOrder = SortOrder.DATE
+
+    fun setTab(next: FilesTab) {
+        if (_tab.value == next) return
+        _tab.postValue(next)
+        currentPath = ""
+        activeCategory = null
+        activeLibrary = libraryFor(next)
+        refresh()
+    }
+
+    private fun libraryFor(tab: FilesTab): MediaLibrary? = when (tab) {
+        FilesTab.FILES -> null
+        FilesTab.PHOTOS -> MediaLibrary.PHOTOS
+        FilesTab.VIDEOS -> MediaLibrary.VIDEOS
+        FilesTab.MUSIC -> MediaLibrary.MUSIC
+        FilesTab.APPS -> MediaLibrary.APPS
+    }
+
+    private fun tabFor(library: MediaLibrary): FilesTab = when (library) {
+        MediaLibrary.PHOTOS -> FilesTab.PHOTOS
+        MediaLibrary.VIDEOS -> FilesTab.VIDEOS
+        MediaLibrary.MUSIC -> FilesTab.MUSIC
+        MediaLibrary.APPS -> FilesTab.APPS
+    }
+
+    fun setQuery(next: String) {
+        if (query == next) return
+        query = next
+        refresh()
+    }
+
+    fun setSort(next: SortOrder) {
+        if (sort == next) return
+        sort = next
+        refresh()
+    }
+
+    fun currentSort(): SortOrder = sort
+
+    /** Re-apply search and sort without rescanning storage. */
+    private fun present(rows: List<FileRow>): List<FileRow> {
+        val term = query.trim()
+        var out = rows
+        if (term.isNotEmpty()) {
+            out = out.filter { row ->
+                when (row) {
+                    is FileRow.Entry -> row.item.name.contains(term, ignoreCase = true)
+                    is FileRow.Category -> row.category.label().contains(term, ignoreCase = true)
+                    is FileRow.Library -> row.library.label().contains(term, ignoreCase = true)
+                    is FileRow.Header -> false
+                }
+            }
+        }
+
+        val entries = out.filterIsInstance<FileRow.Entry>()
+        if (entries.isEmpty()) return out
+        val others = out.filter { it !is FileRow.Entry }
+
+        val ordered = entries.sortedWith(
+            when (sort) {
+                SortOrder.NAME -> compareBy(String.CASE_INSENSITIVE_ORDER) { it.item.name }
+                SortOrder.SIZE -> compareByDescending<FileRow.Entry> { it.item.sizeBytes }
+                    .thenBy(String.CASE_INSENSITIVE_ORDER) { it.item.name }
+                SortOrder.DATE -> compareByDescending<FileRow.Entry> { it.item.lastModified }
+                    .thenBy(String.CASE_INSENSITIVE_ORDER) { it.item.name }
+            }
+        )
+        // Folders first only when there are folders, so a directory listing
+        // reads as structure rather than as a shuffled heap.
+        val withFoldersFirst = if (ordered.any { it.item.isDirectory }) {
+            ordered.sortedBy { if (it.item.isDirectory) 0 else 1 }
+        } else ordered
+
+        val body: List<FileRow> =
+            if (sort == SortOrder.DATE) withDateGroups(withFoldersFirst) else withFoldersFirst
+        return if (others.isEmpty()) body else others + body
+    }
+
+    /**
+     * Today / Yesterday / Earlier headings, so a library of three thousand
+     * screenshots is navigable instead of being one undifferentiated column.
+     */
+    private fun withDateGroups(entries: List<FileRow.Entry>): List<FileRow> {
+        val out = mutableListOf<FileRow>()
+        var last = Int.MIN_VALUE
+        for (entry in entries) {
+            val bucket = dateBucket(entry.item.lastModified)
+            if (bucket != last) {
+                out.add(FileRow.Header(dateLabel(bucket), bucket))
+                last = bucket
+            }
+            out.add(entry)
+        }
+        return out
+    }
+
+    private fun dateBucket(timestamp: Long): Int {
+        if (timestamp <= 0L) return 2
+        val cal = java.util.Calendar.getInstance()
+        val dayOfYear = cal.get(java.util.Calendar.DAY_OF_YEAR)
+        val year = cal.get(java.util.Calendar.YEAR)
+        cal.timeInMillis = timestamp
+        return when {
+            cal.get(java.util.Calendar.YEAR) == year &&
+                cal.get(java.util.Calendar.DAY_OF_YEAR) == dayOfYear -> 0
+            cal.get(java.util.Calendar.YEAR) == year &&
+                cal.get(java.util.Calendar.DAY_OF_YEAR) == dayOfYear - 1 -> 1
+            else -> 2
+        }
+    }
+
+    private fun dateLabel(bucket: Int): String = when (bucket) {
+        0 -> context.getString(R.string.files_date_today)
+        1 -> context.getString(R.string.files_date_yesterday)
+        else -> context.getString(R.string.files_date_earlier)
+    }
 
     fun refresh() {
         viewModelScope.launch {
@@ -122,8 +253,10 @@ class FileManagerViewModel @Inject constructor(
         }
 
         _state.postValue(state)
-        _rows.postValue(rows)
-        _gallery.postValue(activeLibrary != null)
+        _rows.postValue(present(rows))
+        // Rows throughout: the tabs do the separating, and a grid of thumbnails
+        // was slower to scan than a list.
+        _gallery.postValue(false)
         _breadcrumbs.postValue(breadcrumbFor(currentPath))
     }
 
@@ -177,6 +310,10 @@ class FileManagerViewModel @Inject constructor(
         activeLibrary = library
         activeCategory = null
         currentPath = ""
+        // Keep the tab strip honest: opening Photos from the overview must
+        // leave the strip sitting on Photos, or the highlight and the list
+        // disagree about where you are.
+        _tab.postValue(tabFor(library))
         refresh()
     }
 
@@ -221,6 +358,7 @@ class FileManagerViewModel @Inject constructor(
         currentPath = if (path.isBlank() || path == rootPath) "" else path
         activeCategory = null
         activeLibrary = null
+        if (currentPath.isBlank()) _tab.postValue(FilesTab.FILES)
         refresh()
     }
 
@@ -230,6 +368,7 @@ class FileManagerViewModel @Inject constructor(
         activeLibrary = null
         activeCategory = null
         currentPath = ""
+        _tab.postValue(FilesTab.FILES)
         refresh()
         return true
     }
@@ -292,6 +431,8 @@ class FileManagerViewModel @Inject constructor(
     fun isSelected(item: FileItem): Boolean = selection.containsKey(item.path)
     fun selectedItems(): List<FileItem> = selection.values.toList()
     fun selectionSize(): Int = selection.size
+    /** Total size of the selection, for the Send button. */
+    fun selectedBytes(): Long = selection.values.sumOf { it.sizeBytes }
     fun clearSelection() = selection.clear()
 
     fun currentPath(): String = currentPath.ifBlank { rootPath }

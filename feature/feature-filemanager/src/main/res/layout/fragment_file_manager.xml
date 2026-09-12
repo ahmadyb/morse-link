@@ -6,15 +6,75 @@
     android:layout_height="match_parent"
     android:background="@color/background">
 
-    <!-- §14.3 — interactive trail: tap a segment to jump up, tap a caret for
-         sibling folders, tap the empty tail to type a path. -->
-    <com.morselink.core.ui.AddressBarView
-        android:id="@+id/address_bar"
+    <!-- Category tabs. The libraries are tabs rather than tiles, so this is a
+         file list you can scan rather than a wall of thumbnails. -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabs"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:tabGravity="fill"
+        app:tabMode="scrollable" />
+
+    <!-- §14.3 — interactive trail: tap a segment to jump up, tap a caret for
+         sibling folders, tap the empty tail to type a path. Hidden on the
+         library tabs, where there is no directory to be inside of. -->
+    <com.morselink.core.ui.AddressBarView
+        android:id="@+id/address_bar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tabs" />
+
+    <EditText
+        android:id="@+id/search"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="@dimen/screen_padding"
+        android:layout_marginTop="@dimen/unit"
+        android:layout_marginEnd="@dimen/screen_padding"
+        android:autofillHints="username"
+        android:background="@drawable/bg_search_field"
+        android:drawableStart="@drawable/ic_search"
+        android:drawablePadding="@dimen/unit"
+        android:hint="@string/files_search_hint"
+        android:imeOptions="actionSearch"
+        android:inputType="text"
+        android:paddingStart="@dimen/unit_2"
+        android:paddingEnd="@dimen/unit_2"
+        android:singleLine="true"
+        android:textColor="@color/textPrimary"
+        android:textColorHint="@color/textSecondary"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/address_bar" />
+
+    <TextView
+        android:id="@+id/sort_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/screen_padding"
+        android:layout_marginTop="@dimen/unit"
+        android:text="@string/files_sort"
+        android:textColor="@color/textSecondary"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/search" />
+
+    <Spinner
+        android:id="@+id/sort_spinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/unit_half"
+        android:entries="@array/files_sort_options"
+        app:layout_constraintBottom_toBottomOf="@id/sort_label"
+        app:layout_constraintStart_toEndOf="@id/sort_label"
+        app:layout_constraintTop_toTopOf="@id/sort_label" />
 
     <ProgressBar
         android:id="@+id/storage_bar"
@@ -28,7 +88,7 @@
         android:progressDrawable="@drawable/bg_storage_bar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/address_bar" />
+        app:layout_constraintTop_toBottomOf="@id/sort_spinner" />
 
     <TextView
         android:id="@+id/storage_text"
@@ -86,7 +146,7 @@
         android:layout_height="wrap_content"
         android:background="@color/surface"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/selection_bar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
@@ -161,4 +221,37 @@
                 android:text="@string/action_properties" />
         </LinearLayout>
     </HorizontalScrollView>
+
+    <!-- Selection footer. Picking and sending are one gesture here: choose
+         files, press Send, and the transfer screen connects and sends. -->
+    <LinearLayout
+        android:id="@+id/selection_bar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="@dimen/screen_padding"
+        android:paddingEnd="@dimen/screen_padding"
+        android:paddingTop="@dimen/unit"
+        android:paddingBottom="@dimen/unit_2"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_clear"
+            style="@style/Widget.Morselink.Button.Outlined"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/action_clear" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_send"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/unit"
+            android:layout_weight="1"
+            android:text="@string/action_send" />
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -15,10 +15,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.morselink.core.ui.Format
 import com.morselink.feature.filemanager.databinding.ItemFileBinding
+import com.morselink.feature.filemanager.databinding.ItemFileHeaderBinding
 import com.morselink.feature.filemanager.databinding.ItemGalleryCardBinding
 
 private const val TYPE_CARD = 1
 private const val TYPE_ROW = 2
+private const val TYPE_HEADER = 3
 
 class FileAdapter(
     private val onClick: (FileRow) -> Unit,
@@ -26,7 +28,16 @@ class FileAdapter(
     private val isSelected: (com.morselink.core.media.FileItem) -> Boolean,
 ) : ListAdapter<FileRow, RecyclerView.ViewHolder>(Diff) {
 
-    /** When true, files are laid out as gallery tiles instead of rows. */
+    /** Whether libraries are offered as tiles. Off: the tabs already do it. */
+    var libraryTiles: Boolean = false
+
+    /**
+     * When true, files are laid out as gallery tiles instead of rows.
+     *
+     * Library entries are rows now: the tabs across the top already separate
+     * Photos from Videos from Music, so a grid of near-identical tiles under
+     * them was a second, slower way to say the same thing.
+     */
     var useGrid: Boolean = false
         set(value) {
             if (field == value) return
@@ -34,21 +45,24 @@ class FileAdapter(
             notifyDataSetChanged()
         }
 
-    override fun getItemViewType(position: Int): Int =
-        if (isCard(getItem(position))) TYPE_CARD else TYPE_ROW
+    override fun getItemViewType(position: Int): Int = when (val row = getItem(position)) {
+        is FileRow.Header -> TYPE_HEADER
+        else -> if (isCard(row)) TYPE_CARD else TYPE_ROW
+    }
 
     private fun isCard(row: FileRow): Boolean = when (row) {
-        is FileRow.Library -> true
+        is FileRow.Library -> useGrid && libraryTiles
         is FileRow.Entry -> useGrid
+        is FileRow.Header -> false
         is FileRow.Category -> false
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        return if (viewType == TYPE_CARD) {
-            CardHolder(ItemGalleryCardBinding.inflate(inflater, parent, false))
-        } else {
-            RowHolder(ItemFileBinding.inflate(inflater, parent, false))
+        return when (viewType) {
+            TYPE_CARD -> CardHolder(ItemGalleryCardBinding.inflate(inflater, parent, false))
+            TYPE_HEADER -> HeaderHolder(ItemFileHeaderBinding.inflate(inflater, parent, false))
+            else -> RowHolder(ItemFileBinding.inflate(inflater, parent, false))
         }
     }
 
@@ -56,7 +70,9 @@ class FileAdapter(
         val row = getItem(position)
         when (holder) {
             is CardHolder -> holder.bind(row)
+            is HeaderHolder -> holder.bind(row)
             is RowHolder -> holder.bind(row)
+            else -> Unit
         }
     }
 
@@ -177,6 +193,18 @@ class FileAdapter(
         }
     }
 
+    // ------------------------------------------------------------ date heading
+
+    inner class HeaderHolder(private val binding: ItemFileHeaderBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+
+        fun bind(row: FileRow) {
+            binding.title.text = (row as? FileRow.Header)?.title.orEmpty()
+            binding.root.setOnClickListener(null)
+            binding.root.setOnLongClickListener(null)
+        }
+    }
+
     // --------------------------------------------------------------- file row
 
     inner class RowHolder(private val binding: ItemFileBinding) :
@@ -214,7 +242,15 @@ class FileAdapter(
                     binding.root.setOnClickListener { onClick(row) }
                     binding.root.setOnLongClickListener { onLongClick(item) }
                 }
-                is FileRow.Library -> Unit
+                is FileRow.Library -> {
+                    binding.name.text = row.library.label()
+                    binding.meta.text = if (row.count > 0) "${row.count} items" else ""
+                    binding.size.text = if (row.count > 0) row.count.toString() else ""
+                    binding.icon.setImageResource(row.library.icon())
+                    binding.root.setOnClickListener { onClick(row) }
+                    binding.root.setOnLongClickListener { false }
+                }
+                is FileRow.Header -> Unit
             }
         }
     }
@@ -252,6 +288,8 @@ class FileAdapter(
                 oldItem.category == newItem.category
             oldItem is FileRow.Library && newItem is FileRow.Library ->
                 oldItem.library == newItem.library
+            oldItem is FileRow.Header && newItem is FileRow.Header ->
+                oldItem.bucket == newItem.bucket
             oldItem is FileRow.Entry && newItem is FileRow.Entry ->
                 oldItem.item.path == newItem.item.path
             else -> false

@@ -10,12 +10,11 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.morselink.core.media.DirectoryState
 import com.morselink.core.media.FileItem
 import com.morselink.core.media.SmartCategory
+import com.morselink.core.media.SortOrder
 import com.morselink.core.ui.AddressSegment
 import com.morselink.core.ui.Dialogs
 import com.morselink.core.ui.Format
@@ -67,6 +66,17 @@ class FileManagerFragment : Fragment(R.layout.fragment_file_manager) {
 
     private var backCallback: androidx.activity.OnBackPressedCallback? = null
 
+    /** The sort spinner fires a selection callback the moment it is laid out. */
+    private var suppressSortCallback = true
+
+    private fun tabLabel(tab: FilesTab): String = when (tab) {
+        FilesTab.FILES -> getString(R.string.files_tab_files)
+        FilesTab.PHOTOS -> MediaLibrary.PHOTOS.label()
+        FilesTab.VIDEOS -> MediaLibrary.VIDEOS.label()
+        FilesTab.MUSIC -> MediaLibrary.MUSIC.label()
+        FilesTab.APPS -> MediaLibrary.APPS.label()
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val binding = FragmentFileManagerBinding.bind(view)
         this.binding = binding
@@ -83,13 +93,76 @@ class FileManagerFragment : Fragment(R.layout.fragment_file_manager) {
         binding.list.layoutManager = LinearLayoutManager(requireContext())
         binding.list.adapter = adapter
 
-        // Libraries are opened as a gallery of tiles, everything else as rows.
-        // The manager is swapped on the existing adapter rather than the adapter
-        // being rebuilt, which would drop the list.
-        viewModel.gallery.observe(viewLifecycleOwner) { gallery ->
-            adapter.useGrid = gallery
-            applyLayout(gallery)
+        // Rows throughout. The tabs across the top separate the libraries, and
+        // a grid of thumbnails underneath them was a second, slower way to say
+        // the same thing.
+        adapter.useGrid = false
+        adapter.libraryTiles = false
+        applyLayout(false)
+
+        // ------------------------------------------------------------ tabs
+        FilesTab.values().forEach { tab ->
+            binding.tabs.addTab(binding.tabs.newTab().setText(tabLabel(tab)))
         }
+        binding.tabs.addOnTabSelectedListener(object :
+            com.google.android.material.tabs.TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: com.google.android.material.tabs.TabLayout.Tab) {
+                viewModel.setTab(FilesTab.values()[tab.position])
+            }
+            override fun onTabUnselected(tab: com.google.android.material.tabs.TabLayout.Tab) = Unit
+            override fun onTabReselected(tab: com.google.android.material.tabs.TabLayout.Tab) = Unit
+        })
+        // The strip has to follow the list, not just lead it: opening Photos
+        // from a tile, or pressing Back out of a folder, moves the list without
+        // ever touching the strip.
+        viewModel.tab.observe(viewLifecycleOwner) { tab ->
+            val index = FilesTab.values().indexOf(tab)
+            if (index >= 0 && binding.tabs.selectedTabPosition != index) {
+                binding.tabs.getTabAt(index)?.select()
+            }
+            // There is no directory to be inside of while a library is open.
+            binding.addressBar.isVisible = tab == FilesTab.FILES
+        }
+
+        // ---------------------------------------------------------- search
+        binding.search.addTextChangedListener(
+            object : android.text.TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
+                override fun afterTextChanged(s: android.text.Editable?) {
+                    viewModel.setQuery(s?.toString().orEmpty())
+                }
+            }
+        )
+
+        // ------------------------------------------------------------ sort
+        binding.sortSpinner.adapter = android.widget.ArrayAdapter.createFromResource(
+            requireContext(),
+            R.array.files_sort_options,
+            android.R.layout.simple_spinner_dropdown_item,
+        )
+        binding.sortSpinner.setSelection(viewModel.currentSort().ordinal)
+        suppressSortCallback = true
+        binding.sortSpinner.onItemSelectedListener =
+            object : android.widget.AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: android.widget.AdapterView<*>?,
+                    view: android.view.View?,
+                    position: Int,
+                    id: Long,
+                ) {
+                    // The spinner fires once as soon as it is laid out.
+                    if (suppressSortCallback) {
+                        suppressSortCallback = false
+                        return
+                    }
+                    viewModel.setSort(SortOrder.values().getOrElse(position) { SortOrder.DATE })
+                }
+                override fun onNothingSelected(parent: android.widget.AdapterView<*>?) = Unit
+            }
+
+        binding.btnClear.setOnClickListener { clearSelection() }
+        binding.btnSend.setOnClickListener { sendSelection() }
 
         viewModel.rows.observe(viewLifecycleOwner) { rows ->
             adapter.submitList(rows)
@@ -177,33 +250,20 @@ class FileManagerFragment : Fragment(R.layout.fragment_file_manager) {
      * pretending there is nothing inside it.
      */
     /**
-     * Tiles span one column; volumes and smart categories span the full width
-     * so they stay readable as rows underneath the gallery.
+     * One column, always.
+     *
+     * This used to switch to a three-wide grid whenever libraries were on
+     * screen, which put the library tiles side by side and left everything else
+     * squashed into a third of the width. The tabs separate the libraries now,
+     * so the list is just a list - including the date headings, which a grid
+     * could only render as a stray cell.
      */
     private fun applyLayout(gallery: Boolean) {
         val binding = binding ?: return
-        if (!gallery && !hasLibraries()) {
+        if (binding.list.layoutManager !is LinearLayoutManager) {
             binding.list.layoutManager = LinearLayoutManager(requireContext())
-            return
         }
-        val span = if (gallery) 3 else 3
-        binding.list.layoutManager =
-            GridLayoutManager(requireContext(), span, RecyclerView.VERTICAL, false).apply {
-                spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
-                    override fun getSpanSize(position: Int): Int {
-                        val row = adapter.currentList.getOrNull(position) ?: return span
-                        return when {
-                            row is FileRow.Library -> 1
-                            gallery -> 1
-                            else -> span
-                        }
-                    }
-                }
-            }
     }
-
-    private fun hasLibraries(): Boolean =
-        adapter.currentList.any { it is FileRow.Library }
 
     private fun updateEmptyState() {
         val binding = binding ?: return
@@ -221,7 +281,18 @@ class FileManagerFragment : Fragment(R.layout.fragment_file_manager) {
         val binding = binding ?: return
         val count = viewModel.selectionSize()
         binding.actionBar.isVisible = count > 0
+        // The footer is the one that says what sending will do, so it carries
+        // the count and the total size rather than a bare "Send".
+        binding.selectionBar.isVisible = count > 0
         val peer = connection.peer?.takeIf { connection.hasSession() }
+        binding.btnSend.text = when {
+            count == 0 -> getString(R.string.action_send)
+            else -> getString(
+                R.string.files_send_with_count,
+                count,
+                Format.bytes(viewModel.selectedBytes()),
+            )
+        }
         binding.actionSend.text = when {
             count == 0 -> getString(R.string.action_send)
             peer != null -> getString(R.string.files_sending_to, count, peer.name)
@@ -378,6 +449,8 @@ class FileManagerFragment : Fragment(R.layout.fragment_file_manager) {
 /** Smart-category rows and file rows share one list; folders navigate, files select. */
 sealed interface FileRow {
     data class Category(val category: SmartCategory, val count: Int) : FileRow
+    /** A date-group heading - Today / Yesterday / Earlier. */
+    data class Header(val title: String, val bucket: Int) : FileRow
     data class Entry(val item: FileItem) : FileRow
 
     /**

@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="action_send">Send</string>
+    <string name="files_search_hint">Search local files</string>
+    <string name="files_tab_files">Files</string>
+    <string name="files_sort">Sort</string>
+    <string name="files_send_with_count">Send %1$d · %2$s</string>
+    <string name="files_date_today">Today</string>
+    <string name="files_date_yesterday">Yesterday</string>
+    <string name="files_date_earlier">Earlier</string>
+    <string-array name="files_sort_options">
+        <item>Date</item>
+        <item>Size</item>
+        <item>Name</item>
+    </string-array>
     <string name="files_queued">%1$d file(s) queued — connect to send them</string>
     <string name="files_sending_to">Send %1$d to %2$s</string>
     <string name="files_internal_storage">Internal Storage</string>
