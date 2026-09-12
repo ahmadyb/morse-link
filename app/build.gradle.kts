@@ -13,8 +13,11 @@ android {
         applicationId = "com.morselink.app"
         minSdk = 21
         targetSdk = 35
-        versionCode = 2
-        versionName = "1.1.0"
+        // Set from CI so every build carries its own number. Bumping this by
+        // hand is something that gets forgotten, and a build you cannot tell
+        // apart from the last one is a build you cannot report a bug against.
+        versionCode = (project.findProperty("buildVersionCode") as String?)?.toInt() ?: 2
+        versionName = project.findProperty("buildVersionName") as String? ?: "1.1.0"
     }
 
     signingConfigs {

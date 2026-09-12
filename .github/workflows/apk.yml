@@ -39,7 +39,16 @@ jobs:
         run: |
           chmod +x ./gradlew
           set +e
-          ./gradlew testReleaseUnitTest assembleRelease --no-daemon --stacktrace > build.log 2>&1
+          # Every build gets its own version, derived from the run number so it
+          # only ever goes up. Without this a rebuilt APK is indistinguishable
+          # from the previous one and there is no way to tell which build a
+          # report came from.
+          CODE=$(( 100 + ${{ github.run_number }} ))
+          NAME="1.1.${{ github.run_number }}"
+          echo "Building versionCode=$CODE versionName=$NAME"
+          ./gradlew testReleaseUnitTest assembleRelease \
+            -PbuildVersionCode="$CODE" -PbuildVersionName="$NAME" \
+            --no-daemon --stacktrace > build.log 2>&1
           code=$?
           set -e
           tail -n 300 build.log

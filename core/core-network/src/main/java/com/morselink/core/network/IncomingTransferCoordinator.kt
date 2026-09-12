@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -43,8 +44,16 @@ class IncomingTransferCoordinator @Inject constructor() {
      * already running, because a second collection would just race the first for
      * the same control socket.
      */
-    fun start(session: TransportSession) {
-        if (job?.isActive == true) return
+    suspend fun start(session: TransportSession) {
+        val running = job
+        if (running?.isActive == true) return
+        // A loop that has been cancelled but has not finished yet would race
+        // the new one for the same socket, and in its last moments could read
+        // the line the other phone is sending. Wait for it to go.
+        if (running != null) {
+            job = null
+            runCatching { withTimeoutOrNull(5_000) { running.cancelAndJoin() } }
+        }
         Log.d("Morselink", "rx: starting receive loop for ${session.peer.name}")
         job = scope.launch {
             runCatching {
@@ -62,6 +71,24 @@ class IncomingTransferCoordinator @Inject constructor() {
     fun stop() {
         job?.cancel()
         job = null
+    }
+
+    /**
+     * Stops the loop and waits until it has actually finished.
+     *
+     * cancel() alone is not enough. The loop polls the control socket, so after
+     * cancellation it still has up to one poll interval left to run - and in
+     * that window it reads the reply to the very handshake the sender is about
+     * to write. The sender then waits for a resume that its own receiver has
+     * just swallowed, and the file fails on a read timeout. Handing the channel
+     * over has to wait for the old loop to be truly gone.
+     */
+    suspend fun stopAndJoin(timeoutMs: Long = 5_000) {
+        val running = job ?: return
+        job = null
+        runCatching {
+            withTimeoutOrNull(timeoutMs) { running.cancelAndJoin() }
+        }
     }
 
     private fun describe(event: IncomingFileEvent): String = when (event) {

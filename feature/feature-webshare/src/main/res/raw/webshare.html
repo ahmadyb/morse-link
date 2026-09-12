@@ -247,6 +247,9 @@ tr:hover .row-actions { opacity: 1; }
   .row-check { width: 15px; height: 15px; accent-color: var(--primary); cursor: pointer; }
   .side-panel .album.active { background: var(--surface-hover); border-radius: 8px; }
   .breadcrumb .crumb { cursor: pointer; color: var(--primary); margin-left: 8px; }
+  .group { margin-bottom: 22px; }
+  .group .section { display: flex; align-items: center; gap: 8px; }
+  .group .section .icon-btn { margin-left: auto; }
 </style>
 </head>
 <body>
@@ -521,6 +524,31 @@ function renderGrid(rows) {
   const shown = state.album
     ? rows.filter(r => albumKey(r) === state.album) : rows;
   state.lightbox = shown;
+
+  // Folders are sections on the page. They used to live only in the side
+  // panel, which on a phone is a drawer parked off-screen behind the
+  // hamburger - so the grouping existed and was never seen.
+  const grouped = (state.view === 'photos' || state.view === 'videos') && !state.album;
+  let body;
+  if (grouped) {
+    const buckets = new Map();
+    shown.forEach(r => {
+      const key = albumKey(r);
+      if (!buckets.has(key)) buckets.set(key, []);
+      buckets.get(key).push(r);
+    });
+    body = [...buckets.entries()].map(([key, items]) => `
+      <div class="group">
+        <h2 class="section">${folderLabel(key)}
+          <span class="muted">${items.length}</span>
+          <button class="icon-btn" data-zipfolder="${encodeURIComponent(key)}" title="Download folder as zip">⤓</button>
+        </h2>
+        <div class="grid">${items.map(cardFor).join('')}</div>
+      </div>`).join('');
+  } else {
+    body = `<div class="grid">${shown.map(cardFor).join('')}</div>`;
+  }
+
   content.innerHTML = `
     <div class="split">
       ${albumPanel}
@@ -529,9 +557,17 @@ function renderGrid(rows) {
           <span>${state.view}</span>
           ${state.album ? `<span class="crumb" data-album="">← ${state.album.split('/').pop() || 'All'}</span>` : ''}
         </div>
-        <div class="grid">${shown.map(cardFor).join('')}</div>
+        ${body}
       </div>
     </div>`;
+
+  // Zip a whole folder straight from its heading.
+  document.querySelectorAll('[data-zipfolder]').forEach(b => b.onclick = (e) => {
+    e.stopPropagation();
+    const key = decodeURIComponent(b.dataset.zipfolder);
+    const folder = shown.find(r => albumKey(r) === key);
+    if (folder) window.location.href = '/api/zip?path=' + encodeURIComponent(folder.path || key);
+  });
 
   document.querySelectorAll('.album').forEach(a => a.onclick = () => {
     state.album = a.dataset.key || null;
@@ -541,13 +577,15 @@ function renderGrid(rows) {
     state.album = null; render();
   });
   document.querySelectorAll('.card').forEach(card => card.onclick = (e) => {
-    const item = shown[Number(card.dataset.index)];
+    // Matched by id, not position: once the grid is split into folder
+    // sections a row index only means something inside its own section.
+    const item = shown.find(r => r.id === card.dataset.id);
     if (e.target.classList.contains('pick')) {
       state.selection.has(item.id) ? state.selection.delete(item.id) : state.selection.add(item.id);
       card.classList.toggle('selected');
       syncSelBar();
     } else if (state.view === 'photos' || state.view === 'videos') {
-      openLightbox(Number(card.dataset.index));
+      openLightbox(shown.findIndex(r => r.id === item.id));
     } else {
       window.location.href = '/download?id=' + encodeURIComponent(item.id);
     }
@@ -555,6 +593,12 @@ function renderGrid(rows) {
 }
 
 function albumKey(r) { return (r.uri || '').replace(/\/[^/]+$/, ''); }
+
+/** A readable folder name; the last part of the path, not the whole thing. */
+function folderLabel(key) {
+  const name = key.split('/').filter(Boolean).pop();
+  return name && name !== '0' ? name : 'All';
+}
 
 function sideAlbums(rows) {
   const albums = {};
@@ -699,6 +743,12 @@ function openLightbox(index) {
   state.lightboxIndex = index;
   const item = state.lightbox[index];
   if (!item) return;
+  // Moving to the next clip used to leave the last one playing underneath it.
+  $('#modal-body').querySelectorAll('video').forEach(v => {
+    v.pause();
+    v.removeAttribute('src');
+    v.load();
+  });
   const isVideo = state.view === 'videos';
   $('#modal-body').innerHTML = isVideo
     ? `<video src="/download?id=${encodeURIComponent(item.id)}&stream=1" controls autoplay style="max-height:74vh"></video>`
@@ -707,9 +757,32 @@ function openLightbox(index) {
   $('#modal-download').onclick = () => window.location.href = '/download?id=' + encodeURIComponent(item.id);
   $('#modal').classList.add('open');
 }
-$('#modal-close').onclick = () => $('#modal').classList.remove('open');
-$('#modal-prev').onclick = () => openLightbox((state.lightboxIndex - 1 + state.lightbox.length) % state.lightbox.length);
-$('#modal-next').onclick = () => openLightbox((state.lightboxIndex + 1) % state.lightbox.length);
+
+/**
+ * Closing the lightbox only hid it. The <video> stayed in the document, still
+ * playing, so the sound carried on with nothing on screen - and nothing to
+ * press to stop it. Removing the element is what actually stops it; pausing
+ * alone leaves it ready to resume.
+ */
+function closeModal() {
+  $('#modal-body').querySelectorAll('video').forEach(v => {
+    v.pause();
+    v.removeAttribute('src');
+    v.load();
+  });
+  $('#modal-body').innerHTML = '';
+  $('#modal').classList.remove('open');
+}
+
+function stepLightbox(delta) {
+  const n = state.lightbox.length;
+  if (n) openLightbox((state.lightboxIndex + delta + n) % n);
+}
+
+$('#modal-close').onclick = closeModal;
+$('#modal').onclick = (e) => { if (e.target.id === 'modal') closeModal(); };
+$('#modal-prev').onclick = () => stepLightbox(-1);
+$('#modal-next').onclick = () => stepLightbox(1);
 
 /* ------------------------------------------------------------------ player */
 const audio = $('#audio');
@@ -826,7 +899,7 @@ function closePanel() { $('#side-panel')?.classList.remove('open'); $('#scrim').
 
 document.querySelectorAll('.nav-icon').forEach(b => b.onclick = () => setView(b.dataset.view));
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') { $('#modal').classList.remove('open'); closePanel(); }
+  if (e.key === 'Escape') { closeModal(); closePanel(); }
 });
 
 /* boot */

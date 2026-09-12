@@ -8,10 +8,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.morselink.core.media.DirectoryState
 import com.morselink.core.media.FileBrowser
+import com.morselink.core.media.AppItem
 import com.morselink.core.media.FileItem
 import com.morselink.core.media.FileOps
+import com.morselink.core.media.MediaItem
 import com.morselink.core.media.MediaRepository
 import com.morselink.core.media.SmartCategory
+import com.morselink.core.media.SortOrder
 import com.morselink.core.media.StorageInfo
 import com.morselink.core.ui.Format
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -55,6 +58,12 @@ class FileManagerViewModel @Inject constructor(
     /** Empty means "the smart-category overview", which is the entry state. */
     private var currentPath: String = ""
     private var activeCategory: SmartCategory? = null
+    private var activeLibrary: MediaLibrary? = null
+
+    /** True while a media library is open, so the list can lay itself out as a
+     *  gallery rather than as file rows. */
+    private val _gallery = MutableLiveData(false)
+    val gallery: LiveData<Boolean> = _gallery
 
     fun refresh() {
         viewModelScope.launch {
@@ -72,6 +81,11 @@ class FileManagerViewModel @Inject constructor(
         val state: DirectoryState
 
         when {
+            activeLibrary != null -> {
+                val items = libraryItems(activeLibrary!!)
+                rows = items.map { FileRow.Entry(it) }
+                state = if (rows.isEmpty()) DirectoryState.EMPTY else DirectoryState.OK
+            }
             activeCategory != null -> {
                 rows = runCatching { media.category(activeCategory!!) }
                     .getOrDefault(emptyList())
@@ -97,14 +111,73 @@ class FileManagerViewModel @Inject constructor(
                     .filterNot { it.absolutePath == Environment.getExternalStoragePublicDirectory(
                         Environment.DIRECTORY_DOWNLOADS)?.absolutePath }
                     .map { FileRow.Entry(FileBrowser.asItem(it)) }
-                rows = volumes + SmartCategory.values().map { FileRow.Category(it, counts[it] ?: 0) }
+                // The libraries come before the volumes: they are the usual
+                // reason for opening this tab, and a file manager that cannot
+                // reach your photos sends you looking somewhere else.
+                rows = libraryCards() +
+                    volumes +
+                    SmartCategory.values().map { FileRow.Category(it, counts[it] ?: 0) }
                 state = if (rows.isEmpty()) DirectoryState.EMPTY else DirectoryState.OK
             }
         }
 
         _state.postValue(state)
         _rows.postValue(rows)
+        _gallery.postValue(activeLibrary != null)
         _breadcrumbs.postValue(breadcrumbFor(currentPath))
+    }
+
+    // ------------------------------------------------------------- libraries
+
+    /**
+     * A card per library. The cover is the newest item in it, so the tile shows
+     * an actual photo rather than a generic icon.
+     */
+    private suspend fun libraryCards(): List<FileRow.Library> =
+        MediaLibrary.values().map { library ->
+            val items = runCatching { libraryItems(library, limit = 1) }.getOrDefault(emptyList())
+            val total = runCatching { libraryItems(library).size }.getOrDefault(0)
+            FileRow.Library(library, total, items.firstOrNull())
+        }
+
+    /** The contents of one library, newest first. */
+    private suspend fun libraryItems(
+        library: MediaLibrary,
+        limit: Int = Int.MAX_VALUE,
+    ): List<FileItem> {
+        val items = when (library) {
+            MediaLibrary.PHOTOS -> media.photos(SortOrder.DATE)
+            MediaLibrary.VIDEOS -> media.videos(SortOrder.DATE)
+            MediaLibrary.MUSIC -> media.music(SortOrder.DATE)
+            MediaLibrary.APPS -> return media.apps().map { it.toFileItem() }
+        }
+        return items.take(limit).map { it.toFileItem() }
+    }
+
+    private fun MediaItem.toFileItem(): FileItem = FileItem(
+        path = path ?: uri.toString(),
+        name = displayName,
+        isDirectory = false,
+        sizeBytes = sizeBytes,
+        lastModified = dateModified,
+        mimeType = mimeType,
+        uri = uri,
+    )
+
+    private fun AppItem.toFileItem(): FileItem = FileItem(
+        path = apkPath,
+        name = label,
+        isDirectory = false,
+        sizeBytes = sizeBytes,
+        lastModified = 0L,
+        mimeType = "application/vnd.android.package-archive",
+    )
+
+    fun openLibrary(library: MediaLibrary) {
+        activeLibrary = library
+        activeCategory = null
+        currentPath = ""
+        refresh()
     }
 
     /**
@@ -113,6 +186,10 @@ class FileManagerViewModel @Inject constructor(
      */
     private fun breadcrumbFor(path: String): List<Breadcrumb> {
         if (path.isBlank()) {
+            val library = activeLibrary
+            if (library != null) {
+                return listOf(Breadcrumb(ROOT_LABEL, ""), Breadcrumb(library.label(), ""))
+            }
             val category = activeCategory
             return if (category == null) listOf(Breadcrumb(ROOT_LABEL, ""))
             else listOf(Breadcrumb(ROOT_LABEL, ""), Breadcrumb(category.label(), ""))
@@ -143,7 +220,25 @@ class FileManagerViewModel @Inject constructor(
     fun navigateTo(path: String) {
         currentPath = if (path.isBlank() || path == rootPath) "" else path
         activeCategory = null
+        activeLibrary = null
         refresh()
+    }
+
+    /** Back to the top level; false when already there. */
+    fun navigateUp(): Boolean {
+        if (activeLibrary == null && activeCategory == null && currentPath.isBlank()) return false
+        activeLibrary = null
+        activeCategory = null
+        currentPath = ""
+        refresh()
+        return true
+    }
+
+    /** Says where the list currently is, for the screen to hint at. */
+    fun openedLabel(): String? = when {
+        activeLibrary != null -> activeLibrary!!.label()
+        activeCategory != null -> activeCategory!!.label()
+        else -> null
     }
 
     /** Folders living alongside the segment at [depth], for the address-bar caret. */
@@ -161,8 +256,10 @@ class FileManagerViewModel @Inject constructor(
 
     fun onItemClick(row: FileRow) {
         when (row) {
+            is FileRow.Library -> openLibrary(row.library)
             is FileRow.Category -> {
                 activeCategory = row.category
+                activeLibrary = null
                 currentPath = ""
                 viewModelScope.launch { loadRows() }
             }
@@ -175,6 +272,7 @@ class FileManagerViewModel @Inject constructor(
                     }
                     currentPath = item.path
                     activeCategory = null
+                    activeLibrary = null
                     viewModelScope.launch { loadRows() }
                 } else {
                     toggleSelection(item)

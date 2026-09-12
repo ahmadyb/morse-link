@@ -173,20 +173,23 @@ class TransferViewModel @Inject constructor(
             // the receiver path below and the new selection sat in the holder
             // unsent, with nothing on screen saying so.
             isSender = true
-            // Works from either end: a receiver that picks files and taps Send
-            // stops its own receive loop and takes the channel over.
-            takeOverToSend()
             service.start()
             val name = existing.peer.name
             showConnected(name)
             _statusLine.postValue(context.getString(R.string.status_connected, name))
             holder.pendingOutgoing = emptyList()
-            outgoing.send(
-                existing,
-                pending,
-                holder.peer?.transport ?: TransportType.LEGACY_WIFI_DIRECT,
-                onFinished = ::startListening,
-            )
+            viewModelScope.launch {
+                // Works from either end: a receiver that picks files and taps
+                // Send stops its own receive loop and takes the channel over.
+                // Waiting matters - see takeOverToSend.
+                takeOverToSend()
+                outgoing.send(
+                    existing,
+                    pending,
+                    holder.peer?.transport ?: TransportType.LEGACY_WIFI_DIRECT,
+                    onFinished = ::startListening,
+                )
+            }
         } else {
             service.start()
             // Arriving as the receiver: the session is already up, so say who
@@ -203,7 +206,10 @@ class TransferViewModel @Inject constructor(
                 // control socket, and a receive loop reading it would take
                 // the resume replies out from under the send.
                 if (!holder.isSender) {
-                    holder.session?.let { incomingCoordinator.start(it) }
+                    val session = holder.session
+                    if (session != null) {
+                        viewModelScope.launch { incomingCoordinator.start(session) }
+                    }
                 }
             }
         }
@@ -336,7 +342,10 @@ class TransferViewModel @Inject constructor(
     private fun startListening() {
         val session = holder.session ?: return
         holder.isSender = false
-        if (holder.hasSession()) incomingCoordinator.start(session)
+        // Launched rather than awaited: this is handed to the send batch as a
+        // plain callback, and the coordinator's own start() is what waits for
+        // any previous loop to clear.
+        if (holder.hasSession()) viewModelScope.launch { incomingCoordinator.start(session) }
     }
 
     /**
@@ -344,8 +353,8 @@ class TransferViewModel @Inject constructor(
      * the same socket the send writes its handshake to, and would swallow the
      * replies.
      */
-    private fun takeOverToSend() {
-        incomingCoordinator.stop()
+    private suspend fun takeOverToSend() {
+        incomingCoordinator.stopAndJoin()
         holder.isSender = true
     }
 

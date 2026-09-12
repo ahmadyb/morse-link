@@ -10,7 +10,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.morselink.core.media.DirectoryState
 import com.morselink.core.media.FileItem
 import com.morselink.core.media.SmartCategory
@@ -38,6 +40,25 @@ class FileManagerFragment : Fragment(R.layout.fragment_file_manager) {
     private var binding: FragmentFileManagerBinding? = null
     private lateinit var adapter: FileAdapter
 
+    override fun onStart() {
+        super.onStart()
+        // Inside a library or a category, Back steps out rather than leaving
+        // the app - with a single tab there is no other way back to the top.
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner,
+            object : androidx.activity.OnBackPressedCallback(false) {
+                override fun handleOnBackPressed() {
+                    if (!viewModel.navigateUp()) {
+                        isEnabled = false
+                        requireActivity().onBackPressedDispatcher.onBackPressed()
+                    }
+                }
+            }.also { backCallback = it },
+        )
+    }
+
+    private var backCallback: androidx.activity.OnBackPressedCallback? = null
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val binding = FragmentFileManagerBinding.bind(view)
         this.binding = binding
@@ -53,6 +74,14 @@ class FileManagerFragment : Fragment(R.layout.fragment_file_manager) {
         )
         binding.list.layoutManager = LinearLayoutManager(requireContext())
         binding.list.adapter = adapter
+
+        // Libraries are opened as a gallery of tiles, everything else as rows.
+        // The manager is swapped on the existing adapter rather than the adapter
+        // being rebuilt, which would drop the list.
+        viewModel.gallery.observe(viewLifecycleOwner) { gallery ->
+            adapter.useGrid = gallery
+            applyLayout(gallery)
+        }
 
         viewModel.rows.observe(viewLifecycleOwner) { rows ->
             adapter.submitList(rows)
@@ -135,6 +164,35 @@ class FileManagerFragment : Fragment(R.layout.fragment_file_manager) {
      * result. A restricted folder (scoped storage) says so explicitly instead of
      * pretending there is nothing inside it.
      */
+    /**
+     * Tiles span one column; volumes and smart categories span the full width
+     * so they stay readable as rows underneath the gallery.
+     */
+    private fun applyLayout(gallery: Boolean) {
+        val binding = binding ?: return
+        if (!gallery && !hasLibraries()) {
+            binding.list.layoutManager = LinearLayoutManager(requireContext())
+            return
+        }
+        val span = if (gallery) 3 else 3
+        binding.list.layoutManager =
+            GridLayoutManager(requireContext(), span, RecyclerView.VERTICAL, false).apply {
+                spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+                    override fun getSpanSize(position: Int): Int {
+                        val row = adapter.currentList.getOrNull(position) ?: return span
+                        return when {
+                            row is FileRow.Library -> 1
+                            gallery -> 1
+                            else -> span
+                        }
+                    }
+                }
+            }
+    }
+
+    private fun hasLibraries(): Boolean =
+        adapter.currentList.any { it is FileRow.Library }
+
     private fun updateEmptyState() {
         val binding = binding ?: return
         val loading = viewModel.loading.value == true
@@ -267,4 +325,50 @@ class FileManagerFragment : Fragment(R.layout.fragment_file_manager) {
 sealed interface FileRow {
     data class Category(val category: SmartCategory, val count: Int) : FileRow
     data class Entry(val item: FileItem) : FileRow
+
+    /**
+     * One of the media libraries, offered at the top level as a gallery card.
+     *
+     * Photos, videos, music and apps are what people open a file manager for,
+     * and they were reachable only from the Send tab - buried behind a
+     * transfer you had to start first.
+     */
+    data class Library(val library: MediaLibrary, val count: Int, val cover: FileItem?) : FileRow
+}
+
+/** The media libraries offered from the Files tab. */
+enum class MediaLibrary { PHOTOS, VIDEOS, MUSIC, APPS }
+
+// Shared names and icons. They used to live privately in the adapter, but the
+// view model needs them for the breadcrumb too, and two copies of the same
+// wording drift apart.
+
+fun SmartCategory.label(): String = when (this) {
+    SmartCategory.DOCUMENTS -> "Documents"
+    SmartCategory.EBOOKS -> "Ebooks"
+    SmartCategory.APKS -> "APKs"
+    SmartCategory.ARCHIVES -> "Archives"
+    SmartCategory.LARGE_FILES -> "Large files"
+}
+
+fun SmartCategory.subtitle(): String = when (this) {
+    SmartCategory.DOCUMENTS -> "Word, Excel, PPT, PDF, etc."
+    SmartCategory.EBOOKS -> ".epub, .txt, .pdf"
+    SmartCategory.APKS -> "Installed app packages"
+    SmartCategory.ARCHIVES -> ".zip, .rar, .7z"
+    SmartCategory.LARGE_FILES -> "Files over 50MB"
+}
+
+fun MediaLibrary.label(): String = when (this) {
+    MediaLibrary.PHOTOS -> "Photos"
+    MediaLibrary.VIDEOS -> "Videos"
+    MediaLibrary.MUSIC -> "Music"
+    MediaLibrary.APPS -> "Apps"
+}
+
+fun MediaLibrary.icon(): Int = when (this) {
+    MediaLibrary.PHOTOS -> com.morselink.core.ui.R.drawable.ic_photo
+    MediaLibrary.VIDEOS -> com.morselink.core.ui.R.drawable.ic_video
+    MediaLibrary.MUSIC -> com.morselink.core.ui.R.drawable.ic_music
+    MediaLibrary.APPS -> com.morselink.core.ui.R.drawable.ic_app
 }
