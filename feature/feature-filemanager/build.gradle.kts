@@ -39,6 +39,9 @@ dependencies {
     implementation(libs.bundles.androidx.ui)
     implementation(project(":core:core-ui"))
     implementation(project(":core:core-media"))
+    // ConnectionHolder (core-network) to hand picked files to a live session,
+    // and TransferableFile (core-transfer) to describe them.
+    implementation(project(":core:core-network"))
     implementation(project(":core:core-transfer"))
     implementation(libs.androidx.navigation.fragment)
     implementation(libs.glide)
