@@ -83,8 +83,17 @@ class TransferFragment : Fragment(R.layout.fragment_transfer) {
         // minimise to.
         viewModel.canMinimise.observe(viewLifecycleOwner) { allowed ->
             binding.btnMinimise.isVisible = allowed
+            // Choosing files is the point of being connected for most people,
+            // and it was only available as an icon whose meaning you had to
+            // guess. Connect first, then pick - the order that was asked for.
+            binding.btnChooseFiles.isVisible = allowed
         }
         binding.btnMinimise.setOnClickListener { viewModel.minimise() }
+        binding.btnChooseFiles.setOnClickListener {
+            // Not minimised: coming straight back to the transfer screen is how
+            // the send starts once files are chosen.
+            findNavController().navigate(Uri.parse("morselink://files"))
+        }
 
         binding.btnCancel.setOnClickListener {
             binding.btnCancel.isEnabled = false

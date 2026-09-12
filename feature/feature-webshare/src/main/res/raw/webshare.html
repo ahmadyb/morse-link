@@ -637,8 +637,37 @@ function renderMusic(rows) {
   bindRowChecks(rows);
 }
 
+/** The path as clickable steps, so every view can show where you are. */
+function pathCrumbs() {
+  return (state.path || 'Internal storage').split('/').filter(Boolean);
+}
+
+function crumbTrail() {
+  const crumbs = pathCrumbs();
+  return crumbs.map((c, i) => `<span class="crumb" data-crumb="${i}">${c}</span>`)
+    .join('<span>/</span>');
+}
+
+function wireCrumbs() {
+  const crumbs = pathCrumbs();
+  document.querySelectorAll('[data-crumb]').forEach(c => c.onclick = () => {
+    state.path = '/' + crumbs.slice(0, Number(c.dataset.crumb) + 1).join('/');
+    load();
+  });
+}
+
+/**
+ * An empty folder used to drop the entire interface - no breadcrumb, no way
+ * back up - because the short-circuit replaced the whole page with one line of
+ * text. The trail stays so you can climb out.
+ */
+function emptyView() {
+  return `<div class="breadcrumb">${crumbTrail()}</div>
+    <p class="muted">Nothing to show here.</p>`;
+}
+
 function renderFiles(rows) {
-  const crumbs = (state.path || 'Internal storage').split('/').filter(Boolean);
+  const crumbs = pathCrumbs();
   const tree = state.view === 'files' ? `<div class="side-panel" id="side-panel">
       <h2 class="section" style="margin-top:0">Folders</h2>
       <div class="tree-item" data-path="/storage/emulated/0">Internal storage</div>
@@ -648,7 +677,7 @@ function renderFiles(rows) {
   content.innerHTML = `<div class="split">
       ${tree}
       <div style="flex:1; min-width:0">
-        <div class="breadcrumb">${crumbs.map((c, i) => `<span data-crumb="${i}">${c}</span>`).join('<span>/</span>')}</div>
+        <div class="breadcrumb">${crumbTrail()}</div>
         <table>
           <thead><tr><th style="width:32px"><input type="checkbox" id="check-all" title="Select all"></th><th>Name</th><th class="num">Size</th><th class="num">Modified</th><th></th></tr></thead>
           <tbody>
@@ -669,10 +698,7 @@ function renderFiles(rows) {
 
   document.querySelectorAll('[data-dl]').forEach(b => b.onclick = () =>
     window.location.href = '/download?id=' + encodeURIComponent(rows[Number(b.dataset.dl)].id));
-  document.querySelectorAll('[data-crumb]').forEach(c => c.onclick = () => {
-    state.path = '/' + crumbs.slice(0, Number(c.dataset.crumb) + 1).join('/');
-    load();
-  });
+  wireCrumbs();
   document.querySelectorAll('tr[data-dir="1"]').forEach(tr => tr.onclick = () => {
     state.path = rows[Number(tr.dataset.index)].path;
     load();

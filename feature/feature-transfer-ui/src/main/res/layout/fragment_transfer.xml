@@ -139,6 +139,14 @@
             android:textColor="@color/textSecondary"
             android:textSize="13sp" />
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_choose_files"
+            style="@style/Widget.Morselink.Button.Outlined"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/action_choose_files"
+            android:visibility="gone" />
+
         <!-- Icon only: it sits beside the labelled Cancel button, so a second
              word here reads as clutter rather than as help. -->
         <com.google.android.material.button.MaterialButton

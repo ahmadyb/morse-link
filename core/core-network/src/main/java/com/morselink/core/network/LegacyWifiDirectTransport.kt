@@ -575,6 +575,7 @@ class LegacyWifiDirectTransport @Inject constructor(
             // than stopping after the first batch. Only the control channel
             // persists across the batch; each file's payload has its own
             // connection, opened and closed around it.
+            var handedOver = false
             try {
                 // Polled rather than blocked. Cancelling a coroutine does
                 // nothing to a thread parked in a socket read, so a loop that
@@ -634,11 +635,22 @@ class LegacyWifiDirectTransport @Inject constructor(
                     }
                 }
             } catch (error: Throwable) {
-                if (error is kotlinx.coroutines.CancellationException) throw error
+                if (error is kotlinx.coroutines.CancellationException) {
+                    handedOver = true
+                    throw error
+                }
                 MorselinkLog.w("rx: receive loop stopped: ${error.javaClass.simpleName}: ${error.message}")
             } finally {
                 MorselinkLog.d("rx: receiver loop ended")
-                closeSockets()
+                // Only tear the session down when the loop is genuinely
+                // finishing. It is also cancelled to hand the channel over to a
+                // send, and closing the sockets then destroyed the session in
+                // the middle of the handover: the sender wrote its metadata
+                // into a connection that no longer existed, saw no resume
+                // reply, and failed on a read timeout thirty seconds later -
+                // while the other end logged "control channel closed" for the
+                // same instant. Every turnaround failure traces back here.
+                if (!handedOver) closeSockets()
             }
         }
 

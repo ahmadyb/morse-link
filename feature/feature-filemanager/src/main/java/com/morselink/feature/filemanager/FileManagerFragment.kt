@@ -24,6 +24,10 @@ import com.morselink.core.ui.Permissions
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 import javax.inject.Inject
+import android.net.Uri
+import androidx.navigation.fragment.findNavController
+import com.morselink.core.network.ConnectionHolder
+import com.morselink.core.transfer.model.TransferableFile
 
 /**
  * §14.3 / §14.4 — smart categories on entry, raw folder navigation after that,
@@ -31,6 +35,10 @@ import javax.inject.Inject
  */
 @AndroidEntryPoint
 class FileManagerFragment : Fragment(R.layout.fragment_file_manager) {
+
+    /** The live session, so files picked here can be handed straight to it. */
+    @Inject
+    lateinit var connection: ConnectionHolder
 
     @Inject
     lateinit var permissions: Permissions
@@ -111,6 +119,10 @@ class FileManagerFragment : Fragment(R.layout.fragment_file_manager) {
             binding.storageText.text = "${Format.bytes(info.usedBytes)} / ${Format.bytes(info.totalBytes)}"
         }
 
+        // Sending belongs here as much as in the Send tab: this is where the
+        // files are. Pick them, press Send, and the transfer screen connects
+        // and sends - or connect first and come back to choose.
+        binding.actionSend.setOnClickListener { sendSelection() }
         binding.actionShare.setOnClickListener { shareSelection() }
         binding.actionDelete.setOnClickListener { deleteSelection() }
         binding.actionRename.setOnClickListener { renameSelection() }
@@ -209,8 +221,50 @@ class FileManagerFragment : Fragment(R.layout.fragment_file_manager) {
         val binding = binding ?: return
         val count = viewModel.selectionSize()
         binding.actionBar.isVisible = count > 0
+        val peer = connection.peer?.takeIf { connection.hasSession() }
+        binding.actionSend.text = when {
+            count == 0 -> getString(R.string.action_send)
+            peer != null -> getString(R.string.files_sending_to, count, peer.name)
+            else -> getString(R.string.action_send)
+        }
         adapter.notifyDataSetChanged()
         if (count == 0) viewModel.clearSelection()
+    }
+
+    /**
+     * Hands the selection to the transfer session.
+     *
+     * With a session already up this sends straight away; without one the files
+     * are queued and the transfer screen opens to make the connection. Both
+     * orders were asked for - connect first and then choose, or choose and then
+     * connect - and both end at the same place.
+     */
+    private fun sendSelection() {
+        val items = viewModel.selectedItems()
+        if (items.isEmpty()) return
+        connection.pendingOutgoing = items.map { item ->
+            TransferableFile(
+                id = item.path,
+                name = item.name,
+                sizeBytes = item.sizeBytes,
+                mimeType = item.mimeType,
+                uri = item.uri,
+                path = item.path,
+            )
+        }
+        val count = items.size
+        viewModel.clearSelection()
+        renderSelection()
+        Toast.makeText(
+            requireContext(),
+            if (connection.hasSession()) {
+                getString(com.morselink.core.ui.R.string.action_send)
+            } else {
+                getString(R.string.files_queued, count)
+            },
+            Toast.LENGTH_SHORT,
+        ).show()
+        findNavController().navigate(Uri.parse("morselink://transfer"))
     }
 
     private fun shareSelection() {

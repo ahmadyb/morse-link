@@ -72,7 +72,17 @@ class WebShareServer @Inject constructor(
         return when {
             session.method == Method.OPTIONS -> cors(newFixedLengthResponse(Response.Status.OK, MIME_PLAINTEXT, ""))
             session.method == Method.GET && (uri == "" || uri == "/") ->
-                newFixedLengthResponse(Response.Status.OK, MIME_HTML, index())
+                // Never cacheable. The page is compiled into the APK, so a
+                // browser holding an old copy goes on showing the previous
+                // build's interface - features appear to be missing that are
+                // present in the installed app. That is exactly what happened
+                // with folder grouping: it shipped, and the phone kept
+                // rendering the page it had cached before it existed.
+                newFixedLengthResponse(Response.Status.OK, MIME_HTML, index()).apply {
+                    addHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+                    addHeader("Pragma", "no-cache")
+                    addHeader("Expires", "0")
+                }
             session.method == Method.GET && uri.startsWith("/api/files") -> json(filesResponse(session))
             session.method == Method.GET && uri.startsWith("/api/info") -> json(infoResponse())
             session.method == Method.GET && uri.startsWith("/api/theme") -> json(themeResponse())

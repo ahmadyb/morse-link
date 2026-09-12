@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="action_send">Send</string>
+    <string name="files_queued">%1$d file(s) queued — connect to send them</string>
+    <string name="files_sending_to">Send %1$d to %2$s</string>
     <string name="files_internal_storage">Internal Storage</string>
     <string name="files_browse">Browse all folders</string>
     <string name="files_properties">%1$s
