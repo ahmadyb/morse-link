@@ -19,6 +19,7 @@ import com.morselink.core.transfer.MorselinkLog
 import com.morselink.core.transfer.engine.TransferEngine
 import com.morselink.core.transfer.legacy.LegacyPorts
 import com.morselink.core.transfer.model.TransportType
+import com.morselink.core.transfer.model.TransferDirection
 import com.morselink.core.transfer.model.TransferSessionState
 import com.morselink.core.transfer.model.label
 import com.morselink.core.ui.Format
@@ -233,13 +234,27 @@ class TransferViewModel @Inject constructor(
                         )
                     }
                 }
-                holder.hasSession() && peer != null ->
-                    context.getString(R.string.status_connected_waiting, peer.name)
+                holder.hasSession() && peer != null -> {
+                    // Once files have actually moved, "waiting for files" is a
+                    // lie: the screen was showing it above a list of finished
+                    // transfers. Say what happened instead.
+                    val finished = state.all().filter { it.isFinished }
+                    if (finished.isEmpty()) {
+                        context.getString(R.string.status_connected_waiting, peer.name)
+                    } else {
+                        val sent = finished.count { it.direction == TransferDirection.OUTGOING }
+                        context.getString(
+                            R.string.status_connected_summary,
+                            peer.name, sent, finished.size - sent,
+                        )
+                    }
+                }
                 holder.pendingOutgoing.isNotEmpty() ->
                     context.getString(R.string.status_waiting_receiver)
                 else -> context.getString(R.string.status_waiting_connection)
             }
         )
+        refreshConnectedHint()
     }
 
     private fun startSenderPairing() {
@@ -310,6 +325,29 @@ class TransferViewModel @Inject constructor(
         }
     }
 
+    /**
+     * What the connected panel says, computed from the role this side has
+     * right now rather than the one it had when the connection came up.
+     *
+     * The wording used to be baked in at connect time, so a phone that sent
+     * first and then received kept saying "Sending your files now" over a
+     * list of files it was busy receiving.
+     */
+    private fun connectedHint(): String = context.getString(
+        if (holder.isSender || isSender) R.string.pairing_connected_sender_hint
+        else R.string.pairing_connected_hint
+    )
+
+    /** Re-word the connected panel when the direction flips mid-session. */
+    private fun refreshConnectedHint() {
+        val current = pairingContent
+        if (current.mode != PairingMode.CONNECTED) return
+        val hint = connectedHint()
+        if (current.status == hint) return
+        pairingContent = current.copy(status = hint)
+        _pairing.postValue(pairingContent.copy(collapsed = pairingCollapsed))
+    }
+
     /** The connected face of the card, shown on both ends of the transfer. */
     private fun showConnected(peerName: String) {
         _canMinimise.postValue(true)
@@ -324,10 +362,7 @@ class TransferViewModel @Inject constructor(
             PairingState(
                 mode = PairingMode.CONNECTED,
                 peerName = peerName,
-                status = context.getString(
-                    if (isSender) R.string.pairing_connected_sender_hint
-                    else R.string.pairing_connected_hint
-                ),
+                status = connectedHint(),
             )
         )
     }

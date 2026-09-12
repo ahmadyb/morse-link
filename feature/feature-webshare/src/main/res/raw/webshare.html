@@ -485,7 +485,17 @@ function renderHome() {
 function render() {
   if (state.view === 'home') return renderHome();
   const rows = state.filtered;
-  if (!rows.length) { content.innerHTML = '<p class="muted">Nothing to show here.</p>'; return; }
+  // An empty folder still gets its navigation: the trail is how you climb
+  // back out, so it must survive an empty listing. (This is what an early
+  // return here used to throw away.)
+  if (!rows.length) {
+    content.innerHTML = (state.view === 'photos' || state.view === 'videos' || state.view === 'apps')
+      ? `<div class="breadcrumb">${crumbTrail()}</div>
+         <p class="muted">Nothing to show here.</p>`
+      : emptyView();
+    wireCrumbs();
+    return;
+  }
 
   if (state.view === 'photos' || state.view === 'videos' || state.view === 'apps') {
     renderGrid(rows);
@@ -592,7 +602,30 @@ function renderGrid(rows) {
   });
 }
 
-function albumKey(r) { return (r.uri || '').replace(/\/[^/]+$/, ''); }
+/**
+ * The folder this file lives in.
+ *
+ * This must come from the real filesystem path. A MediaStore uri is
+ * content://media/external/images/media/12345 for every photo on the device,
+ * so stripping the last segment gives one identical key for all of them - the
+ * whole library collapses into a single folder. The path is what tells
+ * WhatsApp Images from Camera from Telegram.
+ */
+/** Escape a value before it goes into an HTML attribute or text node. */
+function esc(v) {
+  return String(v == null ? '' : v)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function albumKey(r) {
+  if (r.path) {
+    const i = r.path.lastIndexOf('/');
+    return i > 0 ? r.path.slice(0, i) : r.path;
+  }
+  if (r.bucket) return 'bucket:' + r.bucket;
+  return (r.uri || '').replace(/\/[^/]+$/, '');
+}
 
 /** A readable folder name; the last part of the path, not the whole thing. */
 function folderLabel(key) {
@@ -610,7 +643,7 @@ function sideAlbums(rows) {
   const list = Object.values(albums);
   return `<div class="side-panel" id="side-panel">
       <h2 class="section" style="margin-top:0">Folders</h2>
-      ${list.map(a => `<div class="album ${state.album === a.key ? 'active' : ''}" data-key="${a.key}">
+      ${list.map(a => `<div class="album ${state.album === a.key ? 'active' : ''}" data-key="${esc(a.key)}">
           <img class="thumb" src="${a.first ? '/api/thumb?id=' + encodeURIComponent(a.first.id) : ''}" alt="">
           <div><div>${a.name}</div><div class="muted">${a.count}</div></div>
         </div>`).join('')}

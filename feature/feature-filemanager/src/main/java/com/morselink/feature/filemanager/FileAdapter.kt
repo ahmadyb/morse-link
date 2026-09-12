@@ -1,8 +1,14 @@
 package com.morselink.feature.filemanager
 
+import android.content.pm.PackageManager
+import android.graphics.drawable.Drawable
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Executors
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -108,9 +114,50 @@ class FileAdapter(
     }
 
     /**
+     * An APK shows the icon of the app inside it, not a generic "file" glyph -
+     * a folder of APKs is otherwise a column of identical shapes.
+     *
+     * Reading it means opening the archive, so it happens off the main thread
+     * and is keyed to the row: a recycled view is simply left alone.
+     */
+    private val apkIcons = ConcurrentHashMap<String, Drawable?>()
+    private val iconExecutor = Executors.newSingleThreadExecutor()
+    private val mainHandler = Handler(Looper.getMainLooper())
+
+    private fun loadApkIcon(image: ImageView, path: String) {
+        image.setTag(com.morselink.feature.filemanager.R.id.tag_icon_path, path)
+        val cached = apkIcons[path]
+        if (cached != null) {
+            image.setImageDrawable(cached)
+            return
+        }
+        image.setImageResource(com.morselink.core.ui.R.drawable.ic_app)
+        if (apkIcons.containsKey(path)) return
+        iconExecutor.execute {
+            val icon = runCatching {
+                val pm = image.context.packageManager
+                val info = pm.getPackageArchiveInfo(path, PackageManager.GET_META_DATA)
+                info?.applicationInfo?.apply { sourceDir = path; publicSourceDir = path }
+                    ?.loadIcon(pm)
+            }.getOrNull()
+            apkIcons[path] = icon
+            if (icon == null) return@execute
+            mainHandler.post {
+                if (image.getTag(com.morselink.feature.filemanager.R.id.tag_icon_path) == path) {
+                    image.setImageDrawable(icon)
+                }
+            }
+        }
+    }
+
+    private fun isApk(item: com.morselink.core.media.FileItem): Boolean =
+        !item.isDirectory && (item.name.endsWith(".apk", true) ||
+            item.mimeType == "application/vnd.android.package-archive")
+
+    /**
      * A real thumbnail where the device can produce one. Photos and videos come
-     * from MediaStore via Glide; anything else falls back to a type icon, which
-     * is what the row view always showed.
+     * from MediaStore via Glide; APKs from their own package; anything else
+     * falls back to a type icon, which is what the row view always showed.
      */
     private fun loadThumb(image: ImageView, item: com.morselink.core.media.FileItem) {
         val uri = item.uri
@@ -123,6 +170,8 @@ class FileAdapter(
                 .error(com.morselink.core.ui.R.drawable.ic_photo)
                 .centerCrop()
                 .into(image)
+        } else if (isApk(item) && item.path.isNotBlank()) {
+            loadApkIcon(image, item.path)
         } else {
             image.setImageResource(iconFor(item))
         }
@@ -155,7 +204,11 @@ class FileAdapter(
                         if (item.childCount >= 0) "${item.childCount} items" else "Folder"
                     } else Format.fullDate(item.lastModified)
                     binding.size.text = if (item.isDirectory) "" else Format.bytes(item.sizeBytes)
-                    binding.icon.setImageResource(iconFor(item))
+                    if (isApk(item) && item.path.isNotBlank()) {
+                        loadApkIcon(binding.icon, item.path)
+                    } else {
+                        binding.icon.setImageResource(iconFor(item))
+                    }
                     val selected = isSelected(item)
                     binding.root.isSelected = selected
                     binding.root.setOnClickListener { onClick(row) }

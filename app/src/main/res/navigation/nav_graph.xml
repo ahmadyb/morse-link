@@ -27,7 +27,6 @@
         android:label="Send"
         tools:layout="@layout/fragment_send"
         xmlns:tools="http://schemas.android.com/tools">
-        <deepLink app:uri="morselink://send" />
         <action
             android:id="@+id/action_send_to_transfer"
             app:destination="@id/nav_transfer" />
@@ -52,6 +51,10 @@
         tools:layout="@layout/fragment_transfer"
         xmlns:tools="http://schemas.android.com/tools">
         <deepLink app:uri="morselink://transfer" />
+        <!-- Send is a request to connect, not to browse. Picking happens in
+             the file manager, so "Send" opens the connection screen and the
+             Choose files button there hands over to it. -->
+        <deepLink app:uri="morselink://send" />
     </fragment>
 
     <fragment

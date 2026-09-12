@@ -18,6 +18,7 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.morselink.app.databinding.ActivityMainBinding
+import com.morselink.core.network.ConnectionHolder
 import com.morselink.core.transfer.model.TransferableFile
 import com.morselink.core.ui.CrashLog
 import com.morselink.core.ui.Permissions
@@ -33,6 +34,9 @@ class MainActivity : AppCompatActivity() {
 
     @Inject
     lateinit var sendArgs: SendArgs
+
+    @Inject
+    lateinit var connection: ConnectionHolder
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
@@ -157,7 +161,9 @@ class MainActivity : AppCompatActivity() {
             else -> emptyList()
         }
         if (uris.isEmpty()) return
-        sendArgs.externalUris = uris.map { uri ->
+        // Files shared in from another app are already chosen, so there is
+        // nothing to pick: queue them and open the connection screen.
+        connection.pendingOutgoing = uris.map { uri ->
             TransferableFile(
                 id = uri.toString(),
                 name = uri.lastPathSegment ?: "shared_file",
@@ -166,7 +172,7 @@ class MainActivity : AppCompatActivity() {
                 uri = uri,
             )
         }
-        navController.navigate(R.id.nav_send)
+        navController.navigate(android.net.Uri.parse("morselink://transfer"))
     }
 
     private fun requestBaselinePermissions() {

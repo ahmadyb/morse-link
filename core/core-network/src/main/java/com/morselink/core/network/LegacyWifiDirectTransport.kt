@@ -33,6 +33,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -376,11 +377,41 @@ class LegacyWifiDirectTransport @Inject constructor(
 
         private var controlSocket: Socket? = null
         private var dataSocket: Socket? = null
+
+        /**
+         * True while this session is being used to send.
+         *
+         * The control socket is read by whichever side is listening, and
+         * written by whoever is sending. Two readers cannot share one socket:
+         * readLine() is not thread-safe, and two of them interleaving over the
+         * same stream produce fragments of both messages - which is what a
+         * scrambled line like {"yp""euevle:0tt: in the log is. That is not a
+         * corrupt message, it is two readers tearing one between them.
+         *
+         * Cancelling the loop is the right way to stop it, but cancellation is
+         * cooperative and a loop a beat behind still reads. This flag is the
+         * backstop: the loop will not touch the socket while a send owns it,
+         * whatever the job bookkeeping is doing.
+         */
+        @Volatile
+        private var sending = false
         private var preset: Socket? = presetControl
         private var hadControl: Boolean = false
         private val sendMutex = Mutex()
 
         override suspend fun sendFile(file: TransferableFile): Flow<TransferProgress> = flow {
+            // Claim the control channel for the duration of this send. The
+            // receive loop watches this and stops reading, so the two never
+            // share the socket.
+            sending = true
+            try {
+                emitAll(sendFileOnce(file))
+            } finally {
+                sending = false
+            }
+        }
+
+        private fun sendFileOnce(file: TransferableFile): Flow<TransferProgress> = flow {
             val id = engine.begin(file, TransferDirection.OUTGOING, TransportType.LEGACY_WIFI_DIRECT)
             try {
                 withContext(Dispatchers.IO) {
@@ -584,7 +615,7 @@ class LegacyWifiDirectTransport @Inject constructor(
                 // sender was about to write, which is how a batch lost its
                 // handshake. Checking in every CONTROL_POLL_MS means a cancel
                 // actually takes effect.
-                while (kotlinx.coroutines.currentCoroutineContext().isActive) {
+                while (kotlinx.coroutines.currentCoroutineContext().isActive && !sending) {
                     // Idle is not the same as closed. readLine() throws on the
                     // socket timeout, and that used to be reported as "control
                     // channel closed" - so a receiver that waited more than the

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Key for the path a thumbnail row is currently bound to, so an icon
+         decoded on a background thread can be dropped if the row was recycled
+         for a different file while it was loading. -->
+    <item name="tag_icon_path" type="id" />
+</resources>

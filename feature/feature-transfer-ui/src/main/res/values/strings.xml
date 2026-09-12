@@ -25,6 +25,7 @@
     <string name="status_no_receiver">No receiver connected. Check both phones are on the same network.</string>
     <string name="status_connected">Connected to %1$s</string>
     <string name="status_connected_waiting">Connected to %1$s — waiting for files</string>
+    <string name="status_connected_summary">Connected to %1$s — %2$d sent, %3$d received</string>
     <string name="status_transferring">Transferring %1$d file(s)</string>
     <string name="status_transferring_via">Transferring %1$d file(s) via %2$s</string>
     <string name="status_cancelled">Cancelled</string>

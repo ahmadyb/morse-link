@@ -124,6 +124,14 @@ class WebShareServer @Inject constructor(
                         extra = JSONObject().apply {
                             put("uri", item.uri.toString())
                             put("date", item.dateModified)
+                            // The real directory, so the browser can group by
+                            // folder. Without this it has to fall back to the
+                            // MediaStore uri, which is content://media/external/
+                            // images/media for every photo on the device - one
+                            // key for everything, so all photos land in a
+                            // single "folder".
+                            item.path?.let { put("path", it) }
+                            item.bucketName?.let { put("bucket", it) }
                             if (item.durationMs > 0) put("duration", item.durationMs)
                             item.artist?.let { put("artist", it) }
                         }))
