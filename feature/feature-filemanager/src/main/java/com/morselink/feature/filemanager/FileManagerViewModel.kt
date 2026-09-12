@@ -395,6 +395,7 @@ class FileManagerViewModel @Inject constructor(
 
     fun onItemClick(row: FileRow) {
         when (row) {
+            is FileRow.Header -> Unit
             is FileRow.Library -> openLibrary(row.library)
             is FileRow.Category -> {
                 activeCategory = row.category

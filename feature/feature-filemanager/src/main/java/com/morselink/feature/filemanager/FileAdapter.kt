@@ -93,6 +93,7 @@ class FileAdapter(
             Glide.with(binding.thumb).clear(binding.thumb)
 
             when (row) {
+                is FileRow.Header -> Unit
                 is FileRow.Library -> {
                     binding.name.text = row.library.label()
                     binding.meta.text = if (row.count > 0) "${row.count}" else ""
