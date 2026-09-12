@@ -30,6 +30,7 @@ import javax.inject.Singleton
 @Singleton
 class OutgoingTransferCoordinator @Inject constructor(
     private val engine: TransferEngine,
+    private val incoming: IncomingTransferCoordinator,
 ) {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -62,6 +63,14 @@ class OutgoingTransferCoordinator @Inject constructor(
         MorselinkLog.d("tx: queueing ${files.size} file(s) for ${session.peer.name}")
         scope.launch {
             try {
+                // Take the channel before touching it, every time, rather than
+                // trusting whichever screen happened to start this send to have
+                // done it. A receive loop left running reads the same control
+                // socket the handshake writes to, and takes the resume reply
+                // out from under the send - which is what left a batch hanging
+                // on a thirty second timeout while the other end logged that it
+                // had replied.
+                incoming.stopAndJoin()
                 files.forEach { file ->
                     try {
                         val id = engine.begin(file, TransferDirection.OUTGOING, transport)
