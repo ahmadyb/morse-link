@@ -1,0 +1,85 @@
+----- in-app log -----
+09-09 17:21:59.441 D: transport: listening on 54321
+09-09 17:22:05.874 D: transport: inbound connection accepted
+09-09 17:22:05.916 D: tx: IMG_20260908_154557_243.jpg size=3351426 from /storage/emulated/0/DCIM/Camera/IMG_20260908_154557_243.jpg
+09-09 17:22:05.919 D: tx: IMG_20260908_154557_243.jpg metadata sent, waiting for resume
+09-09 17:22:06.218 D: tx: IMG_20260908_154557_243.jpg resume=3342336 (reply=resume)
+09-09 17:22:06.237 D: tx: data socket open, streaming IMG_20260908_154557_243.jpg
+09-09 17:22:06.263 D: tx: IMG_20260908_154557_243.jpg streamed
+09-09 17:22:06.277 D: tx: IMG_20260908_154542_705.jpg size=3615575 from /storage/emulated/0/DCIM/Camera/IMG_20260908_154542_705.jpg
+09-09 17:22:06.279 D: tx: IMG_20260908_154542_705.jpg metadata sent, waiting for resume
+09-09 17:22:08.191 D: tx: IMG_20260908_154542_705.jpg resume=3604480 (reply=resume)
+09-09 17:22:08.193 D: tx: data socket open, streaming IMG_20260908_154542_705.jpg
+09-09 17:22:08.200 D: tx: IMG_20260908_154542_705.jpg streamed
+09-09 17:22:08.212 D: tx: IMG_20260908_154539_692.jpg size=3132963 from /storage/emulated/0/DCIM/Camera/IMG_20260908_154539_692.jpg
+09-09 17:22:08.214 D: tx: IMG_20260908_154539_692.jpg metadata sent, waiting for resume
+09-09 17:22:09.827 D: tx: IMG_20260908_154539_692.jpg resume=0 (reply=resume)
+09-09 17:22:09.828 D: tx: data socket open, streaming IMG_20260908_154539_692.jpg
+09-09 17:22:10.321 D: tx: IMG_20260908_154539_692.jpg streamed
+09-09 17:27:19.584 D: transport: listening on 54321
+09-09 17:27:26.655 D: transport: inbound connection accepted
+09-09 17:27:26.709 D: tx: IMG_20260908_154557_243.jpg size=3351426 from /storage/emulated/0/DCIM/Camera/IMG_20260908_154557_243.jpg
+09-09 17:27:26.712 D: tx: IMG_20260908_154557_243.jpg metadata sent, waiting for resume
+09-09 17:27:26.845 D: tx: IMG_20260908_154557_243.jpg resume=0 (reply=resume)
+09-09 17:27:26.858 D: tx: data socket open, streaming IMG_20260908_154557_243.jpg
+09-09 17:27:27.344 D: tx: IMG_20260908_154557_243.jpg streamed
+09-09 17:27:27.357 D: tx: IMG_20260908_154542_705.jpg size=3615575 from /storage/emulated/0/DCIM/Camera/IMG_20260908_154542_705.jpg
+09-09 17:27:27.359 D: tx: IMG_20260908_154542_705.jpg metadata sent, waiting for resume
+09-09 17:27:30.011 D: tx: IMG_20260908_154542_705.jpg resume=0 (reply=resume)
+09-09 17:27:30.013 D: tx: data socket open, streaming IMG_20260908_154542_705.jpg
+09-09 17:27:30.514 D: tx: IMG_20260908_154542_705.jpg streamed
+09-09 17:27:30.525 D: tx: IMG_20260908_154539_692.jpg size=3132963 from /storage/emulated/0/DCIM/Camera/IMG_20260908_154539_692.jpg
+09-09 17:27:30.527 D: tx: IMG_20260908_154539_692.jpg metadata sent, waiting for resume
+09-09 17:27:32.232 D: tx: IMG_20260908_154539_692.jpg resume=0 (reply=resume)
+09-09 17:27:32.233 D: tx: data socket open, streaming IMG_20260908_154539_692.jpg
+09-09 17:27:32.657 D: tx: IMG_20260908_154539_692.jpg streamed
+09-09 17:27:32.667 D: tx: baccd158ab6e43dea16a36a3271d19ce.mp4 size=6026078 from /storage/emulated/0/Download/Status_saver/baccd158ab6e43dea16a36a3271d19ce.mp4
+09-09 17:27:32.669 D: tx: baccd158ab6e43dea16a36a3271d19ce.mp4 metadata sent, waiting for resume
+09-09 17:27:34.311 D: tx: baccd158ab6e43dea16a36a3271d19ce.mp4 resume=0 (reply=resume)
+09-09 17:27:34.313 D: tx: data socket open, streaming baccd158ab6e43dea16a36a3271d19ce.mp4
+09-09 17:27:35.206 D: tx: baccd158ab6e43dea16a36a3271d19ce.mp4 streamed
+09-09 17:29:07.976 D: transport: listening on 54321
+09-09 17:29:21.447 D: transport: inbound connection accepted
+09-09 17:29:21.460 D: tx: IMG_20260908_154557_243.jpg size=3351426 from /storage/emulated/0/DCIM/Camera/IMG_20260908_154557_243.jpg
+09-09 17:29:21.463 D: tx: IMG_20260908_154557_243.jpg metadata sent, waiting for resume
+09-09 17:29:21.545 D: tx: IMG_20260908_154557_243.jpg resume=0 (reply=resume)
+09-09 17:29:21.555 D: tx: data socket open, streaming IMG_20260908_154557_243.jpg
+09-09 17:29:22.059 D: tx: IMG_20260908_154557_243.jpg streamed
+09-09 17:29:22.067 D: tx: IMG_20260908_154542_705.jpg size=3615575 from /storage/emulated/0/DCIM/Camera/IMG_20260908_154542_705.jpg
+09-09 17:29:22.069 D: tx: IMG_20260908_154542_705.jpg metadata sent, waiting for resume
+09-09 17:29:23.692 D: tx: IMG_20260908_154542_705.jpg resume=0 (reply=resume)
+09-09 17:29:23.694 D: tx: data socket open, streaming IMG_20260908_154542_705.jpg
+09-09 17:29:24.154 D: tx: IMG_20260908_154542_705.jpg streamed
+09-09 17:29:24.173 D: tx: IMG_20260908_154539_692.jpg size=3132963 from /storage/emulated/0/DCIM/Camera/IMG_20260908_154539_692.jpg
+09-09 17:29:24.174 D: tx: IMG_20260908_154539_692.jpg metadata sent, waiting for resume
+09-09 17:29:27.082 D: tx: IMG_20260908_154539_692.jpg resume=0 (reply=resume)
+09-09 17:29:27.083 D: tx: data socket open, streaming IMG_20260908_154539_692.jpg
+09-09 17:29:27.509 D: tx: IMG_20260908_154539_692.jpg streamed
+09-09 17:29:27.517 D: tx: 20260826_203855.aac size=372728 from /storage/emulated/0/Music/PhoneRecord/08032707138/20260826_203855.aac
+09-09 17:29:27.518 D: tx: 20260826_203855.aac metadata sent, waiting for resume
+09-09 17:29:29.111 D: tx: 20260826_203855.aac resume=0 (reply=resume)
+09-09 17:29:29.113 D: tx: data socket open, streaming 20260826_203855.aac
+09-09 17:29:29.121 D: tx: 20260826_203855.aac streamed
+09-09 17:29:29.130 D: tx: Thunder VPN size=7912145 from /data/app/~~gMTHz0G1P4p-GXvnS_C86Q==/com.fast.free.unblock.thunder.vpn-BuxP-drAlIzQaOyelQ2B2w==/base.apk
+09-09 17:29:29.131 D: tx: Thunder VPN metadata sent, waiting for resume
+09-09 17:29:29.242 D: tx: Thunder VPN resume=0 (reply=resume)
+09-09 17:29:29.243 D: tx: data socket open, streaming Thunder VPN
+09-09 17:29:30.487 D: tx: Thunder VPN streamed
+09-09 17:29:30.495 D: tx: JAMB - Print Examination Slip.pdf size=612306 from /storage/emulated/0/Download/JAMB - Print Examination Slip.pdf
+09-09 17:29:30.496 D: tx: JAMB - Print Examination Slip.pdf metadata sent, waiting for resume
+09-09 17:29:30.647 D: tx: JAMB - Print Examination Slip.pdf resume=0 (reply=resume)
+09-09 17:29:30.648 D: tx: data socket open, streaming JAMB - Print Examination Slip.pdf
+09-09 17:29:30.686 D: tx: JAMB - Print Examination Slip.pdf streamed
+09-09 17:29:30.692 D: tx: statement2026-02-01-2026-02-03.pdf size=394015 from /storage/emulated/0/Download/statement2026-02-01-2026-02-03.pdf
+09-09 17:29:30.693 D: tx: statement2026-02-01-2026-02-03.pdf metadata sent, waiting for resume
+09-09 17:29:30.862 D: tx: statement2026-02-01-2026-02-03.pdf resume=0 (reply=resume)
+09-09 17:29:30.863 D: tx: data socket open, streaming statement2026-02-01-2026-02-03.pdf
+09-09 17:29:30.891 D: tx: statement2026-02-01-2026-02-03.pdf streamed
+09-09 17:29:30.901 D: tx: Bsc Computer Science.pdf size=7097884 from /storage/emulated/0/Download/Bluetooth/Bsc Computer Science.pdf
+09-09 17:29:30.902 D: tx: Bsc Computer Science.pdf metadata sent, waiting for resume
+09-09 17:29:31.002 D: tx: Bsc Computer Science.pdf resume=0 (reply=resume)
+09-09 17:29:31.003 D: tx: data socket open, streaming Bsc Computer Science.pdf
+09-09 17:29:32.071 D: tx: Bsc Computer Science.pdf streamed
+
+----- logcat -----
+(empty)

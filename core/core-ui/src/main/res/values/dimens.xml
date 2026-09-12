@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- §12.3 spacing grid, 8dp base unit -->
+    <dimen name="unit">8dp</dimen>
+    <dimen name="unit_half">4dp</dimen>
+    <dimen name="unit_2">16dp</dimen>
+    <dimen name="unit_3">24dp</dimen>
+    <dimen name="unit_4">32dp</dimen>
+    <dimen name="screen_padding">16dp</dimen>
+    <dimen name="list_item_padding_v">12dp</dimen>
+    <dimen name="radius_card">12dp</dimen>
+    <dimen name="radius_pill">24dp</dimen>
+    <dimen name="radius_thumb">8dp</dimen>
+    <dimen name="icon_size">24dp</dimen>
+    <dimen name="thumb_size">56dp</dimen>
+    <dimen name="appbar_height">56dp</dimen>
+</resources>

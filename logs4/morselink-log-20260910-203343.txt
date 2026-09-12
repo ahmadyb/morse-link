@@ -1,0 +1,397 @@
+----- in-app log -----
+09-10 08:43:45.640 D: transport: listening on 54321
+09-10 08:43:46.917 D: transport: inbound connection accepted
+09-10 08:43:46.927 D: tx: IMG-20260910-WA0001.jpg size=122604 from /storage/emulated/0/WhatsApp/Media/WhatsApp Images/IMG-20260910-WA0001.jpg
+09-10 08:43:46.928 D: tx: IMG-20260910-WA0001.jpg metadata sent, waiting for resume
+09-10 08:43:46.994 D: tx: IMG-20260910-WA0001.jpg resume=0 (reply=resume)
+09-10 08:43:47.005 D: tx: data socket open, streaming IMG-20260910-WA0001.jpg
+09-10 08:43:47.014 D: tx: IMG-20260910-WA0001.jpg sent to Mo Phone
+09-10 09:04:12.988 D: webshare: server started on port 33455
+09-10 09:05:57.828 D: webshare: GET /
+09-10 09:06:01.307 D: webshare: GET /api/info
+09-10 09:06:01.323 D: webshare: GET /favicon.ico
+09-10 09:06:04.032 D: webshare: GET /api/theme
+09-10 09:06:04.164 D: webshare: GET /api/info
+09-10 09:06:04.574 D: webshare: GET /api/theme
+09-10 09:07:25.122 D: webshare: POST /upload
+09-10 09:07:25.139 D: webshare: receiving upload Quantum.Leap.S01E04.(NKIRI.COM).mkv
+09-10 09:07:44.021 D: webshare: saved Quantum.Leap.S01E04.(NKIRI.COM).mkv (109995335 bytes)
+09-10 09:07:50.285 D: webshare: GET /
+09-10 09:07:51.211 D: webshare: GET /api/info
+09-10 09:07:52.282 D: webshare: GET /api/theme
+09-10 09:07:52.416 D: webshare: GET /api/info
+09-10 09:07:54.053 D: webshare: GET /api/theme
+09-10 09:07:55.285 D: webshare: server stopped
+09-10 09:07:57.587 D: webshare: server stopped
+09-10 09:08:55.966 D: webshare: server started on port 33455
+09-10 09:09:04.511 D: webshare: GET /
+09-10 09:09:04.763 D: webshare: GET /api/info
+09-10 09:09:06.162 D: webshare: GET /api/theme
+09-10 09:09:06.255 D: webshare: GET /api/info
+09-10 09:09:06.728 D: webshare: GET /api/theme
+09-10 09:09:14.961 D: webshare: POST /upload
+09-10 09:09:14.965 D: webshare: receiving upload Rich Dad s Guide to ... by Robert T. Kiyosaki  ... (z-lib.or.pdf
+09-10 09:09:15.806 D: webshare: saved Rich Dad s Guide to ... by Robert T. Kiyosaki  ... (z-lib.or.pdf (5084539 bytes)
+09-10 09:09:53.330 D: webshare: POST /upload
+09-10 09:09:53.331 D: webshare: POST /upload
+09-10 09:09:53.336 D: webshare: POST /upload
+09-10 09:09:53.345 D: webshare: POST /upload
+09-10 09:09:54.139 D: webshare: receiving upload A Thousand Splendid by Khaled Hosseini (z-lib.org).pdf
+09-10 09:09:54.139 D: webshare: receiving upload Alhaji Abdurrazaq Yahya Bello.pdf
+09-10 09:09:54.140 D: webshare: receiving upload Alhaji Abdurrazaq Yahya Bello (1) (1).pdf
+09-10 09:09:54.141 D: webshare: receiving upload Alhaji Abdurrazaq Yahya Bello (1).pdf
+09-10 09:09:54.831 D: webshare: saved A Thousand Splendid by Khaled Hosseini (z-lib.org).pdf (1460480 bytes)
+09-10 09:10:01.803 D: webshare: POST /upload
+09-10 09:10:01.977 D: webshare: receiving upload 1.png
+09-10 09:10:05.539 D: webshare: saved 1.png (294239 bytes)
+09-10 09:11:05.116 W: webshare: upload failed - SocketTimeoutException
+09-10 09:11:05.116 W: webshare: upload failed - SocketTimeoutException
+09-10 09:11:05.117 W: webshare: upload failed - SocketTimeoutException
+09-10 09:11:05.116 W: webshare: upload failed - SocketTimeoutException
+09-10 09:11:05.117 W: webshare: upload failed - SocketTimeoutException
+09-10 09:11:05.117 W: webshare: upload failed - SocketTimeoutException
+09-10 09:11:05.289 D: webshare: POST /upload
+09-10 09:11:05.326 D: webshare: receiving upload Jawabin_Akan_Alqur'aani_Maigirma_27_12_1444_15_07_2023_A_Ummul_Quraa.mp3
+09-10 09:11:05.402 D: webshare: GET /api/info
+09-10 09:11:05.578 D: webshare: GET /api/info
+09-10 09:11:05.578 D: webshare: GET /api/info
+09-10 09:11:05.579 D: webshare: GET /api/info
+09-10 09:11:05.579 D: webshare: GET /api/info
+09-10 09:11:05.867 D: webshare: saved Jawabin_Akan_Alqur'aani_Maigirma_27_12_1444_15_07_2023_A_Ummul_Quraa.mp3 (2563139 bytes)
+09-10 09:11:09.759 D: webshare: GET /api/info
+09-10 09:11:09.843 D: webshare: GET /api/theme
+09-10 09:11:09.903 D: webshare: GET /api/theme
+09-10 09:11:09.981 D: webshare: GET /api/theme
+09-10 09:11:10.010 D: webshare: GET /api/theme
+09-10 09:11:10.010 D: webshare: GET /api/theme
+09-10 09:11:10.229 D: webshare: GET /api/theme
+09-10 09:12:00.017 D: webshare: POST /upload
+09-10 09:12:00.026 D: webshare: receiving upload AUD-20230725-WA0002 (1).mp3
+09-10 09:12:02.464 D: webshare: saved AUD-20230725-WA0002 (1).mp3 (15267695 bytes)
+09-10 09:12:20.006 W: webshare: upload failed - SocketTimeoutException
+09-10 09:12:20.293 D: webshare: GET /api/info
+09-10 09:12:21.321 D: webshare: GET /api/theme
+09-10 09:12:22.466 W: webshare: upload failed - SocketTimeoutException
+09-10 09:12:22.771 D: webshare: GET /api/info
+09-10 09:12:23.263 D: webshare: GET /api/theme
+09-10 09:12:28.496 D: webshare: server stopped
+09-10 09:12:31.044 D: webshare: server stopped
+09-10 13:38:09.819 D: transport: connected to 192.168.25.242:54321
+09-10 13:38:09.842 D: transport: sender identified itself as Mo Phone
+09-10 13:38:10.420 D: rx: receiver loop started
+09-10 13:38:11.129 D: rx: IMG-20260910-WA0007.jpeg metadata ok (823371 B), resuming at 0
+09-10 13:38:11.131 D: rx: IMG-20260910-WA0007.jpeg resume sent
+09-10 13:38:11.150 D: rx: IMG-20260910-WA0007.jpeg data socket open, reading chunks
+09-10 13:38:17.184 D: rx: control channel closed
+09-10 13:38:17.185 D: rx: receiver loop ended
+09-10 13:38:40.709 D: transport: listening on 54321
+09-10 13:38:42.594 D: transport: inbound connection accepted
+09-10 13:38:42.627 D: tx: IMG-20260910-WA0004.jpg size=99340 from /storage/emulated/0/WhatsApp/Media/WhatsApp Images/IMG-20260910-WA0004.jpg
+09-10 13:38:42.629 D: tx: IMG-20260910-WA0004.jpg metadata sent, waiting for resume
+09-10 13:38:42.679 D: tx: IMG-20260910-WA0004.jpg resume=0 (reply=resume)
+09-10 13:38:42.683 D: tx: data socket open, streaming IMG-20260910-WA0004.jpg
+09-10 13:38:42.746 D: tx: IMG-20260910-WA0004.jpg sent to Mo Phone
+09-10 13:38:42.769 D: tx: Screenshot_2026-09-10-09-39-14.png size=303715 from /storage/emulated/0/Pictures/Screenshots/Screenshot_2026-09-10-09-39-14.png
+09-10 13:38:42.770 D: tx: Screenshot_2026-09-10-09-39-14.png metadata sent, waiting for resume
+09-10 13:38:42.885 D: tx: Screenshot_2026-09-10-09-39-14.png resume=0 (reply=resume)
+09-10 13:38:42.886 D: tx: data socket open, streaming Screenshot_2026-09-10-09-39-14.png
+09-10 13:38:42.903 D: tx: Screenshot_2026-09-10-09-39-14.png sent to Mo Phone
+09-10 13:41:34.821 D: transport: listening on 54321
+09-10 13:41:40.926 D: transport: inbound connection accepted
+09-10 13:41:40.940 D: tx: IMG-20260910-WA0004.jpg size=99340 from /storage/emulated/0/WhatsApp/Media/WhatsApp Images/IMG-20260910-WA0004.jpg
+09-10 13:41:40.941 D: tx: IMG-20260910-WA0004.jpg metadata sent, waiting for resume
+09-10 13:41:40.988 D: tx: IMG-20260910-WA0004.jpg resume=0 (reply=resume)
+09-10 13:41:40.997 D: tx: data socket open, streaming IMG-20260910-WA0004.jpg
+09-10 13:41:41.020 D: tx: IMG-20260910-WA0004.jpg sent to Mo Phone
+09-10 13:41:41.028 D: tx: Screenshot_2026-09-10-09-39-14.png size=303715 from /storage/emulated/0/Pictures/Screenshots/Screenshot_2026-09-10-09-39-14.png
+09-10 13:41:41.030 D: tx: Screenshot_2026-09-10-09-39-14.png metadata sent, waiting for resume
+09-10 13:41:41.174 D: tx: Screenshot_2026-09-10-09-39-14.png resume=0 (reply=resume)
+09-10 13:41:41.175 D: tx: data socket open, streaming Screenshot_2026-09-10-09-39-14.png
+09-10 13:41:41.200 D: tx: Screenshot_2026-09-10-09-39-14.png sent to Mo Phone
+09-10 13:41:41.208 D: tx: VID-20260818-WA0027.mp4 size=3519708 from /storage/emulated/0/WhatsApp/Media/WhatsApp Video/VID-20260818-WA0027.mp4
+09-10 13:41:41.211 D: tx: VID-20260818-WA0027.mp4 metadata sent, waiting for resume
+09-10 13:41:41.364 D: tx: VID-20260818-WA0027.mp4 resume=0 (reply=resume)
+09-10 13:41:41.364 D: tx: data socket open, streaming VID-20260818-WA0027.mp4
+09-10 13:41:41.951 D: tx: VID-20260818-WA0027.mp4 sent to Mo Phone
+09-10 13:41:41.964 D: tx: ASALIN MAULIDI.mp3 size=8020639 from /storage/emulated/0/Music/ASALIN MAULIDI.mp3
+09-10 13:41:41.965 D: tx: ASALIN MAULIDI.mp3 metadata sent, waiting for resume
+09-10 13:41:42.497 D: tx: ASALIN MAULIDI.mp3 resume=0 (reply=resume)
+09-10 13:41:42.500 D: tx: data socket open, streaming ASALIN MAULIDI.mp3
+09-10 13:41:43.838 D: tx: ASALIN MAULIDI.mp3 sent to Mo Phone
+09-10 13:49:25.038 D: webshare: server stopped
+09-10 15:22:03.930 D: webshare: server started on port 33455
+09-10 15:22:06.949 D: webshare: GET /
+09-10 15:22:07.221 D: webshare: GET /api/info
+09-10 15:22:11.791 D: webshare: GET /api/theme
+09-10 15:22:11.936 D: webshare: GET /api/info
+09-10 15:22:16.040 D: webshare: GET /api/theme
+09-10 15:22:41.640 D: webshare: POST /upload
+09-10 15:22:41.912 D: webshare: receiving upload Mashle_-_18_360p.mp4
+09-10 15:22:55.137 D: webshare: saved Mashle_-_18_360p.mp4 (50778893 bytes)
+09-10 15:23:00.370 D: webshare: server stopped
+09-10 15:23:00.381 W: webshare: upload failed - Socket closed
+09-10 15:24:02.241 D: webshare: server started on port 33455
+09-10 15:24:07.623 D: webshare: GET /
+09-10 15:24:07.819 D: webshare: GET /api/info
+09-10 15:24:11.966 D: webshare: GET /api/theme
+09-10 15:24:12.036 D: webshare: GET /api/info
+09-10 15:24:12.911 D: webshare: GET /api/theme
+09-10 15:24:13.068 D: webshare: GET /api/files
+09-10 15:24:18.960 D: webshare: GET /api/files
+09-10 15:24:22.780 D: webshare: GET /api/files
+09-10 15:24:28.680 D: webshare: GET /api/files
+09-10 15:24:30.833 D: webshare: GET /api/files
+09-10 15:24:54.792 D: webshare: GET /api/files
+09-10 15:24:57.696 D: webshare: GET /api/files
+09-10 15:25:12.197 D: webshare: GET /download
+09-10 15:25:12.199 D: webshare: download requested file:/storage/emulated/0/Telegram/Telegram Video/4_5819133807894211753.mp4
+09-10 15:25:25.871 D: webshare: server stopped
+09-10 19:25:50.743 D: webshare: server stopped
+09-10 19:27:01.307 D: sender: advertising 192.168.43.1:54321, waiting for a receiver
+09-10 19:27:01.314 D: transport: listening on 54321
+09-10 19:27:05.164 D: transport: inbound connection accepted
+09-10 19:27:05.191 D: sender: receiver connected from Mo Phone
+09-10 19:27:05.197 D: tx: queueing 1 file(s) for Mo Phone
+09-10 19:27:05.205 D: tx: Morselink size=8785996 from /data/app/com.morselink.app-1/base.apk
+09-10 19:27:05.211 D: tx: Morselink metadata sent, waiting for resume
+09-10 19:27:05.261 D: tx: Morselink resume=0 (reply=resume)
+09-10 19:27:05.268 D: tx: data socket open, streaming Morselink
+09-10 19:27:06.761 D: tx: Morselink sent to Mo Phone
+09-10 19:27:18.280 D: rx: receiver loop started
+09-10 19:27:18.281 D: rx: control channel closed
+09-10 19:27:18.282 D: rx: receiver loop ended
+09-10 19:29:53.405 D: transport: connected to 192.168.43.173:54321
+09-10 19:29:53.434 D: transport: sender identified itself as Mo Phone
+09-10 19:29:53.493 D: rx: receiver loop started
+09-10 19:29:53.506 D: rx: IMG_20260910_175527_744.jpg metadata ok (2890227 B), resuming at 0
+09-10 19:29:53.507 D: rx: IMG_20260910_175527_744.jpg resume sent
+09-10 19:29:53.521 D: rx: IMG_20260910_175527_744.jpg data socket open, reading chunks
+09-10 19:30:24.154 D: rx: control channel closed
+09-10 19:30:24.155 D: rx: receiver loop ended
+09-10 19:31:00.630 D: tx: queueing 2 file(s) for Mo Phone
+09-10 19:31:00.634 D: tx: IMG_20260908_212927_050.mp4 size=51623106 from /storage/emulated/0/Pictures/Telegram/IMG_20260908_212927_050.mp4
+09-10 19:31:00.636 D: tx: IMG_20260908_212927_050.mp4 FAILED IOException: The connection to Mo Phone was closed
+09-10 19:31:00.650 D: tx: IMG_20260908_223759_601.mp4 size=78877776 from /storage/emulated/0/Pictures/Telegram/IMG_20260908_223759_601.mp4
+09-10 19:31:00.651 D: tx: IMG_20260908_223759_601.mp4 FAILED IOException: The connection to Mo Phone was closed
+09-10 19:32:31.511 D: transport: connected to 192.168.43.173:54321
+09-10 19:32:31.519 D: transport: sender identified itself as Mo Phone
+09-10 19:32:31.631 D: rx: receiver loop started
+09-10 19:32:31.640 D: rx: Screenshot_20260910-193007.png metadata ok (498307 B), resuming at 0
+09-10 19:32:31.641 D: rx: Screenshot_20260910-193007.png resume sent
+09-10 19:32:31.652 D: rx: Screenshot_20260910-193007.png data socket open, reading chunks
+09-10 19:32:31.852 D: rx: Screenshot_20260910-193126.png metadata ok (78705 B), resuming at 0
+09-10 19:32:31.853 D: rx: Screenshot_20260910-193126.png resume sent
+09-10 19:32:31.861 D: rx: Screenshot_20260910-193126.png data socket open, reading chunks
+09-10 19:32:50.001 D: tx: queueing 2 file(s) for Mo Phone
+09-10 19:32:50.003 D: tx: IMG_20260908_223759_601.mp4 size=78877776 from /storage/emulated/0/Pictures/Telegram/IMG_20260908_223759_601.mp4
+09-10 19:32:50.004 D: tx: IMG_20260908_223759_601.mp4 metadata sent, waiting for resume
+09-10 19:33:01.925 D: rx: control channel closed
+09-10 19:33:01.926 D: rx: receiver loop ended
+09-10 19:33:01.929 D: tx: IMG_20260908_223759_601.mp4 FAILED SocketException: Socket closed
+09-10 19:33:01.939 D: tx: IMG_20260908_212927_050.mp4 size=51623106 from /storage/emulated/0/Pictures/Telegram/IMG_20260908_212927_050.mp4
+09-10 19:33:01.940 D: tx: IMG_20260908_212927_050.mp4 FAILED IOException: The connection to Mo Phone was closed
+09-10 19:35:32.629 D: sender: advertising 192.168.43.1:54321, waiting for a receiver
+09-10 19:35:32.631 D: transport: listening on 54321
+09-10 19:35:41.562 D: transport: inbound connection accepted
+09-10 19:35:41.564 D: sender: receiver connected from Mo Phone
+09-10 19:35:41.565 D: tx: queueing 1 file(s) for Mo Phone
+09-10 19:35:41.567 D: tx: baccd158ab6e43dea16a36a3271d19ce.mp4 size=6026078 from /storage/emulated/0/Download/Morselink/baccd158ab6e43dea16a36a3271d19ce.mp4
+09-10 19:35:41.569 D: tx: baccd158ab6e43dea16a36a3271d19ce.mp4 metadata sent, waiting for resume
+09-10 19:35:41.620 D: tx: baccd158ab6e43dea16a36a3271d19ce.mp4 resume=0 (reply=resume)
+09-10 19:35:41.625 D: tx: data socket open, streaming baccd158ab6e43dea16a36a3271d19ce.mp4
+09-10 19:35:42.730 D: tx: baccd158ab6e43dea16a36a3271d19ce.mp4 sent to Mo Phone
+09-10 19:36:25.440 D: tx: queueing 2 file(s) for Mo Phone
+09-10 19:36:25.450 D: tx: baccd158ab6e43dea16a36a3271d19ce.mp4 size=6026078 from /storage/emulated/0/Download/Morselink/baccd158ab6e43dea16a36a3271d19ce.mp4
+09-10 19:36:25.451 D: tx: baccd158ab6e43dea16a36a3271d19ce.mp4 metadata sent, waiting for resume
+09-10 19:36:25.453 D: tx: baccd158ab6e43dea16a36a3271d19ce.mp4 resume=0 (reply=)
+09-10 19:36:25.454 D: tx: data socket open, streaming baccd158ab6e43dea16a36a3271d19ce.mp4
+09-10 19:36:25.496 D: tx: baccd158ab6e43dea16a36a3271d19ce.mp4 FAILED SocketException: sendto failed: EPIPE (Broken pipe)
+09-10 19:36:25.503 D: tx: Screenshot_2026-09-10-15-41-22.png size=127216 from /storage/emulated/0/Pictures/Screenshots/Screenshot_2026-09-10-15-41-22.png
+09-10 19:36:25.505 D: tx: Screenshot_2026-09-10-15-41-22.png FAILED SocketException: sendto failed: EPIPE (Broken pipe)
+09-10 19:37:08.382 D: sender: advertising 192.168.43.1:54321, waiting for a receiver
+09-10 19:37:08.384 D: transport: listening on 54321
+09-10 19:37:10.701 D: transport: inbound connection accepted
+09-10 19:37:10.705 D: sender: receiver connected from Mo Phone
+09-10 19:37:10.707 D: tx: queueing 2 file(s) for Mo Phone
+09-10 19:37:10.712 D: tx: baccd158ab6e43dea16a36a3271d19ce.mp4 size=6026078 from /storage/emulated/0/Download/Morselink/baccd158ab6e43dea16a36a3271d19ce.mp4
+09-10 19:37:10.716 D: tx: baccd158ab6e43dea16a36a3271d19ce.mp4 metadata sent, waiting for resume
+09-10 19:37:10.758 D: tx: baccd158ab6e43dea16a36a3271d19ce.mp4 resume=0 (reply=resume)
+09-10 19:37:10.764 D: tx: data socket open, streaming baccd158ab6e43dea16a36a3271d19ce.mp4
+09-10 19:37:11.836 D: tx: baccd158ab6e43dea16a36a3271d19ce.mp4 sent to Mo Phone
+09-10 19:37:11.839 D: tx: Screenshot_2026-09-10-15-41-22.png size=127216 from /storage/emulated/0/Pictures/Screenshots/Screenshot_2026-09-10-15-41-22.png
+09-10 19:37:11.841 D: tx: Screenshot_2026-09-10-15-41-22.png metadata sent, waiting for resume
+09-10 19:37:12.118 D: tx: Screenshot_2026-09-10-15-41-22.png resume=0 (reply=resume)
+09-10 19:37:12.124 D: tx: data socket open, streaming Screenshot_2026-09-10-15-41-22.png
+09-10 19:37:12.165 D: tx: Screenshot_2026-09-10-15-41-22.png sent to Mo Phone
+09-10 19:37:20.474 D: tx: queueing 2 file(s) for Mo Phone
+09-10 19:37:20.476 D: tx: baccd158ab6e43dea16a36a3271d19ce.mp4 size=6026078 from /storage/emulated/0/Download/Morselink/baccd158ab6e43dea16a36a3271d19ce.mp4
+09-10 19:37:20.477 D: tx: baccd158ab6e43dea16a36a3271d19ce.mp4 metadata sent, waiting for resume
+09-10 19:37:20.490 D: tx: baccd158ab6e43dea16a36a3271d19ce.mp4 resume=0 (reply=resume)
+09-10 19:37:20.491 D: tx: data socket open, streaming baccd158ab6e43dea16a36a3271d19ce.mp4
+09-10 19:37:21.459 D: tx: baccd158ab6e43dea16a36a3271d19ce.mp4 sent to Mo Phone
+09-10 19:37:21.461 D: tx: Screenshot_2026-09-10-15-41-12.png size=266496 from /storage/emulated/0/Pictures/Screenshots/Screenshot_2026-09-10-15-41-12.png
+09-10 19:37:21.463 D: tx: Screenshot_2026-09-10-15-41-12.png metadata sent, waiting for resume
+09-10 19:37:21.776 D: tx: Screenshot_2026-09-10-15-41-12.png resume=0 (reply=resume)
+09-10 19:37:21.777 D: tx: data socket open, streaming Screenshot_2026-09-10-15-41-12.png
+09-10 19:37:21.793 D: tx: Screenshot_2026-09-10-15-41-12.png sent to Mo Phone
+09-10 19:37:27.406 D: tx: queueing 2 file(s) for Mo Phone
+09-10 19:37:27.407 D: tx: baccd158ab6e43dea16a36a3271d19ce.mp4 size=6026078 from /storage/emulated/0/Download/Morselink/baccd158ab6e43dea16a36a3271d19ce.mp4
+09-10 19:37:27.408 D: tx: baccd158ab6e43dea16a36a3271d19ce.mp4 metadata sent, waiting for resume
+09-10 19:37:27.453 D: tx: baccd158ab6e43dea16a36a3271d19ce.mp4 resume=0 (reply=resume)
+09-10 19:37:27.454 D: tx: data socket open, streaming baccd158ab6e43dea16a36a3271d19ce.mp4
+09-10 19:37:28.456 D: tx: baccd158ab6e43dea16a36a3271d19ce.mp4 sent to Mo Phone
+09-10 19:37:28.458 D: tx: Screenshot_2026-09-10-13-46-58.png size=102605 from /storage/emulated/0/Pictures/Screenshots/Screenshot_2026-09-10-13-46-58.png
+09-10 19:37:28.459 D: tx: Screenshot_2026-09-10-13-46-58.png metadata sent, waiting for resume
+09-10 19:37:28.761 D: tx: Screenshot_2026-09-10-13-46-58.png resume=0 (reply=resume)
+09-10 19:37:28.762 D: tx: data socket open, streaming Screenshot_2026-09-10-13-46-58.png
+09-10 19:37:28.778 D: tx: Screenshot_2026-09-10-13-46-58.png sent to Mo Phone
+09-10 19:48:43.896 D: sender: advertising 192.168.43.1:54321, waiting for a receiver
+09-10 19:48:43.901 D: transport: listening on 54321
+09-10 19:48:48.031 D: sender: advertising 192.168.43.1:54321, waiting for a receiver
+09-10 19:48:48.038 W: sender: no receiver dialled in
+09-10 19:48:50.189 D: transport: inbound connection accepted
+09-10 19:48:50.198 W: sender: no receiver dialled in
+09-10 19:49:17.839 D: sender: advertising 192.168.43.1:54321, waiting for a receiver
+09-10 19:49:17.840 D: transport: listening on 54321
+09-10 19:49:43.580 D: transport: inbound connection accepted
+09-10 19:49:43.645 D: sender: receiver connected from Mo Phone
+09-10 19:49:43.674 D: tx: queueing 2 file(s) for Mo Phone
+09-10 19:49:43.701 D: tx: IMG_20260908_212927_050.mp4 size=51623106 from /storage/emulated/0/Pictures/Telegram/IMG_20260908_212927_050.mp4
+09-10 19:49:43.706 D: tx: IMG_20260908_212927_050.mp4 metadata sent, waiting for resume
+09-10 19:49:43.723 D: tx: IMG_20260908_212927_050.mp4 resume=0 (reply=resume)
+09-10 19:49:43.727 D: tx: data socket open, streaming IMG_20260908_212927_050.mp4
+09-10 19:49:52.547 D: tx: IMG_20260908_212927_050.mp4 sent to Mo Phone
+09-10 19:49:52.565 D: tx: IMG_20260908_211124_079.mp4 size=312052832 from /storage/emulated/0/Pictures/Telegram/IMG_20260908_211124_079.mp4
+09-10 19:49:52.566 D: tx: IMG_20260908_211124_079.mp4 metadata sent, waiting for resume
+09-10 19:49:53.621 D: tx: IMG_20260908_211124_079.mp4 resume=0 (reply=resume)
+09-10 19:49:53.623 D: tx: data socket open, streaming IMG_20260908_211124_079.mp4
+09-10 19:49:54.726 D: rx: receiver loop started
+09-10 19:50:24.729 D: rx: control channel closed
+09-10 19:50:24.729 D: rx: receiver loop ended
+09-10 19:50:24.743 D: tx: IMG_20260908_211124_079.mp4 FAILED SocketException: Socket closed
+09-10 19:51:07.365 D: transport: connected to 192.168.43.173:54321
+09-10 19:51:07.374 D: transport: sender identified itself as Mo Phone
+09-10 19:51:07.444 D: rx: receiver loop started
+09-10 19:51:07.453 D: rx: Screenshot_2026-09-10-13-46-58 (1).png metadata ok (102605 B), resuming at 0
+09-10 19:51:07.454 D: rx: Screenshot_2026-09-10-13-46-58 (1).png resume sent
+09-10 19:51:07.468 D: rx: Screenshot_2026-09-10-13-46-58 (1).png data socket open, reading chunks
+09-10 19:51:18.286 D: rx: control channel closed
+09-10 19:51:18.287 D: rx: receiver loop ended
+09-10 19:53:05.712 D: sender: advertising 192.168.43.1:54321, waiting for a receiver
+09-10 19:53:05.720 D: transport: listening on 54321
+09-10 19:53:11.338 D: sender: advertising 192.168.43.1:54321, waiting for a receiver
+09-10 19:53:11.341 W: sender: no receiver dialled in
+09-10 19:53:16.171 D: transport: inbound connection accepted
+09-10 19:53:16.176 W: sender: no receiver dialled in
+09-10 20:26:28.839 D: sender: advertising 192.168.43.1:54321, waiting for a receiver
+09-10 20:26:28.845 D: transport: listening on 54321
+09-10 20:26:33.043 D: transport: inbound connection accepted
+09-10 20:26:33.051 D: sender: receiver connected from Mo Phone
+09-10 20:26:33.056 D: tx: queueing 1 file(s) for Mo Phone
+09-10 20:26:33.070 D: tx: IMG_20260908_223759_601.mp4 size=78877776 from /storage/emulated/0/Pictures/Telegram/IMG_20260908_223759_601.mp4
+09-10 20:26:33.075 D: tx: IMG_20260908_223759_601.mp4 metadata sent, waiting for resume
+09-10 20:26:33.123 D: tx: IMG_20260908_223759_601.mp4 resume=0 (reply=resume)
+09-10 20:26:33.129 D: tx: data socket open, streaming IMG_20260908_223759_601.mp4
+09-10 20:26:37.666 D: rx: receiver loop started
+09-10 20:26:46.600 D: tx: IMG_20260908_223759_601.mp4 sent to Mo Phone
+09-10 20:26:53.981 D: tx: queueing 1 file(s) for Mo Phone
+09-10 20:26:53.984 D: tx: IMG_20260908_212927_050.mp4 size=51623106 from /storage/emulated/0/Pictures/Telegram/IMG_20260908_212927_050.mp4
+09-10 20:26:53.985 D: tx: IMG_20260908_212927_050.mp4 metadata sent, waiting for resume
+09-10 20:26:54.087 D: tx: IMG_20260908_212927_050.mp4 resume=0 (reply=null)
+09-10 20:26:54.088 D: tx: data socket open, streaming IMG_20260908_212927_050.mp4
+09-10 20:27:02.864 D: tx: IMG_20260908_212927_050.mp4 sent to Mo Phone
+09-10 20:27:16.209 D: tx: queueing 1 file(s) for Mo Phone
+09-10 20:27:16.212 D: tx: IMG_20260908_211124_079.mp4 size=312052832 from /storage/emulated/0/Pictures/Telegram/IMG_20260908_211124_079.mp4
+09-10 20:27:16.213 D: tx: IMG_20260908_211124_079.mp4 metadata sent, waiting for resume
+09-10 20:27:16.309 D: rx: skipping control line: {{p:rsm""au"12900"et:"
+09-10 20:27:46.304 D: rx: control channel closed
+09-10 20:27:46.304 D: tx: IMG_20260908_211124_079.mp4 FAILED SocketTimeoutException: null
+09-10 20:27:46.305 D: rx: receiver loop ended
+09-10 20:28:14.034 D: tx: queueing 1 file(s) for Mo Phone
+09-10 20:28:14.036 D: tx: IMG_20260908_211124_079.mp4 size=312052832 from /storage/emulated/0/Pictures/Telegram/IMG_20260908_211124_079.mp4
+09-10 20:28:14.037 D: tx: IMG_20260908_211124_079.mp4 FAILED IOException: The connection to Mo Phone was closed
+09-10 20:28:49.914 D: sender: advertising 192.168.43.1:54321, waiting for a receiver
+09-10 20:28:49.916 D: transport: listening on 54321
+09-10 20:28:59.454 D: transport: inbound connection accepted
+09-10 20:28:59.458 D: sender: receiver connected from Mo Phone
+09-10 20:28:59.460 D: tx: queueing 1 file(s) for Mo Phone
+09-10 20:28:59.465 D: tx: IMG_20260908_205716_243.mp4 size=33996837 from /storage/emulated/0/Pictures/Telegram/IMG_20260908_205716_243.mp4
+09-10 20:28:59.469 D: tx: IMG_20260908_205716_243.mp4 metadata sent, waiting for resume
+09-10 20:28:59.511 D: tx: IMG_20260908_205716_243.mp4 resume=0 (reply=resume)
+09-10 20:28:59.518 D: tx: data socket open, streaming IMG_20260908_205716_243.mp4
+09-10 20:29:04.640 D: rx: receiver loop started
+09-10 20:29:05.326 D: tx: IMG_20260908_205716_243.mp4 sent to Mo Phone
+09-10 20:29:19.667 D: tx: queueing 1 file(s) for Mo Phone
+09-10 20:29:19.669 D: tx: IMG_20260908_205716_243.mp4 size=33996837 from /storage/emulated/0/Pictures/Telegram/IMG_20260908_205716_243.mp4
+09-10 20:29:19.670 D: tx: IMG_20260908_205716_243.mp4 metadata sent, waiting for resume
+09-10 20:29:19.699 D: rx: skipping control line: {ye:rsm""au"0"et:"
+09-10 20:29:49.694 D: tx: IMG_20260908_205716_243.mp4 FAILED SocketTimeoutException: null
+09-10 20:29:49.694 D: rx: control channel closed
+09-10 20:29:49.695 D: rx: receiver loop ended
+09-10 20:30:16.381 D: sender: advertising 192.168.43.1:54321, waiting for a receiver
+09-10 20:30:16.383 D: transport: listening on 54321
+09-10 20:30:19.036 D: transport: inbound connection accepted
+09-10 20:30:19.040 D: sender: receiver connected from Mo Phone
+09-10 20:30:19.042 D: tx: queueing 1 file(s) for Mo Phone
+09-10 20:30:19.047 D: tx: IMG_20260908_205716_243.mp4 size=33996837 from /storage/emulated/0/Pictures/Telegram/IMG_20260908_205716_243.mp4
+09-10 20:30:19.051 D: tx: IMG_20260908_205716_243.mp4 metadata sent, waiting for resume
+09-10 20:30:19.104 D: tx: IMG_20260908_205716_243.mp4 resume=0 (reply=resume)
+09-10 20:30:19.111 D: tx: data socket open, streaming IMG_20260908_205716_243.mp4
+09-10 20:30:24.901 D: tx: IMG_20260908_205716_243.mp4 sent to Mo Phone
+09-10 20:30:36.964 D: tx: queueing 3 file(s) for Mo Phone
+09-10 20:30:36.966 D: tx: 14141dc877903ff7775c2b6bb6f6b2f9_1788854063938.mp4 size=1657806 from /storage/emulated/0/DCIM/Camera/14141dc877903ff7775c2b6bb6f6b2f9_1788854063938.mp4
+09-10 20:30:36.967 D: tx: 14141dc877903ff7775c2b6bb6f6b2f9_1788854063938.mp4 metadata sent, waiting for resume
+09-10 20:30:37.011 D: tx: 14141dc877903ff7775c2b6bb6f6b2f9_1788854063938.mp4 resume=0 (reply=resume)
+09-10 20:30:37.012 D: tx: data socket open, streaming 14141dc877903ff7775c2b6bb6f6b2f9_1788854063938.mp4
+09-10 20:30:37.351 D: tx: 14141dc877903ff7775c2b6bb6f6b2f9_1788854063938.mp4 sent to Mo Phone
+09-10 20:30:37.359 D: tx: VID-20260905-WA0006.mp4 size=1391848 from /storage/emulated/0/WhatsApp/Media/WhatsApp Video/VID-20260905-WA0006.mp4
+09-10 20:30:37.361 D: tx: VID-20260905-WA0006.mp4 metadata sent, waiting for resume
+09-10 20:30:37.541 D: tx: VID-20260905-WA0006.mp4 resume=0 (reply=resume)
+09-10 20:30:37.542 D: tx: data socket open, streaming VID-20260905-WA0006.mp4
+09-10 20:30:37.768 D: tx: VID-20260905-WA0006.mp4 sent to Mo Phone
+09-10 20:30:37.773 D: tx: VID_20260904_102954_392.mp4 size=2000299 from /storage/emulated/0/Movies/Telegram/VID_20260904_102954_392.mp4
+09-10 20:30:37.774 D: tx: VID_20260904_102954_392.mp4 metadata sent, waiting for resume
+09-10 20:30:37.964 D: tx: VID_20260904_102954_392.mp4 resume=0 (reply=resume)
+09-10 20:30:37.964 D: tx: data socket open, streaming VID_20260904_102954_392.mp4
+09-10 20:30:38.286 D: tx: VID_20260904_102954_392.mp4 sent to Mo Phone
+09-10 20:30:59.619 D: tx: queueing 2 file(s) for Mo Phone
+09-10 20:30:59.620 D: tx: VID_20260904_102954_392.mp4 size=2000299 from /storage/emulated/0/Movies/Telegram/VID_20260904_102954_392.mp4
+09-10 20:30:59.622 D: tx: VID_20260904_102954_392.mp4 metadata sent, waiting for resume
+09-10 20:30:59.744 D: tx: VID_20260904_102954_392.mp4 resume=0 (reply=resume)
+09-10 20:30:59.745 D: tx: data socket open, streaming VID_20260904_102954_392.mp4
+09-10 20:31:00.126 D: tx: VID_20260904_102954_392.mp4 sent to Mo Phone
+09-10 20:31:00.128 D: tx: IMG_20260908_205716_243.mp4 size=33996837 from /storage/emulated/0/Pictures/Telegram/IMG_20260908_205716_243.mp4
+09-10 20:31:00.129 D: tx: IMG_20260908_205716_243.mp4 metadata sent, waiting for resume
+09-10 20:31:00.351 D: tx: IMG_20260908_205716_243.mp4 resume=0 (reply=resume)
+09-10 20:31:00.352 D: tx: data socket open, streaming IMG_20260908_205716_243.mp4
+09-10 20:31:05.306 D: rx: receiver loop started
+09-10 20:31:06.207 D: tx: IMG_20260908_205716_243.mp4 sent to Mo Phone
+09-10 20:31:13.959 D: tx: queueing 2 file(s) for Mo Phone
+09-10 20:31:13.961 D: tx: VID_20260904_102954_392.mp4 size=2000299 from /storage/emulated/0/Movies/Telegram/VID_20260904_102954_392.mp4
+09-10 20:31:13.962 D: tx: VID_20260904_102954_392.mp4 metadata sent, waiting for resume
+09-10 20:31:14.079 D: rx: skipping control line: {"ype""rsm""au"0"et:"
+09-10 20:31:44.075 D: rx: control channel closed
+09-10 20:31:44.075 D: tx: VID_20260904_102954_392.mp4 FAILED SocketTimeoutException: null
+09-10 20:31:44.077 D: rx: receiver loop ended
+09-10 20:31:44.089 D: tx: IMG_20260908_205716_243.mp4 size=33996837 from /storage/emulated/0/Pictures/Telegram/IMG_20260908_205716_243.mp4
+09-10 20:31:44.092 D: tx: IMG_20260908_205716_243.mp4 FAILED IOException: The connection to Mo Phone was closed
+09-10 20:32:56.683 D: transport: connected to 192.168.43.173:54321
+09-10 20:32:56.691 D: transport: sender identified itself as Mo Phone
+09-10 20:32:56.760 D: rx: receiver loop started
+09-10 20:32:56.764 D: rx: Screenshot_20260910-203155.png metadata ok (121639 B), resuming at 0
+09-10 20:32:56.765 D: rx: Screenshot_20260910-203155.png resume sent
+09-10 20:32:56.775 D: rx: Screenshot_20260910-203155.png data socket open, reading chunks
+09-10 20:32:56.869 D: rx: Screenshot_20260910-202956.png metadata ok (123433 B), resuming at 0
+09-10 20:32:56.870 D: rx: Screenshot_20260910-202956.png resume sent
+09-10 20:32:56.874 D: rx: Screenshot_20260910-202956.png data socket open, reading chunks
+09-10 20:32:56.981 D: rx: Screenshot_20260910-202758.png metadata ok (108929 B), resuming at 0
+09-10 20:32:56.982 D: rx: Screenshot_20260910-202758.png resume sent
+09-10 20:32:56.985 D: rx: Screenshot_20260910-202758.png data socket open, reading chunks
+09-10 20:32:57.041 D: rx: Screenshot_20260910-193740.png metadata ok (134982 B), resuming at 0
+09-10 20:32:57.043 D: rx: Screenshot_20260910-193740.png resume sent
+09-10 20:32:57.049 D: rx: Screenshot_20260910-193740.png data socket open, reading chunks
+09-10 20:33:05.100 D: rx: control channel closed
+09-10 20:33:05.101 D: rx: receiver loop ended
+
+----- logcat -----
+(empty)

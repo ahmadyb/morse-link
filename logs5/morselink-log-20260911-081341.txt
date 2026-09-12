@@ -1,0 +1,135 @@
+----- in-app log -----
+09-11 07:56:24.355 D: sender: advertising 192.168.43.1:54321, waiting for a receiver
+09-11 07:56:24.367 D: transport: listening on 54321
+09-11 07:56:27.854 D: transport: inbound connection accepted
+09-11 07:56:27.872 D: sender: receiver connected from Mo Phone
+09-11 07:56:27.877 D: tx: queueing 2 file(s) for Mo Phone
+09-11 07:56:27.891 D: tx: IMG_20260908_223759_601.mp4 size=78877776 from /storage/emulated/0/Pictures/Telegram/IMG_20260908_223759_601.mp4
+09-11 07:56:27.897 D: tx: IMG_20260908_223759_601.mp4 metadata sent, waiting for resume
+09-11 07:56:27.939 D: tx: IMG_20260908_223759_601.mp4 resume=0 (reply=resume)
+09-11 07:56:27.946 D: tx: data socket open, streaming IMG_20260908_223759_601.mp4
+09-11 07:56:41.224 D: tx: IMG_20260908_223759_601.mp4 sent to Mo Phone
+09-11 07:56:41.228 D: tx: IMG_20260908_212927_050.mp4 size=51623106 from /storage/emulated/0/Pictures/Telegram/IMG_20260908_212927_050.mp4
+09-11 07:56:41.229 D: tx: IMG_20260908_212927_050.mp4 metadata sent, waiting for resume
+09-11 07:56:42.268 D: tx: IMG_20260908_212927_050.mp4 resume=0 (reply=resume)
+09-11 07:56:42.270 D: tx: data socket open, streaming IMG_20260908_212927_050.mp4
+09-11 07:56:50.969 D: tx: IMG_20260908_212927_050.mp4 sent to Mo Phone
+09-11 07:56:50.970 D: tx: batch of 2 finished
+09-11 07:56:50.985 D: rx: receiver loop started
+09-11 07:57:04.297 D: rx: decb3c33c6304c2c8e8efd626f280d61.mp4 metadata ok (2488654 B), resuming at 0
+09-11 07:57:04.300 D: rx: decb3c33c6304c2c8e8efd626f280d61.mp4 resume sent
+09-11 07:57:04.312 D: rx: decb3c33c6304c2c8e8efd626f280d61.mp4 data socket open, reading chunks
+09-11 07:57:04.868 D: rx: decb3c33c6304c2c8e8efd626f280d61.mp4 done (2488654/2488654 B)
+09-11 07:57:04.873 D: rx: b4066443215e43d09eb570fb7a1157f5.mp4 metadata ok (3013244 B), resuming at 0
+09-11 07:57:04.875 D: rx: b4066443215e43d09eb570fb7a1157f5.mp4 resume sent
+09-11 07:57:04.905 D: rx: b4066443215e43d09eb570fb7a1157f5.mp4 data socket open, reading chunks
+09-11 07:57:34.906 W: rx: b4066443215e43d09eb570fb7a1157f5.mp4.part read failed after 0/3013244 B: SocketTimeoutException: null
+09-11 07:57:34.908 W: rx: b4066443215e43d09eb570fb7a1157f5.mp4 INCOMPLETE - got 0 of 3013244 B (3013244 B missing)
+09-11 07:57:34.932 D: rx: control channel closed
+09-11 07:57:34.933 D: rx: receiver loop ended
+09-11 07:58:08.717 D: sender: advertising 192.168.43.1:54321, waiting for a receiver
+09-11 07:58:08.719 D: transport: listening on 54321
+09-11 07:58:25.663 D: transport: inbound connection accepted
+09-11 07:58:25.667 D: sender: receiver connected from Mo Phone
+09-11 07:58:25.670 D: tx: queueing 1 file(s) for Mo Phone
+09-11 07:58:25.679 D: tx: androidApp-release.apk size=1241419 from /storage/emulated/0/Telegram/Telegram Files/androidApp-release.apk
+09-11 07:58:25.682 D: tx: androidApp-release.apk metadata sent, waiting for resume
+09-11 07:58:25.720 D: tx: androidApp-release.apk resume=0 (reply=resume)
+09-11 07:58:25.726 D: tx: data socket open, streaming androidApp-release.apk
+09-11 07:58:25.977 D: tx: androidApp-release.apk sent to Mo Phone
+09-11 07:58:25.979 D: tx: batch of 1 finished
+09-11 07:58:25.989 D: rx: receiver loop started
+09-11 07:58:55.985 D: rx: control channel closed
+09-11 07:58:55.985 D: rx: receiver loop ended
+09-11 07:59:26.106 D: tx: queueing 1 file(s) for Mo Phone
+09-11 07:59:26.107 D: tx: Morselink size=8794441 from /data/app/com.morselink.app-1/base.apk
+09-11 07:59:26.116 D: tx: Morselink FAILED IOException: The connection to Mo Phone was closed
+09-11 07:59:26.126 D: tx: batch of 1 finished
+09-11 07:59:51.204 D: sender: advertising 192.168.43.1:54321, waiting for a receiver
+09-11 07:59:51.207 D: transport: listening on 54321
+09-11 08:00:15.368 D: transport: inbound connection accepted
+09-11 08:00:15.372 D: sender: receiver connected from Mo Phone
+09-11 08:00:15.374 D: tx: queueing 1 file(s) for Mo Phone
+09-11 08:00:15.378 D: tx: Morselink size=8794441 from /data/app/com.morselink.app-1/base.apk
+09-11 08:00:15.380 D: tx: Morselink metadata sent, waiting for resume
+09-11 08:00:15.444 D: tx: Morselink resume=0 (reply=resume)
+09-11 08:00:15.452 D: tx: data socket open, streaming Morselink
+09-11 08:00:17.037 D: tx: Morselink sent to Mo Phone
+09-11 08:00:17.039 D: tx: batch of 1 finished
+09-11 08:00:17.049 D: rx: receiver loop started
+09-11 08:00:47.325 D: rx: control channel closed
+09-11 08:00:47.326 D: rx: receiver loop ended
+09-11 08:06:07.406 D: sender: advertising 192.168.43.1:54321, waiting for a receiver
+09-11 08:06:07.413 D: transport: listening on 54321
+09-11 08:06:09.677 D: transport: inbound connection accepted
+09-11 08:06:09.684 D: sender: receiver connected from Mo Phone
+09-11 08:06:09.689 D: tx: queueing 4 file(s) for Mo Phone
+09-11 08:06:09.700 D: tx: VID_20260617_095957.mp4 size=16706731 from /storage/emulated/0/DCIM/Camera/VID_20260617_095957.mp4
+09-11 08:06:09.706 D: tx: VID_20260617_095957.mp4 metadata sent, waiting for resume
+09-11 08:06:09.773 D: tx: VID_20260617_095957.mp4 resume=0 (reply=resume)
+09-11 08:06:09.780 D: tx: data socket open, streaming VID_20260617_095957.mp4
+09-11 08:06:12.656 D: tx: VID_20260617_095957.mp4 sent to Mo Phone
+09-11 08:06:12.665 D: tx: IMG_20260726_100022_685.mp4 size=11915271 from /storage/emulated/0/Pictures/Telegram/IMG_20260726_100022_685.mp4
+09-11 08:06:12.666 D: tx: IMG_20260726_100022_685.mp4 metadata sent, waiting for resume
+09-11 08:06:12.978 D: tx: IMG_20260726_100022_685.mp4 resume=0 (reply=resume)
+09-11 08:06:12.980 D: tx: data socket open, streaming IMG_20260726_100022_685.mp4
+09-11 08:06:14.931 D: tx: IMG_20260726_100022_685.mp4 sent to Mo Phone
+09-11 08:06:14.934 D: tx: VID-20260824-WA0003.mp4 size=11701940 from /storage/emulated/0/WhatsApp/Media/WhatsApp Video/VID-20260824-WA0003.mp4
+09-11 08:06:14.935 D: tx: VID-20260824-WA0003.mp4 metadata sent, waiting for resume
+09-11 08:06:15.258 D: tx: VID-20260824-WA0003.mp4 resume=0 (reply=resume)
+09-11 08:06:15.259 D: tx: data socket open, streaming VID-20260824-WA0003.mp4
+09-11 08:06:17.143 D: tx: VID-20260824-WA0003.mp4 sent to Mo Phone
+09-11 08:06:17.146 D: tx: VID_20260622_174155.mp4 size=7603716 from /storage/emulated/0/DCIM/Camera/VID_20260622_174155.mp4
+09-11 08:06:17.147 D: tx: VID_20260622_174155.mp4 metadata sent, waiting for resume
+09-11 08:06:17.468 D: tx: VID_20260622_174155.mp4 resume=0 (reply=resume)
+09-11 08:06:17.470 D: tx: data socket open, streaming VID_20260622_174155.mp4
+09-11 08:06:18.662 D: tx: VID_20260622_174155.mp4 sent to Mo Phone
+09-11 08:06:18.663 D: tx: batch of 4 finished
+09-11 08:06:18.675 D: rx: receiver loop started
+09-11 08:06:48.676 D: rx: control channel closed
+09-11 08:06:48.678 D: rx: receiver loop ended
+09-11 08:09:24.344 D: sender: advertising 192.168.43.1:54321, waiting for a receiver
+09-11 08:09:24.355 D: transport: listening on 54321
+09-11 08:09:30.356 D: transport: inbound connection accepted
+09-11 08:09:30.370 D: sender: receiver connected from Mo Phone
+09-11 08:09:30.373 D: tx: queueing 1 file(s) for Mo Phone
+09-11 08:09:30.378 D: tx: decb3c33c6304c2c8e8efd626f280d61.mp4 size=2488654 from /storage/emulated/0/Download/Morselink/decb3c33c6304c2c8e8efd626f280d61.mp4
+09-11 08:09:30.381 D: tx: decb3c33c6304c2c8e8efd626f280d61.mp4 metadata sent, waiting for resume
+09-11 08:09:30.428 D: tx: decb3c33c6304c2c8e8efd626f280d61.mp4 resume=0 (reply=resume)
+09-11 08:09:30.437 D: tx: data socket open, streaming decb3c33c6304c2c8e8efd626f280d61.mp4
+09-11 08:09:30.835 D: tx: decb3c33c6304c2c8e8efd626f280d61.mp4 sent to Mo Phone
+09-11 08:09:30.846 D: tx: batch of 1 finished
+09-11 08:09:30.857 D: rx: receiver loop started
+09-11 08:09:42.945 D: rx: VID-20260909-WA0001.mp4 metadata ok (2220313 B), resuming at 0
+09-11 08:09:42.946 D: rx: VID-20260909-WA0001.mp4 resume sent
+09-11 08:09:42.960 D: rx: VID-20260909-WA0001.mp4 data socket open, reading chunks
+09-11 08:10:12.959 W: rx: VID-20260909-WA0001.mp4.part read failed after 0/2220313 B: SocketTimeoutException: null
+09-11 08:10:12.962 W: rx: VID-20260909-WA0001.mp4 INCOMPLETE - got 0 of 2220313 B (2220313 B missing)
+09-11 08:10:13.001 D: rx: control channel closed
+09-11 08:10:13.003 D: rx: receiver loop ended
+
+----- logcat -----
+09-11 07:59:26.260 E/AndroidRuntime(22874): FATAL EXCEPTION: DefaultDispatcher-worker-2
+09-11 07:59:26.260 E/AndroidRuntime(22874): Process: com.morselink.app, PID: 22874
+09-11 07:59:26.260 E/AndroidRuntime(22874): java.io.IOException: The connection to Mo Phone was closed
+09-11 07:59:26.260 E/AndroidRuntime(22874): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession.openControlSocket(LegacyWifiDirectTransport.kt:790)
+09-11 07:59:26.260 E/AndroidRuntime(22874): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession.access$openControlSocket(LegacyWifiDirectTransport.kt:369)
+09-11 07:59:26.260 E/AndroidRuntime(22874): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession$receiveLoop$2.invokeSuspend(LegacyWifiDirectTransport.kt:541)
+09-11 07:59:26.260 E/AndroidRuntime(22874): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession$receiveLoop$2.invoke(LegacyWifiDirectTransport.kt)
+09-11 07:59:26.260 E/AndroidRuntime(22874): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession$receiveLoop$2.invoke(LegacyWifiDirectTransport.kt)
+09-11 07:59:26.260 E/AndroidRuntime(22874): 	at kotlinx.coroutines.intrinsics.UndispatchedKt.startUndispatchedOrReturn(Undispatched.kt:61)
+09-11 07:59:26.260 E/AndroidRuntime(22874): 	at kotlinx.coroutines.BuildersKt__Builders_commonKt.withContext(Builders.common.kt:163)
+09-11 07:59:26.260 E/AndroidRuntime(22874): 	at kotlinx.coroutines.BuildersKt.withContext(Unknown Source)
+09-11 07:59:26.260 E/AndroidRuntime(22874): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession.receiveLoop(LegacyWifiDirectTransport.kt:540)
+09-11 07:59:26.260 E/AndroidRuntime(22874): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession.access$receiveLoop(LegacyWifiDirectTransport.kt:369)
+09-11 07:59:26.260 E/AndroidRuntime(22874): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession$incomingFiles$1$job$1.invokeSuspend(LegacyWifiDirectTransport.kt:536)
+09-11 07:59:26.260 E/AndroidRuntime(22874): 	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
+09-11 07:59:26.260 E/AndroidRuntime(22874): 	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:104)
+09-11 07:59:26.260 E/AndroidRuntime(22874): 	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:111)
+09-11 07:59:26.260 E/AndroidRuntime(22874): 	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:99)
+09-11 07:59:26.260 E/AndroidRuntime(22874): 	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:584)
+09-11 07:59:26.260 E/AndroidRuntime(22874): 	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:811)
+09-11 07:59:26.260 E/AndroidRuntime(22874): 	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:715)
+09-11 07:59:26.260 E/AndroidRuntime(22874): 	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:702)
+09-11 07:59:26.260 E/AndroidRuntime(22874): 	Suppressed: kotlinx.coroutines.internal.DiagnosticCoroutineContextException: [StandaloneCoroutine{Cancelling}@f3edc18, Dispatchers.IO]
+--------- beginning of main

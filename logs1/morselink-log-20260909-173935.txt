@@ -1,0 +1,202 @@
+----- in-app log -----
+09-09 17:22:05.495 D: transport: connected to 192.168.25.242:54321
+09-09 17:22:05.513 D: transport: sender identified itself as Morselink Phone
+09-09 17:22:05.817 D: rx: receiver loop started
+09-09 17:22:05.826 D: rx: IMG_20260908_154557_243.jpg metadata ok (3351426 B), resuming at 3342336
+09-09 17:22:05.827 D: rx: IMG_20260908_154557_243.jpg resume sent
+09-09 17:22:05.848 D: rx: IMG_20260908_154557_243.jpg data socket open, reading chunks
+09-09 17:22:07.800 D: rx: IMG_20260908_154542_705.jpg metadata ok (3615575 B), resuming at 3604480
+09-09 17:22:07.801 D: rx: IMG_20260908_154542_705.jpg resume sent
+09-09 17:22:07.806 D: rx: IMG_20260908_154542_705.jpg data socket open, reading chunks
+09-09 17:22:09.437 D: rx: IMG_20260908_154539_692.jpg metadata ok (3132963 B), resuming at 0
+09-09 17:22:09.438 D: rx: IMG_20260908_154539_692.jpg resume sent
+09-09 17:22:09.442 D: rx: IMG_20260908_154539_692.jpg data socket open, reading chunks
+09-09 17:22:30.231 D: rx: control channel closed
+09-09 17:22:30.232 D: rx: receiver loop ended
+09-09 17:27:26.263 D: transport: connected to 192.168.25.242:54321
+09-09 17:27:26.281 D: transport: sender identified itself as Mo Phone
+09-09 17:27:26.444 D: rx: receiver loop started
+09-09 17:27:26.448 D: rx: IMG_20260908_154557_243.jpg metadata ok (3351426 B), resuming at 0
+09-09 17:27:26.449 D: rx: IMG_20260908_154557_243.jpg resume sent
+09-09 17:27:26.469 D: rx: IMG_20260908_154557_243.jpg data socket open, reading chunks
+09-09 17:27:29.609 D: rx: IMG_20260908_154542_705.jpg metadata ok (3615575 B), resuming at 0
+09-09 17:27:29.611 D: rx: IMG_20260908_154542_705.jpg resume sent
+09-09 17:27:29.617 D: rx: IMG_20260908_154542_705.jpg data socket open, reading chunks
+09-09 17:27:31.826 D: rx: IMG_20260908_154539_692.jpg metadata ok (3132963 B), resuming at 0
+09-09 17:27:31.827 D: rx: IMG_20260908_154539_692.jpg resume sent
+09-09 17:27:31.830 D: rx: IMG_20260908_154539_692.jpg data socket open, reading chunks
+09-09 17:27:33.907 D: rx: baccd158ab6e43dea16a36a3271d19ce.mp4 metadata ok (6026078 B), resuming at 0
+09-09 17:27:33.908 D: rx: baccd158ab6e43dea16a36a3271d19ce.mp4 resume sent
+09-09 17:27:33.912 D: rx: baccd158ab6e43dea16a36a3271d19ce.mp4 data socket open, reading chunks
+09-09 17:27:47.600 D: rx: control channel closed
+09-09 17:27:47.601 D: rx: receiver loop ended
+09-09 17:29:20.569 D: transport: connected to 192.168.25.242:54321
+09-09 17:29:20.578 D: transport: sender identified itself as Mo Phone
+09-09 17:29:20.654 D: rx: receiver loop started
+09-09 17:29:20.666 D: rx: IMG_20260908_154557_243.jpg metadata ok (3351426 B), resuming at 0
+09-09 17:29:20.667 D: rx: IMG_20260908_154557_243.jpg resume sent
+09-09 17:29:20.676 D: rx: IMG_20260908_154557_243.jpg data socket open, reading chunks
+09-09 17:29:22.799 D: rx: IMG_20260908_154542_705.jpg metadata ok (3615575 B), resuming at 0
+09-09 17:29:22.800 D: rx: IMG_20260908_154542_705.jpg resume sent
+09-09 17:29:22.803 D: rx: IMG_20260908_154542_705.jpg data socket open, reading chunks
+09-09 17:29:26.187 D: rx: IMG_20260908_154539_692.jpg metadata ok (3132963 B), resuming at 0
+09-09 17:29:26.188 D: rx: IMG_20260908_154539_692.jpg resume sent
+09-09 17:29:26.193 D: rx: IMG_20260908_154539_692.jpg data socket open, reading chunks
+09-09 17:29:28.220 D: rx: 20260826_203855.aac metadata ok (372728 B), resuming at 0
+09-09 17:29:28.221 D: rx: 20260826_203855.aac resume sent
+09-09 17:29:28.224 D: rx: 20260826_203855.aac data socket open, reading chunks
+09-09 17:29:28.357 D: rx: Thunder VPN metadata ok (7912145 B), resuming at 0
+09-09 17:29:28.366 D: rx: Thunder VPN resume sent
+09-09 17:29:28.370 D: rx: Thunder VPN data socket open, reading chunks
+09-09 17:29:29.760 D: rx: JAMB - Print Examination Slip.pdf metadata ok (612306 B), resuming at 0
+09-09 17:29:29.762 D: rx: JAMB - Print Examination Slip.pdf resume sent
+09-09 17:29:29.768 D: rx: JAMB - Print Examination Slip.pdf data socket open, reading chunks
+09-09 17:29:29.984 D: rx: statement2026-02-01-2026-02-03.pdf metadata ok (394015 B), resuming at 0
+09-09 17:29:29.986 D: rx: statement2026-02-01-2026-02-03.pdf resume sent
+09-09 17:29:29.990 D: rx: statement2026-02-01-2026-02-03.pdf data socket open, reading chunks
+09-09 17:29:30.125 D: rx: Bsc Computer Science.pdf metadata ok (7097884 B), resuming at 0
+09-09 17:29:30.126 D: rx: Bsc Computer Science.pdf resume sent
+09-09 17:29:30.131 D: rx: Bsc Computer Science.pdf data socket open, reading chunks
+09-09 17:30:01.299 D: rx: control channel closed
+09-09 17:30:01.301 D: rx: receiver loop ended
+
+----- logcat -----
+--------- beginning of crash
+09-09 17:25:02.713 E/AndroidRuntime( 2362): FATAL EXCEPTION: main
+09-09 17:25:02.713 E/AndroidRuntime( 2362): Process: com.morselink.app, PID: 2362
+09-09 17:25:02.713 E/AndroidRuntime( 2362): java.lang.NoClassDefFoundError: com.morselink.core.transfer.engine.TransferEngine$$ExternalSyntheticLambda1
+09-09 17:25:02.713 E/AndroidRuntime( 2362): 	at com.morselink.core.transfer.engine.TransferEngine.clearFinished(TransferEngine.kt:194)
+09-09 17:25:02.713 E/AndroidRuntime( 2362): 	at com.morselink.feature.transfer.TransferViewModel.startSenderPairing(TransferViewModel.kt:186)
+09-09 17:25:02.713 E/AndroidRuntime( 2362): 	at com.morselink.feature.transfer.TransferViewModel.<init>(TransferViewModel.kt:136)
+09-09 17:25:02.713 E/AndroidRuntime( 2362): 	at com.morselink.app.DaggerMorselinkApp_HiltComponents_SingletonC$ViewModelCImpl$SwitchingProvider.get(DaggerMorselinkApp_HiltComponents_SingletonC.java:691)
+09-09 17:25:02.713 E/AndroidRuntime( 2362): 	at dagger.hilt.android.internal.lifecycle.HiltViewModelFactory$2.createViewModel(HiltViewModelFactory.java:132)
+09-09 17:25:02.713 E/AndroidRuntime( 2362): 	at dagger.hilt.android.internal.lifecycle.HiltViewModelFactory$2.create(HiltViewModelFactory.java:103)
+09-09 17:25:02.713 E/AndroidRuntime( 2362): 	at dagger.hilt.android.internal.lifecycle.HiltViewModelFactory.create(HiltViewModelFactory.java:170)
+09-09 17:25:02.713 E/AndroidRuntime( 2362): 	at androidx.lifecycle.ViewModelProvider$Factory$-CC.$default$create(ViewModelProvider.android.kt:158)
+09-09 17:25:02.713 E/AndroidRuntime( 2362): 	at dagger.hilt.android.internal.lifecycle.HiltViewModelFactory.create(HiltViewModelFactory.java)
+09-09 17:25:02.713 E/AndroidRuntime( 2362): 	at androidx.lifecycle.viewmodel.ViewModelProviderImpl_androidKt.createViewModel(ViewModelProviderImpl.android.kt:34)
+09-09 17:25:02.713 E/AndroidRuntime( 2362): 	at androidx.lifecycle.viewmodel.ViewModelProviderImpl.getViewModel$lifecycle_viewmodel_release(ViewModelProviderImpl.kt:65)
+09-09 17:25:02.713 E/AndroidRuntime( 2362): 	at androidx.lifecycle.viewmodel.ViewModelProviderImpl.getViewModel$lifecycle_viewmodel_release$default(ViewModelProviderImpl.kt:47)
+09-09 17:25:02.713 E/AndroidRuntime( 2362): 	at androidx.lifecycle.ViewModelProvider.get(ViewModelProvider.android.kt:91)
+09-09 17:25:02.713 E/AndroidRuntime( 2362): 	at androidx.lifecycle.ViewModelLazy.getValue(ViewModelLazy.kt:51)
+09-09 17:25:02.713 E/AndroidRuntime( 2362): 	at androidx.lifecycle.ViewModelLazy.getValue(ViewModelLazy.kt:35)
+09-09 17:25:02.713 E/AndroidRuntime( 2362): 	at com.morselink.feature.transfer.TransferFragment.getViewModel(TransferFragment.kt:25)
+09-09 17:25:02.713 E/AndroidRuntime( 2362): 	at com.morselink.feature.transfer.TransferFragment.onViewCreated(TransferFragment.kt:37)
+09-09 17:25:02.713 E/AndroidRuntime( 2362): 	at androidx.fragment.app.Fragment.performViewCreated(Fragment.java:3152)
+09-09 17:25:02.713 E/AndroidRuntime( 2362): 	at androidx.fragment.app.FragmentStateManager.createView(FragmentStateManager.java:608)
+09-09 17:25:02.713 E/AndroidRuntime( 2362): 	at androidx.fragment.app.FragmentStateManager.moveToExpectedState(FragmentStateManager.java:286)
+09-09 17:25:02.713 E/AndroidRuntime( 2362): 	at androidx.fragment.app.FragmentManager.executeOpsTogether(FragmentManager.java:2214)
+09-09 17:25:02.713 E/AndroidRuntime( 2362): 	at androidx.fragment.app.FragmentManager.removeRedundantOperationsAndExecute(FragmentManager.java:2115)
+09-09 17:25:02.713 E/AndroidRuntime( 2362): 	at androidx.fragment.app.FragmentManager.execPendingActions(FragmentManager.java:2052)
+09-09 17:25:02.713 E/AndroidRuntime( 2362): 	at androidx.fragment.app.FragmentManager$5.run(FragmentManager.java:703)
+09-09 17:25:02.713 E/AndroidRuntime( 2362): 	at android.os.Handler.handleCallback(Handler.java:819)
+09-09 17:25:02.713 E/AndroidRuntime( 2362): 	at android.os.Handler.dispatchMessage(Handler.java:104)
+09-09 17:25:02.713 E/AndroidRuntime( 2362): 	at android.os.Looper.loop(Looper.java:210)
+09-09 17:25:02.713 E/AndroidRuntime( 2362): 	at android.app.ActivityThread.main(ActivityThread.java:5982)
+09-09 17:25:02.713 E/AndroidRuntime( 2362): 	at java.lang.reflect.Method.invoke(Native Method)
+09-09 17:25:02.713 E/AndroidRuntime( 2362): 	at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:852)
+09-09 17:25:02.713 E/AndroidRuntime( 2362): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:742)
+09-09 17:25:54.216 E/AndroidRuntime( 7685): FATAL EXCEPTION: main
+09-09 17:25:54.216 E/AndroidRuntime( 7685): Process: com.morselink.app, PID: 7685
+09-09 17:25:54.216 E/AndroidRuntime( 7685): java.lang.NoClassDefFoundError: com.morselink.core.transfer.engine.TransferEngine$$ExternalSyntheticLambda1
+09-09 17:25:54.216 E/AndroidRuntime( 7685): 	at com.morselink.core.transfer.engine.TransferEngine.clearFinished(TransferEngine.kt:194)
+09-09 17:25:54.216 E/AndroidRuntime( 7685): 	at com.morselink.feature.transfer.TransferViewModel.startSenderPairing(TransferViewModel.kt:186)
+09-09 17:25:54.216 E/AndroidRuntime( 7685): 	at com.morselink.feature.transfer.TransferViewModel.<init>(TransferViewModel.kt:136)
+09-09 17:25:54.216 E/AndroidRuntime( 7685): 	at com.morselink.app.DaggerMorselinkApp_HiltComponents_SingletonC$ViewModelCImpl$SwitchingProvider.get(DaggerMorselinkApp_HiltComponents_SingletonC.java:691)
+09-09 17:25:54.216 E/AndroidRuntime( 7685): 	at dagger.hilt.android.internal.lifecycle.HiltViewModelFactory$2.createViewModel(HiltViewModelFactory.java:132)
+09-09 17:25:54.216 E/AndroidRuntime( 7685): 	at dagger.hilt.android.internal.lifecycle.HiltViewModelFactory$2.create(HiltViewModelFactory.java:103)
+09-09 17:25:54.216 E/AndroidRuntime( 7685): 	at dagger.hilt.android.internal.lifecycle.HiltViewModelFactory.create(HiltViewModelFactory.java:170)
+09-09 17:25:54.216 E/AndroidRuntime( 7685): 	at androidx.lifecycle.ViewModelProvider$Factory$-CC.$default$create(ViewModelProvider.android.kt:158)
+09-09 17:25:54.216 E/AndroidRuntime( 7685): 	at dagger.hilt.android.internal.lifecycle.HiltViewModelFactory.create(HiltViewModelFactory.java)
+09-09 17:25:54.216 E/AndroidRuntime( 7685): 	at androidx.lifecycle.viewmodel.ViewModelProviderImpl_androidKt.createViewModel(ViewModelProviderImpl.android.kt:34)
+09-09 17:25:54.216 E/AndroidRuntime( 7685): 	at androidx.lifecycle.viewmodel.ViewModelProviderImpl.getViewModel$lifecycle_viewmodel_release(ViewModelProviderImpl.kt:65)
+09-09 17:25:54.216 E/AndroidRuntime( 7685): 	at androidx.lifecycle.viewmodel.ViewModelProviderImpl.getViewModel$lifecycle_viewmodel_release$default(ViewModelProviderImpl.kt:47)
+09-09 17:25:54.216 E/AndroidRuntime( 7685): 	at androidx.lifecycle.ViewModelProvider.get(ViewModelProvider.android.kt:91)
+09-09 17:25:54.216 E/AndroidRuntime( 7685): 	at androidx.lifecycle.ViewModelLazy.getValue(ViewModelLazy.kt:51)
+09-09 17:25:54.216 E/AndroidRuntime( 7685): 	at androidx.lifecycle.ViewModelLazy.getValue(ViewModelLazy.kt:35)
+09-09 17:25:54.216 E/AndroidRuntime( 7685): 	at com.morselink.feature.transfer.TransferFragment.getViewModel(TransferFragment.kt:25)
+09-09 17:25:54.216 E/AndroidRuntime( 7685): 	at com.morselink.feature.transfer.TransferFragment.onViewCreated(TransferFragment.kt:37)
+09-09 17:25:54.216 E/AndroidRuntime( 7685): 	at androidx.fragment.app.Fragment.performViewCreated(Fragment.java:3152)
+09-09 17:25:54.216 E/AndroidRuntime( 7685): 	at androidx.fragment.app.FragmentStateManager.createView(FragmentStateManager.java:608)
+09-09 17:25:54.216 E/AndroidRuntime( 7685): 	at androidx.fragment.app.FragmentStateManager.moveToExpectedState(FragmentStateManager.java:286)
+09-09 17:25:54.216 E/AndroidRuntime( 7685): 	at androidx.fragment.app.FragmentManager.executeOpsTogether(FragmentManager.java:2214)
+09-09 17:25:54.216 E/AndroidRuntime( 7685): 	at androidx.fragment.app.FragmentManager.removeRedundantOperationsAndExecute(FragmentManager.java:2115)
+09-09 17:25:54.216 E/AndroidRuntime( 7685): 	at androidx.fragment.app.FragmentManager.execPendingActions(FragmentManager.java:2052)
+09-09 17:25:54.216 E/AndroidRuntime( 7685): 	at androidx.fragment.app.FragmentManager$5.run(FragmentManager.java:703)
+09-09 17:25:54.216 E/AndroidRuntime( 7685): 	at android.os.Handler.handleCallback(Handler.java:819)
+09-09 17:25:54.216 E/AndroidRuntime( 7685): 	at android.os.Handler.dispatchMessage(Handler.java:104)
+09-09 17:25:54.216 E/AndroidRuntime( 7685): 	at android.os.Looper.loop(Looper.java:210)
+09-09 17:25:54.216 E/AndroidRuntime( 7685): 	at android.app.ActivityThread.main(ActivityThread.java:5982)
+09-09 17:25:54.216 E/AndroidRuntime( 7685): 	at java.lang.reflect.Method.invoke(Native Method)
+09-09 17:25:54.216 E/AndroidRuntime( 7685): 	at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:852)
+09-09 17:25:54.216 E/AndroidRuntime( 7685): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:742)
+09-09 17:26:29.098 E/AndroidRuntime( 7940): FATAL EXCEPTION: main
+09-09 17:26:29.098 E/AndroidRuntime( 7940): Process: com.morselink.app, PID: 7940
+09-09 17:26:29.098 E/AndroidRuntime( 7940): java.lang.NoClassDefFoundError: com.morselink.core.transfer.engine.TransferEngine$$ExternalSyntheticLambda1
+09-09 17:26:29.098 E/AndroidRuntime( 7940): 	at com.morselink.core.transfer.engine.TransferEngine.clearFinished(TransferEngine.kt:194)
+09-09 17:26:29.098 E/AndroidRuntime( 7940): 	at com.morselink.feature.transfer.TransferViewModel.startSenderPairing(TransferViewModel.kt:186)
+09-09 17:26:29.098 E/AndroidRuntime( 7940): 	at com.morselink.feature.transfer.TransferViewModel.<init>(TransferViewModel.kt:136)
+09-09 17:26:29.098 E/AndroidRuntime( 7940): 	at com.morselink.app.DaggerMorselinkApp_HiltComponents_SingletonC$ViewModelCImpl$SwitchingProvider.get(DaggerMorselinkApp_HiltComponents_SingletonC.java:691)
+09-09 17:26:29.098 E/AndroidRuntime( 7940): 	at dagger.hilt.android.internal.lifecycle.HiltViewModelFactory$2.createViewModel(HiltViewModelFactory.java:132)
+09-09 17:26:29.098 E/AndroidRuntime( 7940): 	at dagger.hilt.android.internal.lifecycle.HiltViewModelFactory$2.create(HiltViewModelFactory.java:103)
+09-09 17:26:29.098 E/AndroidRuntime( 7940): 	at dagger.hilt.android.internal.lifecycle.HiltViewModelFactory.create(HiltViewModelFactory.java:170)
+09-09 17:26:29.098 E/AndroidRuntime( 7940): 	at androidx.lifecycle.ViewModelProvider$Factory$-CC.$default$create(ViewModelProvider.android.kt:158)
+09-09 17:26:29.098 E/AndroidRuntime( 7940): 	at dagger.hilt.android.internal.lifecycle.HiltViewModelFactory.create(HiltViewModelFactory.java)
+09-09 17:26:29.098 E/AndroidRuntime( 7940): 	at androidx.lifecycle.viewmodel.ViewModelProviderImpl_androidKt.createViewModel(ViewModelProviderImpl.android.kt:34)
+09-09 17:26:29.098 E/AndroidRuntime( 7940): 	at androidx.lifecycle.viewmodel.ViewModelProviderImpl.getViewModel$lifecycle_viewmodel_release(ViewModelProviderImpl.kt:65)
+09-09 17:26:29.098 E/AndroidRuntime( 7940): 	at androidx.lifecycle.viewmodel.ViewModelProviderImpl.getViewModel$lifecycle_viewmodel_release$default(ViewModelProviderImpl.kt:47)
+09-09 17:26:29.098 E/AndroidRuntime( 7940): 	at androidx.lifecycle.ViewModelProvider.get(ViewModelProvider.android.kt:91)
+09-09 17:26:29.098 E/AndroidRuntime( 7940): 	at androidx.lifecycle.ViewModelLazy.getValue(ViewModelLazy.kt:51)
+09-09 17:26:29.098 E/AndroidRuntime( 7940): 	at androidx.lifecycle.ViewModelLazy.getValue(ViewModelLazy.kt:35)
+09-09 17:26:29.098 E/AndroidRuntime( 7940): 	at com.morselink.feature.transfer.TransferFragment.getViewModel(TransferFragment.kt:25)
+09-09 17:26:29.098 E/AndroidRuntime( 7940): 	at com.morselink.feature.transfer.TransferFragment.onViewCreated(TransferFragment.kt:37)
+09-09 17:26:29.098 E/AndroidRuntime( 7940): 	at androidx.fragment.app.Fragment.performViewCreated(Fragment.java:3152)
+09-09 17:26:29.098 E/AndroidRuntime( 7940): 	at androidx.fragment.app.FragmentStateManager.createView(FragmentStateManager.java:608)
+09-09 17:26:29.098 E/AndroidRuntime( 7940): 	at androidx.fragment.app.FragmentStateManager.moveToExpectedState(FragmentStateManager.java:286)
+09-09 17:26:29.098 E/AndroidRuntime( 7940): 	at androidx.fragment.app.FragmentManager.executeOpsTogether(FragmentManager.java:2214)
+09-09 17:26:29.098 E/AndroidRuntime( 7940): 	at androidx.fragment.app.FragmentManager.removeRedundantOperationsAndExecute(FragmentManager.java:2115)
+09-09 17:26:29.098 E/AndroidRuntime( 7940): 	at androidx.fragment.app.FragmentManager.execPendingActions(FragmentManager.java:2052)
+09-09 17:26:29.098 E/AndroidRuntime( 7940): 	at androidx.fragment.app.FragmentManager$5.run(FragmentManager.java:703)
+09-09 17:26:29.098 E/AndroidRuntime( 7940): 	at android.os.Handler.handleCallback(Handler.java:819)
+09-09 17:26:29.098 E/AndroidRuntime( 7940): 	at android.os.Handler.dispatchMessage(Handler.java:104)
+09-09 17:26:29.098 E/AndroidRuntime( 7940): 	at android.os.Looper.loop(Looper.java:210)
+09-09 17:26:29.098 E/AndroidRuntime( 7940): 	at android.app.ActivityThread.main(ActivityThread.java:5982)
+09-09 17:26:29.098 E/AndroidRuntime( 7940): 	at java.lang.reflect.Method.invoke(Native Method)
+09-09 17:26:29.098 E/AndroidRuntime( 7940): 	at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:852)
+09-09 17:26:29.098 E/AndroidRuntime( 7940): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:742)
+09-09 17:31:54.159 E/AndroidRuntime( 8054): FATAL EXCEPTION: main
+09-09 17:31:54.159 E/AndroidRuntime( 8054): Process: com.morselink.app, PID: 8054
+09-09 17:31:54.159 E/AndroidRuntime( 8054): java.lang.NoClassDefFoundError: com.morselink.core.transfer.engine.TransferEngine$$ExternalSyntheticLambda1
+09-09 17:31:54.159 E/AndroidRuntime( 8054): 	at com.morselink.core.transfer.engine.TransferEngine.clearFinished(TransferEngine.kt:194)
+09-09 17:31:54.159 E/AndroidRuntime( 8054): 	at com.morselink.feature.transfer.TransferViewModel.startSenderPairing(TransferViewModel.kt:186)
+09-09 17:31:54.159 E/AndroidRuntime( 8054): 	at com.morselink.feature.transfer.TransferViewModel.<init>(TransferViewModel.kt:136)
+09-09 17:31:54.159 E/AndroidRuntime( 8054): 	at com.morselink.app.DaggerMorselinkApp_HiltComponents_SingletonC$ViewModelCImpl$SwitchingProvider.get(DaggerMorselinkApp_HiltComponents_SingletonC.java:691)
+09-09 17:31:54.159 E/AndroidRuntime( 8054): 	at dagger.hilt.android.internal.lifecycle.HiltViewModelFactory$2.createViewModel(HiltViewModelFactory.java:132)
+09-09 17:31:54.159 E/AndroidRuntime( 8054): 	at dagger.hilt.android.internal.lifecycle.HiltViewModelFactory$2.create(HiltViewModelFactory.java:103)
+09-09 17:31:54.159 E/AndroidRuntime( 8054): 	at dagger.hilt.android.internal.lifecycle.HiltViewModelFactory.create(HiltViewModelFactory.java:170)
+09-09 17:31:54.159 E/AndroidRuntime( 8054): 	at androidx.lifecycle.ViewModelProvider$Factory$-CC.$default$create(ViewModelProvider.android.kt:158)
+09-09 17:31:54.159 E/AndroidRuntime( 8054): 	at dagger.hilt.android.internal.lifecycle.HiltViewModelFactory.create(HiltViewModelFactory.java)
+09-09 17:31:54.159 E/AndroidRuntime( 8054): 	at androidx.lifecycle.viewmodel.ViewModelProviderImpl_androidKt.createViewModel(ViewModelProviderImpl.android.kt:34)
+09-09 17:31:54.159 E/AndroidRuntime( 8054): 	at androidx.lifecycle.viewmodel.ViewModelProviderImpl.getViewModel$lifecycle_viewmodel_release(ViewModelProviderImpl.kt:65)
+09-09 17:31:54.159 E/AndroidRuntime( 8054): 	at androidx.lifecycle.viewmodel.ViewModelProviderImpl.getViewModel$lifecycle_viewmodel_release$default(ViewModelProviderImpl.kt:47)
+09-09 17:31:54.159 E/AndroidRuntime( 8054): 	at androidx.lifecycle.ViewModelProvider.get(ViewModelProvider.android.kt:91)
+09-09 17:31:54.159 E/AndroidRuntime( 8054): 	at androidx.lifecycle.ViewModelLazy.getValue(ViewModelLazy.kt:51)
+09-09 17:31:54.159 E/AndroidRuntime( 8054): 	at androidx.lifecycle.ViewModelLazy.getValue(ViewModelLazy.kt:35)
+09-09 17:31:54.159 E/AndroidRuntime( 8054): 	at com.morselink.feature.transfer.TransferFragment.getViewModel(TransferFragment.kt:25)
+09-09 17:31:54.159 E/AndroidRuntime( 8054): 	at com.morselink.feature.transfer.TransferFragment.onViewCreated(TransferFragment.kt:37)
+09-09 17:31:54.159 E/AndroidRuntime( 8054): 	at androidx.fragment.app.Fragment.performViewCreated(Fragment.java:3152)
+09-09 17:31:54.159 E/AndroidRuntime( 8054): 	at androidx.fragment.app.FragmentStateManager.createView(FragmentStateManager.java:608)
+09-09 17:31:54.159 E/AndroidRuntime( 8054): 	at androidx.fragment.app.FragmentStateManager.moveToExpectedState(FragmentStateManager.java:286)
+09-09 17:31:54.159 E/AndroidRuntime( 8054): 	at androidx.fragment.app.FragmentManager.executeOpsTogether(FragmentManager.java:2214)
+09-09 17:31:54.159 E/AndroidRuntime( 8054): 	at androidx.fragment.app.FragmentManager.removeRedundantOperationsAndExecute(FragmentManager.java:2115)
+09-09 17:31:54.159 E/AndroidRuntime( 8054): 	at androidx.fragment.app.FragmentManager.execPendingActions(FragmentManager.java:2052)
+09-09 17:31:54.159 E/AndroidRuntime( 8054): 	at androidx.fragment.app.FragmentManager$5.run(FragmentManager.java:703)
+09-09 17:31:54.159 E/AndroidRuntime( 8054): 	at android.os.Handler.handleCallback(Handler.java:819)
+09-09 17:31:54.159 E/AndroidRuntime( 8054): 	at android.os.Handler.dispatchMessage(Handler.java:104)
+09-09 17:31:54.159 E/AndroidRuntime( 8054): 	at android.os.Looper.loop(Looper.java:210)
+09-09 17:31:54.159 E/AndroidRuntime( 8054): 	at android.app.ActivityThread.main(ActivityThread.java:5982)
+09-09 17:31:54.159 E/AndroidRuntime( 8054): 	at java.lang.reflect.Method.invoke(Native Method)
+09-09 17:31:54.159 E/AndroidRuntime( 8054): 	at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:852)
+09-09 17:31:54.159 E/AndroidRuntime( 8054): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:742)
+--------- beginning of system
+--------- beginning of main

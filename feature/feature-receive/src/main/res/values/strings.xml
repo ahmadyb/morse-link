@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="receive_hint">Scan the QR code on the sender\'s screen</string>
+    <string name="receive_manual">Enter the port manually</string>
+    <string name="receive_camera_needed">Camera permission is needed to scan a QR code</string>
+    <string name="receive_camera_unavailable">No camera is available on this device</string>
+    <string name="receive_camera_failed">Camera unavailable — tap to retry</string>
+    <string name="receive_manual_title">Connect manually</string>
+    <string name="receive_manual_address">Sender address (fixed gateway): %1$s</string>
+    <string name="receive_manual_port_hint">Port</string>
+    <string name="receive_manual_connect">Connect</string>
+    <string name="receive_connecting">Connecting…</string>
+    <string name="receive_bluetooth_note">Bluetooth is used to discover nearby devices</string>
+</resources>

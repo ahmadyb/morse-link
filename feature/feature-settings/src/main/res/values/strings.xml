@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_device_name">Device name</string>
+    <string name="settings_avatar">Avatar</string>
+    <string name="settings_download_dir">Default download location</string>
+    <string name="settings_prefer_wifi_direct">Prefer Wi-Fi Direct over hotspot</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_notifications">Transfer notifications</string>
+    <string name="settings_sounds">Sound effects</string>
+    <string name="settings_timeout">Connection timeout (sec)</string>
+    <string name="settings_reconnect">Max reconnect attempts</string>
+    <string name="settings_webshare">WebShare (phone ↔ PC)</string>
+    <string name="settings_version">Version</string>
+    <string name="settings_privacy">Privacy policy</string>
+    <string name="settings_avatar_hint">Tap to change the colour of your device badge</string>
+    <string name="settings_app_log">App log</string>
+    <string name="settings_app_log_hint">Record what the app is doing so it can be pasted into a bug report</string>
+    <string name="settings_app_log_on">Recording — tap to switch off</string>
+    <string name="settings_app_log_off">Switched off — tap to switch on</string>
+    <string name="settings_app_log_view">View app log</string>
+    <string name="settings_app_log_view_hint">Read and copy what has been recorded</string>
+    <string name="settings_app_log_view_off">Switch logging on above to record anything</string>
+    <string name="settings_app_log_export">Export app log to a file</string>
+    <string name="settings_app_log_export_hint">Saves the whole log as a .txt file named by date and time, ready to attach</string>
+    <string name="settings_app_log_export_off">Switch logging on above to record anything</string>
+    <string name="settings_app_log_export_done">Saved as %1$s</string>
+    <string name="settings_app_log_export_failed">Could not write the log file</string>
+    <string name="settings_crash_log">Crash log</string>
+    <string name="settings_crash_log_none">No crashes recorded</string>
+    <string name="settings_crash_log_count">%1$d recorded — tap to view</string>
+    <string name="settings_crash_log_empty">The app has not recorded any crashes.</string>
+    <string name="history_empty">No transfers yet</string>
+    <string name="history_received">Received</string>
+    <string name="history_sent">Sent</string>
+    <string name="history_privacy_title">Privacy</string>
+    <string name="history_privacy_body">Morselink works entirely offline. Files only ever travel to a device you explicitly pair with, and no analytics, telemetry or file metadata leaves your phone.</string>
+</resources>

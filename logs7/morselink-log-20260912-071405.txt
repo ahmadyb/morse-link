@@ -1,0 +1,52 @@
+----- in-app log -----
+09-12 07:07:09.141 D: transport: connected to 192.168.43.1:54321
+09-12 07:07:09.146 D: transport: sender identified itself as Alien Phone
+09-12 07:07:09.214 D: rx: receiver loop started
+09-12 07:07:09.220 D: rx: Screenshot_2026-09-11-23-13-45.png metadata ok (83579 B), resuming at 0
+09-12 07:07:09.222 D: rx: Screenshot_2026-09-11-23-13-45.png resume sent
+09-12 07:07:09.231 D: rx: Screenshot_2026-09-11-23-13-45.png data socket open, reading chunks
+09-12 07:07:09.385 D: rx: Screenshot_2026-09-11-23-13-45.png done (83579/83579 B)
+09-12 07:07:09.390 D: rx: Screenshot_2026-09-11-23-13-41.png metadata ok (82794 B), resuming at 0
+09-12 07:07:09.391 D: rx: Screenshot_2026-09-11-23-13-41.png resume sent
+09-12 07:07:09.399 D: rx: Screenshot_2026-09-11-23-13-41.png data socket open, reading chunks
+09-12 07:07:09.600 D: rx: Screenshot_2026-09-11-23-13-41.png done (82794/82794 B)
+09-12 07:07:09.606 D: rx: Screenshot_2026-09-11-23-12-52.png metadata ok (76309 B), resuming at 0
+09-12 07:07:09.608 D: rx: Screenshot_2026-09-11-23-12-52.png resume sent
+09-12 07:07:09.616 D: rx: Screenshot_2026-09-11-23-12-52.png data socket open, reading chunks
+09-12 07:07:09.717 D: rx: Screenshot_2026-09-11-23-12-52.png done (76309/76309 B)
+09-12 07:07:48.963 D: tx: queueing 2 file(s) for Alien Phone
+09-12 07:07:48.967 D: tx: Screenshot_20260912-063043.png size=668183 from /storage/emulated/0/Pictures/Screenshots/Screenshot_20260912-063043.png
+09-12 07:07:48.970 D: tx: Screenshot_20260912-063043.png metadata sent, waiting for resume
+09-12 07:08:19.064 D: tx: Screenshot_20260912-063043.png FAILED SocketTimeoutException: Read timed out
+09-12 07:08:19.090 D: tx: Screenshot_20260904-201322.png size=551548 from /storage/emulated/0/Pictures/Screenshots/Screenshot_20260904-201322.png
+09-12 07:08:19.092 D: tx: Screenshot_20260904-201322.png metadata sent, waiting for resume
+09-12 07:08:49.517 D: rx: receiver loop ended
+09-12 07:08:49.518 D: tx: Screenshot_20260904-201322.png FAILED SocketTimeoutException: Read timed out
+09-12 07:08:49.538 D: tx: batch of 2 finished
+09-12 07:08:49.551 W: rx: cannot start receiving - The connection to Alien Phone was closed
+09-12 07:09:53.687 D: tx: queueing 1 file(s) for Alien Phone
+09-12 07:09:53.689 D: tx: VID-20260909-WA0001.mp4 size=2220313 from /storage/emulated/0/Movies/WhatsApp/VID-20260909-WA0001.mp4
+09-12 07:09:53.690 D: tx: VID-20260909-WA0001.mp4 FAILED IOException: The connection to Alien Phone was closed
+09-12 07:09:53.697 D: tx: batch of 1 finished
+09-12 07:09:53.700 W: rx: cannot start receiving - The connection to Alien Phone was closed
+09-12 07:11:55.387 D: transport: connected to 192.168.43.1:54321
+09-12 07:11:55.393 D: transport: sender identified itself as Alien Phone
+09-12 07:11:55.464 D: rx: receiver loop started
+09-12 07:11:55.470 D: rx: 4_5843432611141131500.mp4 metadata ok (62584910 B), resuming at 0
+09-12 07:11:55.471 D: rx: 4_5843432611141131500.mp4 resume sent
+09-12 07:11:55.478 D: rx: 4_5843432611141131500.mp4 data socket open, reading chunks
+09-12 07:12:07.901 D: rx: 4_5843432611141131500.mp4 done (62584910/62584910 B)
+09-12 07:12:08.341 D: rx: control channel closed (SocketException)
+09-12 07:12:08.342 D: rx: receiver loop ended
+09-12 07:12:55.520 D: transport: connected to 192.168.43.1:54321
+09-12 07:12:55.527 D: transport: sender identified itself as Alien Phone
+09-12 07:12:55.592 D: rx: receiver loop started
+09-12 07:12:55.599 D: rx: 4_5816753236371053975.mp4 metadata ok (312052832 B), resuming at 0
+09-12 07:12:55.600 D: rx: 4_5816753236371053975.mp4 resume sent
+09-12 07:12:55.608 D: rx: 4_5816753236371053975.mp4 data socket open, reading chunks
+09-12 07:13:02.119 W: rx: 4_5816753236371053975.mp4 INCOMPLETE - got 32899072 of 312052832 B (279153760 B missing)
+09-12 07:13:02.137 D: rx: control channel closed
+09-12 07:13:02.139 D: rx: receiver loop ended
+
+----- logcat -----
+(empty)

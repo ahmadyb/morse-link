@@ -1,0 +1,520 @@
+----- in-app log -----
+09-10 08:43:46.778 D: transport: connected to 192.168.43.1:54321
+09-10 08:43:46.787 D: transport: sender identified itself as Alien Phone
+09-10 08:43:46.847 D: rx: receiver loop started
+09-10 08:43:46.853 D: rx: IMG-20260910-WA0001.jpg metadata ok (122604 B), resuming at 0
+09-10 08:43:46.854 D: rx: IMG-20260910-WA0001.jpg resume sent
+09-10 08:43:46.865 D: rx: IMG-20260910-WA0001.jpg data socket open, reading chunks
+09-10 08:43:53.074 D: rx: control channel closed
+09-10 08:43:53.075 D: rx: receiver loop ended
+09-10 08:45:28.822 D: webshare: server stopped
+09-10 13:38:03.550 D: transport: listening on 54321
+09-10 13:38:10.217 D: transport: inbound connection accepted
+09-10 13:38:10.276 D: tx: IMG-20260910-WA0007.jpeg size=823371 from /storage/emulated/0/Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Images/IMG-20260910-WA0007.jpeg
+09-10 13:38:10.279 D: tx: IMG-20260910-WA0007.jpeg metadata sent, waiting for resume
+09-10 13:38:11.554 D: tx: IMG-20260910-WA0007.jpeg resume=0 (reply=resume)
+09-10 13:38:11.574 D: tx: data socket open, streaming IMG-20260910-WA0007.jpeg
+09-10 13:38:11.626 D: tx: IMG-20260910-WA0007.jpeg sent to Alien Phone
+09-10 13:38:43.012 D: transport: connected to 192.168.25.136:54321
+09-10 13:38:43.016 D: transport: sender identified itself as Alien Phone
+09-10 13:38:43.086 D: rx: receiver loop started
+09-10 13:38:43.092 D: rx: IMG-20260910-WA0004.jpg metadata ok (99340 B), resuming at 0
+09-10 13:38:43.094 D: rx: IMG-20260910-WA0004.jpg resume sent
+09-10 13:38:43.102 D: rx: IMG-20260910-WA0004.jpg data socket open, reading chunks
+09-10 13:38:43.303 D: rx: Screenshot_2026-09-10-09-39-14.png metadata ok (303715 B), resuming at 0
+09-10 13:38:43.304 D: rx: Screenshot_2026-09-10-09-39-14.png resume sent
+09-10 13:38:43.308 D: rx: Screenshot_2026-09-10-09-39-14.png data socket open, reading chunks
+09-10 13:39:04.018 D: rx: control channel closed
+09-10 13:39:04.020 D: rx: receiver loop ended
+09-10 13:41:41.346 D: transport: connected to 192.168.25.136:54321
+09-10 13:41:41.351 D: transport: sender identified itself as Alien Phone
+09-10 13:41:41.400 D: rx: receiver loop started
+09-10 13:41:41.405 D: rx: IMG-20260910-WA0004.jpg metadata ok (99340 B), resuming at 0
+09-10 13:41:41.406 D: rx: IMG-20260910-WA0004.jpg resume sent
+09-10 13:41:41.416 D: rx: IMG-20260910-WA0004.jpg data socket open, reading chunks
+09-10 13:41:41.591 D: rx: Screenshot_2026-09-10-09-39-14.png metadata ok (303715 B), resuming at 0
+09-10 13:41:41.592 D: rx: Screenshot_2026-09-10-09-39-14.png resume sent
+09-10 13:41:41.595 D: rx: Screenshot_2026-09-10-09-39-14.png data socket open, reading chunks
+09-10 13:41:41.781 D: rx: VID-20260818-WA0027.mp4 metadata ok (3519708 B), resuming at 0
+09-10 13:41:41.781 D: rx: VID-20260818-WA0027.mp4 resume sent
+09-10 13:41:41.784 D: rx: VID-20260818-WA0027.mp4 data socket open, reading chunks
+09-10 13:41:42.911 D: rx: ASALIN MAULIDI.mp3 metadata ok (8020639 B), resuming at 0
+09-10 13:41:42.912 D: rx: ASALIN MAULIDI.mp3 resume sent
+09-10 13:41:42.916 D: rx: ASALIN MAULIDI.mp3 data socket open, reading chunks
+09-10 13:41:49.245 D: rx: control channel closed
+09-10 13:41:49.246 D: rx: receiver loop ended
+09-10 19:27:05.863 D: transport: connected to 192.168.43.1:54321
+09-10 19:27:05.880 D: transport: sender identified itself as Alien Phone
+09-10 19:27:05.948 D: rx: receiver loop started
+09-10 19:27:05.953 D: rx: Morselink metadata ok (8785996 B), resuming at 0
+09-10 19:27:05.955 D: rx: Morselink resume sent
+09-10 19:27:05.963 D: rx: Morselink data socket open, reading chunks
+09-10 19:27:10.540 D: rx: control channel closed
+09-10 19:27:10.541 D: rx: receiver loop ended
+09-10 19:29:38.204 D: sender: advertising 192.168.43.173:54321, waiting for a receiver
+09-10 19:29:38.209 D: transport: listening on 54321
+09-10 19:29:54.106 D: transport: inbound connection accepted
+09-10 19:29:54.130 D: sender: receiver connected from Alien Phone
+09-10 19:29:54.132 D: tx: queueing 1 file(s) for Alien Phone
+09-10 19:29:54.147 D: tx: IMG_20260910_175527_744.jpg size=2890227 from /storage/emulated/0/DCIM/Camera/IMG_20260910_175527_744.jpg
+09-10 19:29:54.150 D: tx: IMG_20260910_175527_744.jpg metadata sent, waiting for resume
+09-10 19:29:54.207 D: tx: IMG_20260910_175527_744.jpg resume=0 (reply=resume)
+09-10 19:29:54.220 D: tx: data socket open, streaming IMG_20260910_175527_744.jpg
+09-10 19:29:54.692 D: tx: IMG_20260910_175527_744.jpg sent to Alien Phone
+09-10 19:30:22.014 D: rx: receiver loop started
+09-10 19:30:24.919 D: rx: control channel closed
+09-10 19:30:24.921 D: rx: receiver loop ended
+09-10 19:32:02.811 D: sender: advertising 192.168.43.173:54321, waiting for a receiver
+09-10 19:32:02.817 D: transport: listening on 54321
+09-10 19:32:32.211 D: transport: inbound connection accepted
+09-10 19:32:32.214 D: sender: receiver connected from Alien Phone
+09-10 19:32:32.216 D: tx: queueing 2 file(s) for Alien Phone
+09-10 19:32:32.220 D: tx: Screenshot_20260910-193007.png size=498307 from /storage/emulated/0/Pictures/Screenshots/Screenshot_20260910-193007.png
+09-10 19:32:32.222 D: tx: Screenshot_20260910-193007.png metadata sent, waiting for resume
+09-10 19:32:32.340 D: tx: Screenshot_20260910-193007.png resume=0 (reply=resume)
+09-10 19:32:32.351 D: tx: data socket open, streaming Screenshot_20260910-193007.png
+09-10 19:32:32.381 D: tx: Screenshot_20260910-193007.png sent to Alien Phone
+09-10 19:32:32.385 D: tx: Screenshot_20260910-193126.png size=78705 from /storage/emulated/0/Pictures/Screenshots/Screenshot_20260910-193126.png
+09-10 19:32:32.386 D: tx: Screenshot_20260910-193126.png metadata sent, waiting for resume
+09-10 19:32:32.553 D: tx: Screenshot_20260910-193126.png resume=0 (reply=resume)
+09-10 19:32:32.554 D: tx: data socket open, streaming Screenshot_20260910-193126.png
+09-10 19:32:32.578 D: tx: Screenshot_20260910-193126.png sent to Alien Phone
+09-10 19:33:55.201 D: rx: receiver loop started
+09-10 19:33:55.212 D: rx: IMG_20260908_223759_601.mp4 metadata ok (78877776 B), resuming at 0
+09-10 19:33:55.214 D: rx: IMG_20260908_223759_601.mp4 resume sent
+09-10 19:33:55.220 D: rx: IMG_20260908_223759_601.mp4 data socket open, reading chunks
+09-10 19:33:55.297 D: rx: control channel closed
+09-10 19:33:55.298 D: rx: receiver loop ended
+09-10 19:35:42.256 D: transport: connected to 192.168.43.1:54321
+09-10 19:35:42.262 D: transport: sender identified itself as Alien Phone
+09-10 19:35:42.306 D: rx: receiver loop started
+09-10 19:35:42.312 D: rx: baccd158ab6e43dea16a36a3271d19ce.mp4 metadata ok (6026078 B), resuming at 0
+09-10 19:35:42.313 D: rx: baccd158ab6e43dea16a36a3271d19ce.mp4 resume sent
+09-10 19:35:42.320 D: rx: baccd158ab6e43dea16a36a3271d19ce.mp4 data socket open, reading chunks
+09-10 19:35:54.919 D: tx: queueing 1 file(s) for Alien Phone
+09-10 19:35:54.923 D: tx: IMG_20260910_175519_868.jpg size=3004870 from /storage/emulated/0/DCIM/Camera/IMG_20260910_175519_868.jpg
+09-10 19:35:54.925 D: tx: IMG_20260910_175519_868.jpg metadata sent, waiting for resume
+09-10 19:36:13.755 D: rx: control channel closed
+09-10 19:36:13.756 D: rx: receiver loop ended
+09-10 19:36:13.758 D: tx: IMG_20260910_175519_868.jpg FAILED SocketException: Socket closed
+09-10 19:37:11.393 D: transport: connected to 192.168.43.1:54321
+09-10 19:37:11.401 D: transport: sender identified itself as Alien Phone
+09-10 19:37:11.443 D: rx: receiver loop started
+09-10 19:37:11.448 D: rx: baccd158ab6e43dea16a36a3271d19ce.mp4 metadata ok (6026078 B), resuming at 0
+09-10 19:37:11.450 D: rx: baccd158ab6e43dea16a36a3271d19ce.mp4 resume sent
+09-10 19:37:11.457 D: rx: baccd158ab6e43dea16a36a3271d19ce.mp4 data socket open, reading chunks
+09-10 19:37:12.808 D: rx: Screenshot_2026-09-10-15-41-22.png metadata ok (127216 B), resuming at 0
+09-10 19:37:12.809 D: rx: Screenshot_2026-09-10-15-41-22.png resume sent
+09-10 19:37:12.814 D: rx: Screenshot_2026-09-10-15-41-22.png data socket open, reading chunks
+09-10 19:37:21.181 D: rx: baccd158ab6e43dea16a36a3271d19ce.mp4 metadata ok (6026078 B), resuming at 0
+09-10 19:37:21.183 D: rx: baccd158ab6e43dea16a36a3271d19ce.mp4 resume sent
+09-10 19:37:21.188 D: rx: baccd158ab6e43dea16a36a3271d19ce.mp4 data socket open, reading chunks
+09-10 19:37:22.468 D: rx: Screenshot_2026-09-10-15-41-12.png metadata ok (266496 B), resuming at 0
+09-10 19:37:22.469 D: rx: Screenshot_2026-09-10-15-41-12.png resume sent
+09-10 19:37:22.472 D: rx: Screenshot_2026-09-10-15-41-12.png data socket open, reading chunks
+09-10 19:37:28.144 D: rx: baccd158ab6e43dea16a36a3271d19ce.mp4 metadata ok (6026078 B), resuming at 0
+09-10 19:37:28.146 D: rx: baccd158ab6e43dea16a36a3271d19ce.mp4 resume sent
+09-10 19:37:28.151 D: rx: baccd158ab6e43dea16a36a3271d19ce.mp4 data socket open, reading chunks
+09-10 19:37:29.453 D: rx: Screenshot_2026-09-10-13-46-58.png metadata ok (102605 B), resuming at 0
+09-10 19:37:29.453 D: rx: Screenshot_2026-09-10-13-46-58.png resume sent
+09-10 19:37:29.456 D: rx: Screenshot_2026-09-10-13-46-58.png data socket open, reading chunks
+09-10 19:37:43.356 D: rx: control channel closed
+09-10 19:37:43.358 D: rx: receiver loop ended
+09-10 19:48:50.884 D: transport: connected to 192.168.43.1:54321
+09-10 19:48:50.890 D: transport: sender identified itself as Alien Phone
+09-10 19:48:50.963 D: rx: receiver loop started
+09-10 19:49:04.313 D: rx: control channel closed
+09-10 19:49:04.314 D: rx: receiver loop ended
+09-10 19:49:44.269 D: transport: connected to 192.168.43.1:54321
+09-10 19:49:44.286 D: transport: sender identified itself as Alien Phone
+09-10 19:49:44.334 D: rx: receiver loop started
+09-10 19:49:44.404 D: rx: IMG_20260908_212927_050.mp4 metadata ok (51623106 B), resuming at 0
+09-10 19:49:44.407 D: rx: IMG_20260908_212927_050.mp4 resume sent
+09-10 19:49:44.418 D: rx: IMG_20260908_212927_050.mp4 data socket open, reading chunks
+09-10 19:49:54.309 D: rx: IMG_20260908_211124_079.mp4 metadata ok (312052832 B), resuming at 0
+09-10 19:49:54.309 D: rx: IMG_20260908_211124_079.mp4 resume sent
+09-10 19:49:54.313 D: rx: IMG_20260908_211124_079.mp4 data socket open, reading chunks
+09-10 19:50:25.528 D: rx: control channel closed
+09-10 19:50:25.530 D: rx: receiver loop ended
+09-10 19:50:52.181 D: sender: advertising 192.168.43.173:54321, waiting for a receiver
+09-10 19:50:52.186 D: transport: listening on 54321
+09-10 19:51:08.061 D: transport: inbound connection accepted
+09-10 19:51:08.066 D: sender: receiver connected from Alien Phone
+09-10 19:51:08.068 D: tx: queueing 1 file(s) for Alien Phone
+09-10 19:51:08.073 D: tx: Screenshot_2026-09-10-13-46-58 (1).png size=102605 from /storage/emulated/0/Download/Morselink/Screenshot_2026-09-10-13-46-58 (1).png
+09-10 19:51:08.076 D: tx: Screenshot_2026-09-10-13-46-58 (1).png metadata sent, waiting for resume
+09-10 19:51:08.151 D: tx: Screenshot_2026-09-10-13-46-58 (1).png resume=0 (reply=resume)
+09-10 19:51:08.164 D: tx: data socket open, streaming Screenshot_2026-09-10-13-46-58 (1).png
+09-10 19:51:08.192 D: tx: Screenshot_2026-09-10-13-46-58 (1).png sent to Alien Phone
+09-10 19:53:16.861 D: transport: connected to 192.168.43.1:54321
+09-10 19:53:16.869 D: transport: sender identified itself as Alien Phone
+09-10 19:53:16.944 D: rx: receiver loop started
+09-10 19:53:23.408 D: rx: control channel closed
+09-10 19:53:23.410 D: rx: receiver loop ended
+09-10 20:26:33.728 D: transport: connected to 192.168.43.1:54321
+09-10 20:26:33.736 D: transport: sender identified itself as Alien Phone
+09-10 20:26:33.798 D: rx: receiver loop started
+09-10 20:26:33.805 D: rx: IMG_20260908_223759_601.mp4 metadata ok (78877776 B), resuming at 0
+09-10 20:26:33.806 D: rx: IMG_20260908_223759_601.mp4 resume sent
+09-10 20:26:33.814 D: rx: IMG_20260908_223759_601.mp4 data socket open, reading chunks
+09-10 20:26:54.768 D: rx: IMG_20260908_212927_050.mp4 metadata ok (51623106 B), resuming at 0
+09-10 20:26:54.769 D: rx: IMG_20260908_212927_050.mp4 resume sent
+09-10 20:26:54.773 D: rx: IMG_20260908_212927_050.mp4 data socket open, reading chunks
+09-10 20:27:16.990 D: rx: IMG_20260908_211124_079.mp4 metadata ok (312052832 B), resuming at 182190080
+09-10 20:27:16.991 D: rx: IMG_20260908_211124_079.mp4 resume sent
+09-10 20:27:16.996 D: rx: IMG_20260908_211124_079.mp4 data socket open, reading chunks
+09-10 20:27:47.032 D: rx: control channel closed
+09-10 20:27:47.033 D: rx: receiver loop ended
+09-10 20:29:00.136 D: transport: connected to 192.168.43.1:54321
+09-10 20:29:00.145 D: transport: sender identified itself as Alien Phone
+09-10 20:29:00.188 D: rx: receiver loop started
+09-10 20:29:00.193 D: rx: IMG_20260908_205716_243.mp4 metadata ok (33996837 B), resuming at 0
+09-10 20:29:00.195 D: rx: IMG_20260908_205716_243.mp4 resume sent
+09-10 20:29:00.203 D: rx: IMG_20260908_205716_243.mp4 data socket open, reading chunks
+09-10 20:29:20.381 D: rx: IMG_20260908_205716_243.mp4 metadata ok (33996837 B), resuming at 0
+09-10 20:29:20.382 D: rx: IMG_20260908_205716_243.mp4 resume sent
+09-10 20:29:20.387 D: rx: IMG_20260908_205716_243.mp4 data socket open, reading chunks
+09-10 20:29:50.483 D: rx: control channel closed
+09-10 20:29:50.484 D: rx: receiver loop ended
+09-10 20:30:19.717 D: transport: connected to 192.168.43.1:54321
+09-10 20:30:19.726 D: transport: sender identified itself as Alien Phone
+09-10 20:30:19.780 D: rx: receiver loop started
+09-10 20:30:19.786 D: rx: IMG_20260908_205716_243.mp4 metadata ok (33996837 B), resuming at 0
+09-10 20:30:19.787 D: rx: IMG_20260908_205716_243.mp4 resume sent
+09-10 20:30:19.795 D: rx: IMG_20260908_205716_243.mp4 data socket open, reading chunks
+09-10 20:30:37.693 D: rx: 14141dc877903ff7775c2b6bb6f6b2f9_1788854063938.mp4 metadata ok (1657806 B), resuming at 0
+09-10 20:30:37.694 D: rx: 14141dc877903ff7775c2b6bb6f6b2f9_1788854063938.mp4 resume sent
+09-10 20:30:37.698 D: rx: 14141dc877903ff7775c2b6bb6f6b2f9_1788854063938.mp4 data socket open, reading chunks
+09-10 20:30:38.223 D: rx: VID-20260905-WA0006.mp4 metadata ok (1391848 B), resuming at 0
+09-10 20:30:38.224 D: rx: VID-20260905-WA0006.mp4 resume sent
+09-10 20:30:38.228 D: rx: VID-20260905-WA0006.mp4 data socket open, reading chunks
+09-10 20:30:38.645 D: rx: VID_20260904_102954_392.mp4 metadata ok (2000299 B), resuming at 0
+09-10 20:30:38.647 D: rx: VID_20260904_102954_392.mp4 resume sent
+09-10 20:30:38.650 D: rx: VID_20260904_102954_392.mp4 data socket open, reading chunks
+09-10 20:31:00.426 D: rx: VID_20260904_102954_392.mp4 metadata ok (2000299 B), resuming at 0
+09-10 20:31:00.427 D: rx: VID_20260904_102954_392.mp4 resume sent
+09-10 20:31:00.432 D: rx: VID_20260904_102954_392.mp4 data socket open, reading chunks
+09-10 20:31:01.033 D: rx: IMG_20260908_205716_243.mp4 metadata ok (33996837 B), resuming at 0
+09-10 20:31:01.034 D: rx: IMG_20260908_205716_243.mp4 resume sent
+09-10 20:31:01.037 D: rx: IMG_20260908_205716_243.mp4 data socket open, reading chunks
+09-10 20:31:14.761 D: rx: VID_20260904_102954_392.mp4 metadata ok (2000299 B), resuming at 0
+09-10 20:31:14.762 D: rx: VID_20260904_102954_392.mp4 resume sent
+09-10 20:31:14.766 D: rx: VID_20260904_102954_392.mp4 data socket open, reading chunks
+09-10 20:31:44.864 D: rx: control channel closed
+09-10 20:31:44.865 D: rx: receiver loop ended
+09-10 20:32:55.555 D: sender: advertising 192.168.43.173:54321, waiting for a receiver
+09-10 20:32:55.571 D: transport: listening on 54321
+09-10 20:32:57.372 D: transport: inbound connection accepted
+09-10 20:32:57.375 D: sender: receiver connected from Alien Phone
+09-10 20:32:57.377 D: tx: queueing 4 file(s) for Alien Phone
+09-10 20:32:57.383 D: tx: Screenshot_20260910-203155.png size=121639 from /storage/emulated/0/Pictures/Screenshots/Screenshot_20260910-203155.png
+09-10 20:32:57.387 D: tx: Screenshot_20260910-203155.png metadata sent, waiting for resume
+09-10 20:32:57.454 D: tx: Screenshot_20260910-203155.png resume=0 (reply=resume)
+09-10 20:32:57.464 D: tx: data socket open, streaming Screenshot_20260910-203155.png
+09-10 20:32:57.492 D: tx: Screenshot_20260910-203155.png sent to Alien Phone
+09-10 20:32:57.496 D: tx: Screenshot_20260910-202956.png size=123433 from /storage/emulated/0/Pictures/Screenshots/Screenshot_20260910-202956.png
+09-10 20:32:57.498 D: tx: Screenshot_20260910-202956.png metadata sent, waiting for resume
+09-10 20:32:57.559 D: tx: Screenshot_20260910-202956.png resume=0 (reply=resume)
+09-10 20:32:57.560 D: tx: data socket open, streaming Screenshot_20260910-202956.png
+09-10 20:32:57.572 D: tx: Screenshot_20260910-202956.png sent to Alien Phone
+09-10 20:32:57.576 D: tx: Screenshot_20260910-202758.png size=108929 from /storage/emulated/0/Pictures/Screenshots/Screenshot_20260910-202758.png
+09-10 20:32:57.577 D: tx: Screenshot_20260910-202758.png metadata sent, waiting for resume
+09-10 20:32:57.671 D: tx: Screenshot_20260910-202758.png resume=0 (reply=resume)
+09-10 20:32:57.672 D: tx: data socket open, streaming Screenshot_20260910-202758.png
+09-10 20:32:57.697 D: tx: Screenshot_20260910-202758.png sent to Alien Phone
+09-10 20:32:57.701 D: tx: Screenshot_20260910-193740.png size=134982 from /storage/emulated/0/Pictures/Screenshots/Screenshot_20260910-193740.png
+09-10 20:32:57.702 D: tx: Screenshot_20260910-193740.png metadata sent, waiting for resume
+09-10 20:32:57.729 D: tx: Screenshot_20260910-193740.png resume=0 (reply=resume)
+09-10 20:32:57.730 D: tx: data socket open, streaming Screenshot_20260910-193740.png
+09-10 20:32:57.742 D: tx: Screenshot_20260910-193740.png sent to Alien Phone
+09-10 20:35:04.980 D: webshare: server stopped
+09-11 07:56:28.233 D: transport: connected to 192.168.43.1:54321
+09-11 07:56:28.246 D: transport: sender identified itself as Alien Phone
+09-11 07:56:28.303 D: rx: receiver loop started
+09-11 07:56:28.309 D: rx: IMG_20260908_223759_601.mp4 metadata ok (78877776 B), resuming at 0
+09-11 07:56:28.310 D: rx: IMG_20260908_223759_601.mp4 resume sent
+09-11 07:56:28.319 D: rx: IMG_20260908_223759_601.mp4 data socket open, reading chunks
+09-11 07:56:42.638 D: rx: IMG_20260908_212927_050.mp4 metadata ok (51623106 B), resuming at 0
+09-11 07:56:42.639 D: rx: IMG_20260908_212927_050.mp4 resume sent
+09-11 07:56:42.644 D: rx: IMG_20260908_212927_050.mp4 data socket open, reading chunks
+09-11 07:57:04.642 D: tx: queueing 2 file(s) for Alien Phone
+09-11 07:57:04.648 D: tx: decb3c33c6304c2c8e8efd626f280d61.mp4 size=2488654 from /storage/emulated/0/Download/Status_saver/decb3c33c6304c2c8e8efd626f280d61.mp4
+09-11 07:57:04.651 D: tx: decb3c33c6304c2c8e8efd626f280d61.mp4 metadata sent, waiting for resume
+09-11 07:57:04.679 D: rx: skipping control line:  ye":"rsume","value":0,"text":""}
+09-11 07:57:04.679 D: tx: decb3c33c6304c2c8e8efd626f280d61.mp4 resume=0 (reply=null)
+09-11 07:57:04.680 D: tx: data socket open, streaming decb3c33c6304c2c8e8efd626f280d61.mp4
+09-11 07:57:05.012 D: tx: decb3c33c6304c2c8e8efd626f280d61.mp4 sent to Alien Phone
+09-11 07:57:05.014 D: tx: b4066443215e43d09eb570fb7a1157f5.mp4 size=3013244 from /storage/emulated/0/Download/Status_saver/b4066443215e43d09eb570fb7a1157f5.mp4
+09-11 07:57:05.015 D: tx: b4066443215e43d09eb570fb7a1157f5.mp4 metadata sent, waiting for resume
+09-11 07:57:35.282 D: rx: control channel closed
+09-11 07:57:35.283 D: rx: receiver loop ended
+09-11 07:57:35.283 D: tx: b4066443215e43d09eb570fb7a1157f5.mp4 FAILED SocketTimeoutException: Read timed out
+09-11 07:58:26.035 D: transport: connected to 192.168.43.1:54321
+09-11 07:58:26.044 D: transport: sender identified itself as Alien Phone
+09-11 07:58:26.087 D: rx: receiver loop started
+09-11 07:58:26.092 D: rx: androidApp-release.apk metadata ok (1241419 B), resuming at 0
+09-11 07:58:26.093 D: rx: androidApp-release.apk resume sent
+09-11 07:58:26.099 D: rx: androidApp-release.apk data socket open, reading chunks
+09-11 07:58:56.443 D: rx: control channel closed
+09-11 07:58:56.444 D: rx: receiver loop ended
+09-11 08:00:15.742 D: transport: connected to 192.168.43.1:54321
+09-11 08:00:15.748 D: transport: sender identified itself as Alien Phone
+09-11 08:00:15.808 D: rx: receiver loop started
+09-11 08:00:15.813 D: rx: Morselink metadata ok (8794441 B), resuming at 0
+09-11 08:00:15.815 D: rx: Morselink resume sent
+09-11 08:00:15.824 D: rx: Morselink data socket open, reading chunks
+09-11 08:00:47.688 D: rx: control channel closed
+09-11 08:00:47.689 D: rx: receiver loop ended
+09-11 08:01:07.289 D: tx: queueing 6 file(s) for Alien Phone
+09-11 08:01:07.294 D: tx: 7cd605a113a94b1490ba899a4182a458.mp4 size=8578796 from /storage/emulated/0/Download/Status_saver/7cd605a113a94b1490ba899a4182a458.mp4
+09-11 08:01:07.296 D: tx: 7cd605a113a94b1490ba899a4182a458.mp4 FAILED IOException: The connection to Alien Phone was closed
+09-11 08:01:07.304 D: tx: ec20c8c6022941a0954c3002bdc1b18e.mp4 size=10671336 from /storage/emulated/0/Download/Status_saver/ec20c8c6022941a0954c3002bdc1b18e.mp4
+09-11 08:01:07.306 D: tx: ec20c8c6022941a0954c3002bdc1b18e.mp4 FAILED IOException: The connection to Alien Phone was closed
+09-11 08:01:07.312 D: tx: 5306acd02b274eaca0cc6f5400208600.mp4 size=4313287 from /storage/emulated/0/Download/Status_saver/5306acd02b274eaca0cc6f5400208600.mp4
+09-11 08:01:07.314 D: tx: 5306acd02b274eaca0cc6f5400208600.mp4 FAILED IOException: The connection to Alien Phone was closed
+09-11 08:01:07.319 D: tx: IMG_20260905_083832_755.jpg size=2913335 from /storage/emulated/0/DCIM/Camera/IMG_20260905_083832_755.jpg
+09-11 08:01:07.320 D: tx: IMG_20260905_083832_755.jpg FAILED IOException: The connection to Alien Phone was closed
+09-11 08:01:07.326 D: tx: IMG_20260905_083830_770.jpg size=2974354 from /storage/emulated/0/DCIM/Camera/IMG_20260905_083830_770.jpg
+09-11 08:01:07.328 D: tx: IMG_20260905_083830_770.jpg FAILED IOException: The connection to Alien Phone was closed
+09-11 08:01:07.334 D: tx: IMG_20260905_083812_271.jpg size=2316767 from /storage/emulated/0/DCIM/Camera/IMG_20260905_083812_271.jpg
+09-11 08:01:07.335 D: tx: IMG_20260905_083812_271.jpg FAILED IOException: The connection to Alien Phone was closed
+09-11 08:06:09.337 D: transport: connected to 192.168.43.1:54321
+09-11 08:06:09.348 D: transport: sender identified itself as Alien Phone
+09-11 08:06:09.428 D: rx: receiver loop started
+09-11 08:06:09.434 D: rx: VID_20260617_095957.mp4 metadata ok (16706731 B), resuming at 0
+09-11 08:06:09.435 D: rx: VID_20260617_095957.mp4 resume sent
+09-11 08:06:09.443 D: rx: VID_20260617_095957.mp4 data socket open, reading chunks
+09-11 08:06:12.634 D: rx: VID_20260617_095957.mp4 done (16706731/16706731 B)
+09-11 08:06:12.638 D: rx: IMG_20260726_100022_685.mp4 metadata ok (11915271 B), resuming at 0
+09-11 08:06:12.639 D: rx: IMG_20260726_100022_685.mp4 resume sent
+09-11 08:06:12.642 D: rx: IMG_20260726_100022_685.mp4 data socket open, reading chunks
+09-11 08:06:14.915 D: rx: IMG_20260726_100022_685.mp4 done (11915271/11915271 B)
+09-11 08:06:14.919 D: rx: VID-20260824-WA0003.mp4 metadata ok (11701940 B), resuming at 0
+09-11 08:06:14.920 D: rx: VID-20260824-WA0003.mp4 resume sent
+09-11 08:06:14.924 D: rx: VID-20260824-WA0003.mp4 data socket open, reading chunks
+09-11 08:06:17.124 D: rx: VID-20260824-WA0003.mp4 done (11701940/11701940 B)
+09-11 08:06:17.128 D: rx: VID_20260622_174155.mp4 metadata ok (7603716 B), resuming at 0
+09-11 08:06:17.128 D: rx: VID_20260622_174155.mp4 resume sent
+09-11 08:06:17.132 D: rx: VID_20260622_174155.mp4 data socket open, reading chunks
+09-11 08:06:18.580 D: rx: VID_20260622_174155.mp4 done (7603716/7603716 B)
+09-11 08:06:48.404 D: rx: control channel closed
+09-11 08:06:48.405 D: rx: receiver loop ended
+09-11 08:08:46.662 D: tx: queueing 8 file(s) for Alien Phone
+09-11 08:08:46.687 D: tx: 7cd605a113a94b1490ba899a4182a458.mp4 size=8578796 from /storage/emulated/0/Download/Status_saver/7cd605a113a94b1490ba899a4182a458.mp4
+09-11 08:08:46.690 D: tx: 7cd605a113a94b1490ba899a4182a458.mp4 FAILED IOException: The connection to Alien Phone was closed
+09-11 08:08:46.703 D: tx: f8df1ab86f2b497f841deb7012816e3a.mp4 size=10658524 from /storage/emulated/0/Download/Status_saver/f8df1ab86f2b497f841deb7012816e3a.mp4
+09-11 08:08:46.705 D: tx: f8df1ab86f2b497f841deb7012816e3a.mp4 FAILED IOException: The connection to Alien Phone was closed
+09-11 08:08:46.712 D: tx: dc06156adb6e4485ac0051c391b255fa.mp4 size=10654454 from /storage/emulated/0/Download/Status_saver/dc06156adb6e4485ac0051c391b255fa.mp4
+09-11 08:08:46.714 D: tx: dc06156adb6e4485ac0051c391b255fa.mp4 FAILED IOException: The connection to Alien Phone was closed
+09-11 08:08:46.721 D: tx: VID-20260909-WA0000(1).mp4 size=3264060 from /storage/emulated/0/Movies/WhatsApp/VID-20260909-WA0000(1).mp4
+09-11 08:08:46.722 D: tx: VID-20260909-WA0000(1).mp4 FAILED IOException: The connection to Alien Phone was closed
+09-11 08:08:46.728 D: tx: d2a0b2dff34a49a59fd0bc0259102c26.mp4 size=5364817 from /storage/emulated/0/Download/Status_saver/d2a0b2dff34a49a59fd0bc0259102c26.mp4
+09-11 08:08:46.729 D: tx: d2a0b2dff34a49a59fd0bc0259102c26.mp4 FAILED IOException: The connection to Alien Phone was closed
+09-11 08:08:46.735 D: tx: 199f30bb2369446d95332acbd2f2fcbd.mp4 size=8030172 from /storage/emulated/0/Download/Status_saver/199f30bb2369446d95332acbd2f2fcbd.mp4
+09-11 08:08:46.736 D: tx: 199f30bb2369446d95332acbd2f2fcbd.mp4 FAILED IOException: The connection to Alien Phone was closed
+09-11 08:08:46.742 D: tx: 92289e9222b3440db9b4c6f119f28261.mp4 size=4494194 from /storage/emulated/0/Download/Status_saver/92289e9222b3440db9b4c6f119f28261.mp4
+09-11 08:08:46.744 D: tx: 92289e9222b3440db9b4c6f119f28261.mp4 FAILED IOException: The connection to Alien Phone was closed
+09-11 08:08:46.751 D: tx: d03eafe91469458dac6d12ed8d0da9d4.mp4 size=4523853 from /storage/emulated/0/Download/Status_saver/d03eafe91469458dac6d12ed8d0da9d4.mp4
+09-11 08:08:46.752 D: tx: d03eafe91469458dac6d12ed8d0da9d4.mp4 FAILED IOException: The connection to Alien Phone was closed
+09-11 08:08:46.767 D: tx: batch of 8 finished
+09-11 08:09:30.121 D: transport: connected to 192.168.43.1:54321
+09-11 08:09:30.130 D: transport: sender identified itself as Alien Phone
+09-11 08:09:30.188 D: rx: receiver loop started
+09-11 08:09:30.191 D: rx: decb3c33c6304c2c8e8efd626f280d61.mp4 metadata ok (2488654 B), resuming at 0
+09-11 08:09:30.192 D: rx: decb3c33c6304c2c8e8efd626f280d61.mp4 resume sent
+09-11 08:09:30.201 D: rx: decb3c33c6304c2c8e8efd626f280d61.mp4 data socket open, reading chunks
+09-11 08:09:30.862 D: rx: decb3c33c6304c2c8e8efd626f280d61.mp4 done (2488654/2488654 B)
+09-11 08:09:42.679 D: tx: queueing 1 file(s) for Alien Phone
+09-11 08:09:42.684 D: tx: VID-20260909-WA0001.mp4 size=2220313 from /storage/emulated/0/Movies/WhatsApp/VID-20260909-WA0001.mp4
+09-11 08:09:42.686 D: tx: VID-20260909-WA0001.mp4 metadata sent, waiting for resume
+09-11 08:09:42.729 D: rx: skipping control line:   p :"r um" "vau ":0,t xt"" }
+09-11 08:10:12.746 D: tx: VID-20260909-WA0001.mp4 FAILED SocketTimeoutException: Read timed out
+09-11 08:10:12.753 D: rx: control channel closed
+09-11 08:10:12.754 D: rx: receiver loop ended
+09-11 08:10:12.767 D: tx: batch of 1 finished
+09-11 09:28:53.338 D: transport: connected to 192.168.43.1:54321
+09-11 09:28:53.347 D: transport: sender identified itself as Alien Phone
+09-11 09:28:53.413 D: rx: receiver loop started
+09-11 09:28:53.416 D: rx: dsLZETnVakjN8hZ2yUc9Vo.mp4 metadata ok (2535194 B), resuming at 0
+09-11 09:28:53.417 D: rx: dsLZETnVakjN8hZ2yUc9Vo.mp4 resume sent
+09-11 09:28:53.424 D: rx: dsLZETnVakjN8hZ2yUc9Vo.mp4 data socket open, reading chunks
+09-11 09:28:54.345 D: rx: dsLZETnVakjN8hZ2yUc9Vo.mp4 done (2535194/2535194 B)
+09-11 09:29:10.444 D: tx: queueing 1 file(s) for Alien Phone
+09-11 09:29:10.448 D: tx: Screenshot_20260904-201322.png size=551548 from /storage/emulated/0/Pictures/Screenshots/Screenshot_20260904-201322.png
+09-11 09:29:10.451 D: tx: Screenshot_20260904-201322.png metadata sent, waiting for resume
+09-11 09:29:10.474 D: tx: Screenshot_20260904-201322.png resume=0 (reply=null)
+09-11 09:29:10.476 D: tx: data socket open, streaming Screenshot_20260904-201322.png
+09-11 09:29:10.563 D: tx: Screenshot_20260904-201322.png sent to Alien Phone
+09-11 09:29:10.565 D: tx: batch of 1 finished
+09-11 09:29:10.572 D: rx: receiver loop started
+09-11 09:29:20.735 D: rx: skipping control line: "      datP r :5432 "to lBt s": 35 4, il ": "i :" di co en \\ me a\/et rn \/ do 
+09-11 09:29:33.913 D: tx: queueing 2 file(s) for Alien Phone
+09-11 09:29:33.917 D: tx: Screenshot_20260904-201322.png size=551548 from /storage/emulated/0/Pictures/Screenshots/Screenshot_20260904-201322.png
+09-11 09:29:33.918 D: tx: Screenshot_20260904-201322.png metadata sent, waiting for resume
+09-11 09:29:50.740 D: rx: control channel closed
+09-11 09:29:50.742 D: rx: receiver loop ended
+09-11 09:29:50.744 D: rx: control channel closed
+09-11 09:29:50.744 D: rx: receiver loop ended
+09-11 09:29:50.744 D: tx: Screenshot_20260904-201322.png FAILED SocketException: Socket closed
+09-11 09:29:50.765 D: tx: IMG-20260907-WA0000.jpg size=42597 from /storage/emulated/0/Pictures/WhatsApp/IMG-20260907-WA0000.jpg
+09-11 09:29:50.767 D: tx: IMG-20260907-WA0000.jpg FAILED IOException: The connection to Alien Phone was closed
+09-11 09:29:50.776 D: tx: batch of 2 finished
+09-11 09:30:14.663 D: transport: connected to 192.168.43.1:54321
+09-11 09:30:14.668 D: transport: sender identified itself as Alien Phone
+09-11 09:30:14.721 D: rx: receiver loop started
+09-11 09:30:14.725 D: rx: Screenshot_2026-09-11-08-10-24.png metadata ok (74571 B), resuming at 0
+09-11 09:30:14.726 D: rx: Screenshot_2026-09-11-08-10-24.png resume sent
+09-11 09:30:14.733 D: rx: Screenshot_2026-09-11-08-10-24.png data socket open, reading chunks
+09-11 09:30:14.854 D: rx: Screenshot_2026-09-11-08-10-24.png done (74571/74571 B)
+09-11 09:30:19.722 D: rx: Screenshot_2026-09-11-08-10-24.png metadata ok (74571 B), resuming at 0
+09-11 09:30:19.724 D: rx: Screenshot_2026-09-11-08-10-24.png resume sent
+09-11 09:30:19.728 D: rx: Screenshot_2026-09-11-08-10-24.png data socket open, reading chunks
+09-11 09:30:49.727 W: rx: Screenshot_2026-09-11-08-10-24.png INCOMPLETE - got 0 of 74571 B (74571 B missing)
+09-11 09:30:49.752 D: rx: Screenshot_2026-09-10-13-46-45.png metadata ok (189442 B), resuming at 0
+09-11 09:30:49.754 D: rx: Screenshot_2026-09-10-13-46-45.png resume sent
+09-11 09:30:49.765 D: rx: Screenshot_2026-09-10-13-46-45.png data socket open, reading chunks
+09-11 09:30:49.784 W: rx: Screenshot_2026-09-10-13-46-45.png INCOMPLETE - got 0 of 189442 B (189442 B missing)
+09-11 09:30:49.795 D: rx: control channel closed
+09-11 09:30:49.796 D: rx: receiver loop ended
+09-11 09:31:17.410 D: tx: queueing 1 file(s) for Alien Phone
+09-11 09:31:17.413 D: tx: Screenshot_20260905-140847.png size=121645 from /storage/emulated/0/Pictures/Screenshots/Screenshot_20260905-140847.png
+09-11 09:31:17.415 D: tx: Screenshot_20260905-140847.png FAILED IOException: The connection to Alien Phone was closed
+09-11 09:31:17.420 D: tx: batch of 1 finished
+09-11 09:31:29.430 D: sender: advertising 192.168.43.173:54321, waiting for a receiver
+09-11 09:31:29.434 D: transport: listening on 54321
+09-11 09:31:33.247 D: transport: inbound connection accepted
+09-11 09:31:33.252 D: sender: receiver connected from Alien Phone
+09-11 09:31:33.254 D: tx: queueing 1 file(s) for Alien Phone
+09-11 09:31:33.261 D: tx: IMG_20260905_084503_531.jpg size=4007599 from /storage/emulated/0/DCIM/Camera/IMG_20260905_084503_531.jpg
+09-11 09:31:33.264 D: tx: IMG_20260905_084503_531.jpg metadata sent, waiting for resume
+09-11 09:31:33.356 D: tx: IMG_20260905_084503_531.jpg resume=0 (reply=resume)
+09-11 09:31:33.367 D: tx: data socket open, streaming IMG_20260905_084503_531.jpg
+09-11 09:31:34.080 D: tx: IMG_20260905_084503_531.jpg sent to Alien Phone
+09-11 09:31:34.082 D: tx: batch of 1 finished
+09-11 09:31:34.091 D: rx: receiver loop started
+09-11 09:31:40.153 D: tx: queueing 2 file(s) for Alien Phone
+09-11 09:31:40.156 D: tx: IMG_20260905_084503_531.jpg size=4007599 from /storage/emulated/0/DCIM/Camera/IMG_20260905_084503_531.jpg
+09-11 09:31:40.158 D: tx: IMG_20260905_084503_531.jpg metadata sent, waiting for resume
+09-11 09:32:10.190 D: tx: IMG_20260905_084503_531.jpg FAILED SocketTimeoutException: Read timed out
+09-11 09:32:10.203 D: rx: control channel closed
+09-11 09:32:10.204 D: rx: receiver loop ended
+09-11 09:32:10.213 D: tx: IMG_20260902_141000_885.jpg size=3478499 from /storage/emulated/0/DCIM/Camera/IMG_20260902_141000_885.jpg
+09-11 09:32:10.215 D: tx: IMG_20260902_141000_885.jpg FAILED IOException: The connection to Alien Phone was closed
+09-11 09:32:10.220 D: tx: batch of 2 finished
+
+----- logcat -----
+09-11 08:08:46.847 E/AndroidRuntime( 3175): FATAL EXCEPTION: DefaultDispatcher-worker-5
+09-11 08:08:46.847 E/AndroidRuntime( 3175): Process: com.morselink.app, PID: 3175
+09-11 08:08:46.847 E/AndroidRuntime( 3175): java.io.IOException: The connection to Alien Phone was closed
+09-11 08:08:46.847 E/AndroidRuntime( 3175): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession.openControlSocket(LegacyWifiDirectTransport.kt:790)
+09-11 08:08:46.847 E/AndroidRuntime( 3175): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession.access$openControlSocket(LegacyWifiDirectTransport.kt:369)
+09-11 08:08:46.847 E/AndroidRuntime( 3175): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession$receiveLoop$2.invokeSuspend(LegacyWifiDirectTransport.kt:541)
+09-11 08:08:46.847 E/AndroidRuntime( 3175): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession$receiveLoop$2.invoke(LegacyWifiDirectTransport.kt:8)
+09-11 08:08:46.847 E/AndroidRuntime( 3175): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession$receiveLoop$2.invoke(LegacyWifiDirectTransport.kt:4)
+09-11 08:08:46.847 E/AndroidRuntime( 3175): 	at kotlinx.coroutines.intrinsics.UndispatchedKt.startUndispatchedOrReturn(Undispatched.kt:61)
+09-11 08:08:46.847 E/AndroidRuntime( 3175): 	at kotlinx.coroutines.BuildersKt__Builders_commonKt.withContext(Builders.common.kt:163)
+09-11 08:08:46.847 E/AndroidRuntime( 3175): 	at kotlinx.coroutines.BuildersKt.withContext(dex-id-cf1a7fd0fa244a4cadb13ddd8ca703b744e32199:1)
+09-11 08:08:46.847 E/AndroidRuntime( 3175): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession.receiveLoop(LegacyWifiDirectTransport.kt:540)
+09-11 08:08:46.847 E/AndroidRuntime( 3175): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession.access$receiveLoop(LegacyWifiDirectTransport.kt:369)
+09-11 08:08:46.847 E/AndroidRuntime( 3175): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession$incomingFiles$1$job$1.invokeSuspend(LegacyWifiDirectTransport.kt:536)
+09-11 08:08:46.847 E/AndroidRuntime( 3175): 	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
+09-11 08:08:46.847 E/AndroidRuntime( 3175): 	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:104)
+09-11 08:08:46.847 E/AndroidRuntime( 3175): 	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:111)
+09-11 08:08:46.847 E/AndroidRuntime( 3175): 	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:99)
+09-11 08:08:46.847 E/AndroidRuntime( 3175): 	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:584)
+09-11 08:08:46.847 E/AndroidRuntime( 3175): 	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:811)
+09-11 08:08:46.847 E/AndroidRuntime( 3175): 	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:715)
+09-11 08:08:46.847 E/AndroidRuntime( 3175): 	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:702)
+09-11 08:08:46.847 E/AndroidRuntime( 3175): 	Suppressed: kotlinx.coroutines.internal.DiagnosticCoroutineContextException: [StandaloneCoroutine{Cancelling}@6883bb, Dispatchers.IO]
+09-11 08:10:12.804 E/AndroidRuntime( 5067): FATAL EXCEPTION: DefaultDispatcher-worker-3
+09-11 08:10:12.804 E/AndroidRuntime( 5067): Process: com.morselink.app, PID: 5067
+09-11 08:10:12.804 E/AndroidRuntime( 5067): java.io.IOException: The connection to Alien Phone was closed
+09-11 08:10:12.804 E/AndroidRuntime( 5067): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession.openControlSocket(LegacyWifiDirectTransport.kt:790)
+09-11 08:10:12.804 E/AndroidRuntime( 5067): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession.access$openControlSocket(LegacyWifiDirectTransport.kt:369)
+09-11 08:10:12.804 E/AndroidRuntime( 5067): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession$receiveLoop$2.invokeSuspend(LegacyWifiDirectTransport.kt:541)
+09-11 08:10:12.804 E/AndroidRuntime( 5067): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession$receiveLoop$2.invoke(LegacyWifiDirectTransport.kt:8)
+09-11 08:10:12.804 E/AndroidRuntime( 5067): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession$receiveLoop$2.invoke(LegacyWifiDirectTransport.kt:4)
+09-11 08:10:12.804 E/AndroidRuntime( 5067): 	at kotlinx.coroutines.intrinsics.UndispatchedKt.startUndispatchedOrReturn(Undispatched.kt:61)
+09-11 08:10:12.804 E/AndroidRuntime( 5067): 	at kotlinx.coroutines.BuildersKt__Builders_commonKt.withContext(Builders.common.kt:163)
+09-11 08:10:12.804 E/AndroidRuntime( 5067): 	at kotlinx.coroutines.BuildersKt.withContext(dex-id-cf1a7fd0fa244a4cadb13ddd8ca703b744e32199:1)
+09-11 08:10:12.804 E/AndroidRuntime( 5067): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession.receiveLoop(LegacyWifiDirectTransport.kt:540)
+09-11 08:10:12.804 E/AndroidRuntime( 5067): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession.access$receiveLoop(LegacyWifiDirectTransport.kt:369)
+09-11 08:10:12.804 E/AndroidRuntime( 5067): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession$incomingFiles$1$job$1.invokeSuspend(LegacyWifiDirectTransport.kt:536)
+09-11 08:10:12.804 E/AndroidRuntime( 5067): 	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
+09-11 08:10:12.804 E/AndroidRuntime( 5067): 	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:104)
+09-11 08:10:12.804 E/AndroidRuntime( 5067): 	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:111)
+09-11 08:10:12.804 E/AndroidRuntime( 5067): 	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:99)
+09-11 08:10:12.804 E/AndroidRuntime( 5067): 	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:584)
+09-11 08:10:12.804 E/AndroidRuntime( 5067): 	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:811)
+09-11 08:10:12.804 E/AndroidRuntime( 5067): 	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:715)
+09-11 08:10:12.804 E/AndroidRuntime( 5067): 	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:702)
+09-11 08:10:12.804 E/AndroidRuntime( 5067): 	Suppressed: kotlinx.coroutines.internal.DiagnosticCoroutineContextException: [StandaloneCoroutine{Cancelling}@aaf6510, Dispatchers.IO]
+09-11 09:29:50.828 E/AndroidRuntime(24360): FATAL EXCEPTION: DefaultDispatcher-worker-4
+09-11 09:29:50.828 E/AndroidRuntime(24360): Process: com.morselink.app, PID: 24360
+09-11 09:29:50.828 E/AndroidRuntime(24360): java.io.IOException: The connection to Alien Phone was closed
+09-11 09:29:50.828 E/AndroidRuntime(24360): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession.openControlSocket(LegacyWifiDirectTransport.kt:790)
+09-11 09:29:50.828 E/AndroidRuntime(24360): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession.access$openControlSocket(LegacyWifiDirectTransport.kt:369)
+09-11 09:29:50.828 E/AndroidRuntime(24360): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession$receiveLoop$2.invokeSuspend(LegacyWifiDirectTransport.kt:541)
+09-11 09:29:50.828 E/AndroidRuntime(24360): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession$receiveLoop$2.invoke(LegacyWifiDirectTransport.kt:8)
+09-11 09:29:50.828 E/AndroidRuntime(24360): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession$receiveLoop$2.invoke(LegacyWifiDirectTransport.kt:4)
+09-11 09:29:50.828 E/AndroidRuntime(24360): 	at kotlinx.coroutines.intrinsics.UndispatchedKt.startUndispatchedOrReturn(Undispatched.kt:61)
+09-11 09:29:50.828 E/AndroidRuntime(24360): 	at kotlinx.coroutines.BuildersKt__Builders_commonKt.withContext(Builders.common.kt:163)
+09-11 09:29:50.828 E/AndroidRuntime(24360): 	at kotlinx.coroutines.BuildersKt.withContext(dex-id-cf1a7fd0fa244a4cadb13ddd8ca703b744e32199:1)
+09-11 09:29:50.828 E/AndroidRuntime(24360): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession.receiveLoop(LegacyWifiDirectTransport.kt:540)
+09-11 09:29:50.828 E/AndroidRuntime(24360): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession.access$receiveLoop(LegacyWifiDirectTransport.kt:369)
+09-11 09:29:50.828 E/AndroidRuntime(24360): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession$incomingFiles$1$job$1.invokeSuspend(LegacyWifiDirectTransport.kt:536)
+09-11 09:29:50.828 E/AndroidRuntime(24360): 	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
+09-11 09:29:50.828 E/AndroidRuntime(24360): 	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:104)
+09-11 09:29:50.828 E/AndroidRuntime(24360): 	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:111)
+09-11 09:29:50.828 E/AndroidRuntime(24360): 	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:99)
+09-11 09:29:50.828 E/AndroidRuntime(24360): 	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:584)
+09-11 09:29:50.828 E/AndroidRuntime(24360): 	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:811)
+09-11 09:29:50.828 E/AndroidRuntime(24360): 	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:715)
+09-11 09:29:50.828 E/AndroidRuntime(24360): 	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:702)
+09-11 09:29:50.828 E/AndroidRuntime(24360): 	Suppressed: kotlinx.coroutines.internal.DiagnosticCoroutineContextException: [StandaloneCoroutine{Cancelling}@ddbb3f4, Dispatchers.IO]
+09-11 09:31:17.471 E/AndroidRuntime(25329): FATAL EXCEPTION: DefaultDispatcher-worker-7
+09-11 09:31:17.471 E/AndroidRuntime(25329): Process: com.morselink.app, PID: 25329
+09-11 09:31:17.471 E/AndroidRuntime(25329): java.io.IOException: The connection to Alien Phone was closed
+09-11 09:31:17.471 E/AndroidRuntime(25329): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession.openControlSocket(LegacyWifiDirectTransport.kt:790)
+09-11 09:31:17.471 E/AndroidRuntime(25329): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession.access$openControlSocket(LegacyWifiDirectTransport.kt:369)
+09-11 09:31:17.471 E/AndroidRuntime(25329): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession$receiveLoop$2.invokeSuspend(LegacyWifiDirectTransport.kt:541)
+09-11 09:31:17.471 E/AndroidRuntime(25329): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession$receiveLoop$2.invoke(LegacyWifiDirectTransport.kt:8)
+09-11 09:31:17.471 E/AndroidRuntime(25329): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession$receiveLoop$2.invoke(LegacyWifiDirectTransport.kt:4)
+09-11 09:31:17.471 E/AndroidRuntime(25329): 	at kotlinx.coroutines.intrinsics.UndispatchedKt.startUndispatchedOrReturn(Undispatched.kt:61)
+09-11 09:31:17.471 E/AndroidRuntime(25329): 	at kotlinx.coroutines.BuildersKt__Builders_commonKt.withContext(Builders.common.kt:163)
+09-11 09:31:17.471 E/AndroidRuntime(25329): 	at kotlinx.coroutines.BuildersKt.withContext(dex-id-cf1a7fd0fa244a4cadb13ddd8ca703b744e32199:1)
+09-11 09:31:17.471 E/AndroidRuntime(25329): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession.receiveLoop(LegacyWifiDirectTransport.kt:540)
+09-11 09:31:17.471 E/AndroidRuntime(25329): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession.access$receiveLoop(LegacyWifiDirectTransport.kt:369)
+09-11 09:31:17.471 E/AndroidRuntime(25329): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession$incomingFiles$1$job$1.invokeSuspend(LegacyWifiDirectTransport.kt:536)
+09-11 09:31:17.471 E/AndroidRuntime(25329): 	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
+09-11 09:31:17.471 E/AndroidRuntime(25329): 	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:104)
+09-11 09:31:17.471 E/AndroidRuntime(25329): 	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:111)
+09-11 09:31:17.471 E/AndroidRuntime(25329): 	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:99)
+09-11 09:31:17.471 E/AndroidRuntime(25329): 	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:584)
+09-11 09:31:17.471 E/AndroidRuntime(25329): 	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:811)
+09-11 09:31:17.471 E/AndroidRuntime(25329): 	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:715)
+09-11 09:31:17.471 E/AndroidRuntime(25329): 	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:702)
+09-11 09:31:17.471 E/AndroidRuntime(25329): 	Suppressed: kotlinx.coroutines.internal.DiagnosticCoroutineContextException: [StandaloneCoroutine{Cancelling}@34139b8, Dispatchers.IO]
+09-11 09:32:10.255 E/AndroidRuntime(26162): FATAL EXCEPTION: DefaultDispatcher-worker-2
+09-11 09:32:10.255 E/AndroidRuntime(26162): Process: com.morselink.app, PID: 26162
+09-11 09:32:10.255 E/AndroidRuntime(26162): java.io.IOException: The connection to Alien Phone was closed
+09-11 09:32:10.255 E/AndroidRuntime(26162): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession.openControlSocket(LegacyWifiDirectTransport.kt:790)
+09-11 09:32:10.255 E/AndroidRuntime(26162): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession.access$openControlSocket(LegacyWifiDirectTransport.kt:369)
+09-11 09:32:10.255 E/AndroidRuntime(26162): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession$receiveLoop$2.invokeSuspend(LegacyWifiDirectTransport.kt:541)
+09-11 09:32:10.255 E/AndroidRuntime(26162): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession$receiveLoop$2.invoke(LegacyWifiDirectTransport.kt:8)
+09-11 09:32:10.255 E/AndroidRuntime(26162): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession$receiveLoop$2.invoke(LegacyWifiDirectTransport.kt:4)
+09-11 09:32:10.255 E/AndroidRuntime(26162): 	at kotlinx.coroutines.intrinsics.UndispatchedKt.startUndispatchedOrReturn(Undispatched.kt:61)
+09-11 09:32:10.255 E/AndroidRuntime(26162): 	at kotlinx.coroutines.BuildersKt__Builders_commonKt.withContext(Builders.common.kt:163)
+09-11 09:32:10.255 E/AndroidRuntime(26162): 	at kotlinx.coroutines.BuildersKt.withContext(dex-id-cf1a7fd0fa244a4cadb13ddd8ca703b744e32199:1)
+09-11 09:32:10.255 E/AndroidRuntime(26162): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession.receiveLoop(LegacyWifiDirectTransport.kt:540)
+09-11 09:32:10.255 E/AndroidRuntime(26162): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession.access$receiveLoop(LegacyWifiDirectTransport.kt:369)
+09-11 09:32:10.255 E/AndroidRuntime(26162): 	at com.morselink.core.network.LegacyWifiDirectTransport$LegacySession$incomingFiles$1$job$1.invokeSuspend(LegacyWifiDirectTransport.kt:536)
+09-11 09:32:10.255 E/AndroidRuntime(26162): 	at kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)
+09-11 09:32:10.255 E/AndroidRuntime(26162): 	at kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:104)
+09-11 09:32:10.255 E/AndroidRuntime(26162): 	at kotlinx.coroutines.internal.LimitedDispatcher$Worker.run(LimitedDispatcher.kt:111)
+09-11 09:32:10.255 E/AndroidRuntime(26162): 	at kotlinx.coroutines.scheduling.TaskImpl.run(Tasks.kt:99)
+09-11 09:32:10.255 E/AndroidRuntime(26162): 	at kotlinx.coroutines.scheduling.CoroutineScheduler.runSafely(CoroutineScheduler.kt:584)
+09-11 09:32:10.255 E/AndroidRuntime(26162): 	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.executeTask(CoroutineScheduler.kt:811)
+09-11 09:32:10.255 E/AndroidRuntime(26162): 	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.runWorker(CoroutineScheduler.kt:715)
+09-11 09:32:10.255 E/AndroidRuntime(26162): 	at kotlinx.coroutines.scheduling.CoroutineScheduler$Worker.run(CoroutineScheduler.kt:702)
+09-11 09:32:10.255 E/AndroidRuntime(26162): 	Suppressed: kotlinx.coroutines.internal.DiagnosticCoroutineContextException: [StandaloneCoroutine{Cancelling}@fa8a77, Dispatchers.IO]
