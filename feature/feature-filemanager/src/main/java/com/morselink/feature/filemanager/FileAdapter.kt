@@ -92,6 +92,7 @@ class FileAdapter(
             // Recycled tiles arrive with the previous row's thumbnail, badge and
             // tick still attached, so clear all of it before binding.
             binding.check.visibility = android.view.View.GONE
+            binding.selectionWash.visibility = android.view.View.GONE
             binding.badge.visibility = android.view.View.GONE
             binding.badge.text = ""
             binding.meta.text = ""
@@ -128,6 +129,8 @@ class FileAdapter(
                     val selected = isSelected(item)
                     binding.root.isSelected = selected
                     binding.check.visibility =
+                        if (selected) android.view.View.VISIBLE else android.view.View.GONE
+                    binding.selectionWash.visibility =
                         if (selected) android.view.View.VISIBLE else android.view.View.GONE
                     binding.root.setOnClickListener { onClick(row) }
                     binding.root.setOnLongClickListener { onLongClick(item) }

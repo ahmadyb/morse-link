@@ -59,7 +59,28 @@
             app:argType="boolean"
             android:defaultValue="false" />
         <deepLink app:uri="morselink://transfer" />
-        <deepLink app:uri="morselink://send?asSender=true" />
+    </fragment>
+
+    <!--
+      The same screen, reached from Send.
+
+      A query parameter (morselink://send?asSender=true) was the first attempt
+      and it does not survive deep-link matching reliably, so the screen never
+      learned it was here to send and showed no QR. Two destinations carrying
+      fixed defaults need no parsing at all: which URI opened the screen decides
+      what it is for.
+    -->
+    <fragment
+        android:id="@+id/nav_transfer_send"
+        android:name="com.morselink.feature.transfer.TransferFragment"
+        android:label="Send"
+        tools:layout="@layout/fragment_transfer"
+        xmlns:tools="http://schemas.android.com/tools">
+        <argument
+            android:name="asSender"
+            app:argType="boolean"
+            android:defaultValue="true" />
+        <deepLink app:uri="morselink://send" />
     </fragment>
 
     <fragment

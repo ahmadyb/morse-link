@@ -1,9 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<!--
+  A vertical stack, not a set of constraints.
+
+  Constrained, the footer could end up part-way down the screen with the
+  transfer list hidden underneath it, which is what one handset shows - and
+  it renders correctly for a moment during a transition, so the fault is in
+  how the constraints settle rather than in what they ask for. A stack has
+  no settling to do: header, card, list taking everything left, footer last.
+-->
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:background="@color/background">
 
     <TextView
@@ -14,10 +24,7 @@
         android:paddingTop="@dimen/unit_2"
         android:paddingEnd="@dimen/screen_padding"
         android:textColor="@color/textSecondary"
-        android:textSize="13sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:textSize="13sp" />
 
     <!-- Collapsible card (§14.8). Two faces: the pairing QR while we wait for a
          receiver, and the peer we are connected to once the session is up. Both
@@ -25,7 +32,7 @@
          underneath it on a phone. -->
     <LinearLayout
         android:id="@+id/pairing_panel"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/screen_padding"
         android:layout_marginTop="@dimen/unit"
@@ -36,10 +43,7 @@
         android:paddingTop="@dimen/unit"
         android:paddingEnd="@dimen/unit"
         android:paddingBottom="@dimen/unit"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/transport_label">
+        android:visibility="gone">
 
         <LinearLayout
             android:id="@+id/pairing_header"
@@ -107,29 +111,23 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/list"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_weight="1"
         android:clipToPadding="false"
         android:paddingStart="@dimen/screen_padding"
-        android:paddingEnd="@dimen/screen_padding"
-        app:layout_constraintBottom_toTopOf="@id/footer"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/pairing_panel" />
+        android:paddingEnd="@dimen/screen_padding" />
 
     <LinearLayout
         android:id="@+id/footer"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingStart="@dimen/screen_padding"
         android:paddingEnd="@dimen/screen_padding"
         android:paddingTop="@dimen/unit"
-        android:paddingBottom="@dimen/unit_3"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        android:paddingBottom="@dimen/unit_3">
 
         <TextView
             android:id="@+id/stats"
@@ -174,4 +172,4 @@
             android:layout_height="wrap_content"
             android:text="@string/action_cancel" />
     </LinearLayout>
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

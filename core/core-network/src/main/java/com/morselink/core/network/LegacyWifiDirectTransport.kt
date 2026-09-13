@@ -400,6 +400,35 @@ class LegacyWifiDirectTransport @Inject constructor(
         private var sending = false
 
         /**
+         * True while a single file is being received.
+         *
+         * A receive in flight owns the data port, so a send that starts
+         * alongside it cannot bind that port and fails outright with
+         * EADDRINUSE - which in the log cost a whole file and then the
+         * session, because the sender reported "connection closed" to the
+         * other end.
+         */
+        @Volatile
+        private var receiving = false
+
+        /**
+         * Waits for an in-flight receive to let go of the data port.
+         *
+         * The receiver is usually parked in a socket read, which no amount of
+         * asking will interrupt, so its data socket is closed first - that
+         * makes the read fail immediately and the receive unwind.
+         */
+        private suspend fun awaitReceiveIdle(timeoutMs: Long = 10_000) {
+            if (!receiving) return
+            MorselinkLog.d("tx: waiting for an in-flight receive to finish")
+            runCatching { dataSocket?.close() }
+            val deadline = android.os.SystemClock.elapsedRealtime() + timeoutMs
+            while (receiving && android.os.SystemClock.elapsedRealtime() < deadline) {
+                kotlinx.coroutines.delay(50)
+            }
+        }
+
+        /**
          * Serialises every read and write on the control socket.
          *
          * One socket, two coroutines. The receive loop reads it waiting for
@@ -454,6 +483,10 @@ class LegacyWifiDirectTransport @Inject constructor(
                         // receiver dials in as soon as it has read the
                         // metadata; if nothing is listening yet its first
                         // connect is refused and it has to back off and retry.
+                        // Binding the data port fails with EADDRINUSE while a
+                        // receive is still holding it, so let that finish
+                        // first rather than losing the file.
+                        awaitReceiveIdle()
                         val dataServer = bindDataServer()
                         // Held across write-then-read so nothing else can
                         // touch the control channel in between: releasing
@@ -640,6 +673,7 @@ class LegacyWifiDirectTransport @Inject constructor(
             // persists across the batch; each file's payload has its own
             // connection, opened and closed around it.
             var handedOver = false
+            var claimedBySend = false
             try {
                 // Polled rather than blocked. Cancelling a coroutine does
                 // nothing to a thread parked in a socket read, so a loop that
@@ -648,7 +682,14 @@ class LegacyWifiDirectTransport @Inject constructor(
                 // sender was about to write, which is how a batch lost its
                 // handshake. Checking in every CONTROL_POLL_MS means a cancel
                 // actually takes effect.
-                while (kotlinx.coroutines.currentCoroutineContext().isActive && !sending) {
+                while (true) {
+                    if (!kotlinx.coroutines.currentCoroutineContext().isActive) break
+                    // A send has claimed the channel. Record it rather than
+                    // inferring it later: by the time the finally block runs,
+                    // the send may have finished and cleared the flag, and
+                    // "the flag is false" would then read as "nobody is
+                    // sending" and tear the session down mid-handover.
+                    if (sending) { claimedBySend = true; break }
                     // The read is the critical section; the work that follows a
                     // completed read (writing the resume, receiving the file)
                     // happens outside it, so a send is never blocked for longer
@@ -673,6 +714,12 @@ class LegacyWifiDirectTransport @Inject constructor(
                 MorselinkLog.w("rx: receive loop stopped: ${error.javaClass.simpleName}: ${error.message}")
             } finally {
                 MorselinkLog.d("rx: receiver loop ended")
+                // Two ways to leave that are not a finish: cancelled to hand
+                // the channel over, and leaving because a send already took
+                // it. Both must leave the session standing - closing the
+                // sockets here destroyed it a millisecond before the send
+                // started, which is every turnaround failure in the log.
+                if (claimedBySend) handedOver = true
                 if (!handedOver) closeSockets()
             }
         }
@@ -729,6 +776,20 @@ class LegacyWifiDirectTransport @Inject constructor(
             message?.takeIf { it.isNotBlank() } ?: javaClass.simpleName
 
         private suspend fun receiveOne(
+            meta: ChunkProtocol.FileMeta,
+            directory: File,
+            controlOut: DataOutputStream,
+            emit: (IncomingFileEvent) -> Unit,
+        ) {
+            receiving = true
+            try {
+                receiveOneInner(meta, directory, controlOut, emit)
+            } finally {
+                receiving = false
+            }
+        }
+
+        private suspend fun receiveOneInner(
             meta: ChunkProtocol.FileMeta,
             directory: File,
             controlOut: DataOutputStream,
