@@ -64,6 +64,9 @@ import kotlin.math.min
  * CRC32 per chunk, retransmission requests and byte-offset resume.
  */
 @Singleton
+/** One line off the control channel, or null when the socket said nothing yet. */
+private data class ControlLine(val text: String, val isClosedMarker: Boolean)
+
 class LegacyWifiDirectTransport @Inject constructor(
     @ApplicationContext private val context: Context,
     private val engine: TransferEngine,
@@ -833,7 +836,7 @@ class LegacyWifiDirectTransport @Inject constructor(
          * app down: the loop runs in the transport's own coroutine, so nothing
          * upstream was in a position to catch it.
          */
-        private fun receiveChunks(
+        private suspend fun receiveChunks(
             data: Socket,
             controlOut: DataOutputStream,
             part: File,
