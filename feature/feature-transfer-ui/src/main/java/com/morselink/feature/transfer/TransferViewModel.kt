@@ -257,6 +257,20 @@ class TransferViewModel @Inject constructor(
         refreshConnectedHint()
     }
 
+    /**
+     * Show the pairing QR because this screen was opened to send.
+     *
+     * Nothing is queued yet - that is the point, you pick after you connect -
+     * so the init block cannot tell this apart from arriving to receive, and
+     * it used to choose "receive" and leave the card blank.
+     */
+    fun openAsSender() {
+        // Already connected: the card is showing the peer, which is more
+        // useful than replacing it with a code nobody needs to scan.
+        if (holder.hasSession()) return
+        startSenderPairing()
+    }
+
     private fun startSenderPairing() {
         isSender = true
         holder.isSender = true

@@ -78,6 +78,13 @@ class TransferFragment : Fragment(R.layout.fragment_transfer) {
             )
         }
 
+        // Opened from Send: show the code to pair. Connect first, then pick -
+        // so there is nothing queued yet and the init block cannot work out
+        // why we are here.
+        if (arguments?.getBoolean("asSender", false) == true) {
+            viewModel.openAsSender()
+        }
+
         // Only offered once there is a session to come back to. Before that
         // the QR is the whole point of the screen, and there is nothing to
         // minimise to.

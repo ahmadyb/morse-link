@@ -50,11 +50,16 @@
         android:label="Transfer"
         tools:layout="@layout/fragment_transfer"
         xmlns:tools="http://schemas.android.com/tools">
+        <!-- Whether this screen was opened in order to send. Send arrives
+             before anything has been picked, and without it the screen had no
+             way to tell "I am here to pair" from "I am here to receive" - so
+             it fell into the receiver branch and showed no QR code at all. -->
+        <argument
+            android:name="asSender"
+            app:argType="boolean"
+            android:defaultValue="false" />
         <deepLink app:uri="morselink://transfer" />
-        <!-- Send is a request to connect, not to browse. Picking happens in
-             the file manager, so "Send" opens the connection screen and the
-             Choose files button there hands over to it. -->
-        <deepLink app:uri="morselink://send" />
+        <deepLink app:uri="morselink://send?asSender=true" />
     </fragment>
 
     <fragment
