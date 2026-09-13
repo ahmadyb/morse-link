@@ -395,6 +395,22 @@ class LegacyWifiDirectTransport @Inject constructor(
          */
         @Volatile
         private var sending = false
+
+        /**
+         * Serialises every read and write on the control socket.
+         *
+         * One socket, two coroutines. The receive loop reads it waiting for
+         * metadata; a send writes metadata to it and then reads the reply.
+         * Anything less than strict exclusion interleaves them: readLine() is
+         * not thread-safe, and a cancelled reader can leave the stream parked
+         * mid-message, so the next reader reads the tail of someone else's
+         * line and both sides wait for a reply that has already been consumed.
+         *
+         * The flag above stops the loop; this mutex guarantees that even a
+         * loop one beat behind is never inside a read when a send begins,
+         * because a send cannot acquire it until the loop lets go.
+         */
+        private val channelMutex = Mutex()
         private var preset: Socket? = presetControl
         private var hadControl: Boolean = false
         private val sendMutex = Mutex()
@@ -436,28 +452,37 @@ class LegacyWifiDirectTransport @Inject constructor(
                         // metadata; if nothing is listening yet its first
                         // connect is refused and it has to back off and retry.
                         val dataServer = bindDataServer()
-                        controlOut.writeUtfLine(
-                            ChunkProtocol.metadata(
-                                files = listOf(
-                                    ChunkProtocol.FileMeta(
-                                        id = file.id,
-                                        name = file.name,
-                                        size = file.sizeBytes,
-                                        sha256 = file.sha256,
-                                        mime = file.mimeType,
-                                    )
-                                ),
-                                totalBytes = file.sizeBytes,
-                                dataPort = LegacyPorts.DATA_PORT,
+                        // Held across write-then-read so nothing else can
+                        // touch the control channel in between: releasing
+                        // after the write let the receive loop take the
+                        // socket back and consume the resume before this send
+                        // ever saw it.
+                        val handshake = channelMutex.withLock {
+                            controlOut.writeUtfLine(
+                                ChunkProtocol.metadata(
+                                    files = listOf(
+                                        ChunkProtocol.FileMeta(
+                                            id = file.id,
+                                            name = file.name,
+                                            size = file.sizeBytes,
+                                            sha256 = file.sha256,
+                                            mime = file.mimeType,
+                                        )
+                                    ),
+                                    totalBytes = file.sizeBytes,
+                                    dataPort = LegacyPorts.DATA_PORT,
+                                )
                             )
-                        )
-
-                        MorselinkLog.d("tx: ${file.name} metadata sent, waiting for resume")
-                        val reply = ChunkProtocol.parseControl(controlIn.readUtfLine())
-                        val startOffset = if (reply?.type == ChunkProtocol.ControlMessage.TYPE_RESUME) {
-                            reply.value.coerceIn(0, file.sizeBytes)
-                        } else 0L
-                        MorselinkLog.d("tx: ${file.name} resume=$startOffset (reply=${reply?.type})")
+                            controlOut.flush()
+                            MorselinkLog.d("tx: ${file.name} metadata sent, waiting for resume")
+                            val reply = ChunkProtocol.parseControl(controlIn.readUtfLine())
+                            val offset = if (reply?.type == ChunkProtocol.ControlMessage.TYPE_RESUME) {
+                                reply.value.coerceIn(0, file.sizeBytes)
+                            } else 0L
+                            offset to reply?.type
+                        }
+                        val startOffset = handshake.first
+                        MorselinkLog.d("tx: ${file.name} resume=$startOffset (reply=${handshake.second})")
 
                         val data = try {
                             openDataSocket(dataServer)
@@ -508,7 +533,7 @@ class LegacyWifiDirectTransport @Inject constructor(
         }
 
         /** §5 — chunk headers, payload and trailer written to one buffered stream. */
-        private fun streamFile(
+        private suspend fun streamFile(
             source: File,
             startOffset: Long,
             transferId: String,
@@ -543,7 +568,12 @@ class LegacyWifiDirectTransport @Inject constructor(
                 }
             }
             out.flush()
-            runCatching { controlOut.writeUtfLine(ChunkProtocol.control(ChunkProtocol.ControlMessage.TYPE_DONE)) }
+            runCatching {
+                channelMutex.withLock {
+                    controlOut.writeUtfLine(ChunkProtocol.control(ChunkProtocol.ControlMessage.TYPE_DONE))
+                    controlOut.flush()
+                }
+            }
         }
 
         private fun sendChunk(
@@ -616,54 +646,21 @@ class LegacyWifiDirectTransport @Inject constructor(
                 // handshake. Checking in every CONTROL_POLL_MS means a cancel
                 // actually takes effect.
                 while (kotlinx.coroutines.currentCoroutineContext().isActive && !sending) {
-                    // Idle is not the same as closed. readLine() throws on the
-                    // socket timeout, and that used to be reported as "control
-                    // channel closed" - so a receiver that waited more than the
-                    // timeout for the other phone to pick some files tore the
-                    // whole session down, and every send after that failed with
-                    // "The connection to <peer> was closed".
-                    control.soTimeout = CONTROL_POLL_MS
-                    val line = try {
-                        controlIn.readUtfLine()
-                    } catch (timeout: java.net.SocketTimeoutException) {
-                        continue          // nothing yet; keep waiting
-                    } catch (error: java.io.IOException) {
-                        MorselinkLog.d("rx: control channel closed (${error.javaClass.simpleName})")
-                        break
-                    }
-                    if (line.isBlank()) {
+                    // The read is the critical section; the work that follows a
+                    // completed read (writing the resume, receiving the file)
+                    // happens outside it, so a send is never blocked for longer
+                    // than one poll interval.
+                    val line = channelMutex.withLock { readControlLine(control, controlIn) } ?: continue
+                    if (line.isClosedMarker) {
                         MorselinkLog.d("rx: control channel closed")
                         break
                     }
-                    val metadata = ChunkProtocol.parseMetadata(line)
-                    if (metadata == null) {
-                        // Not metadata, so keep reading. The sender writes a
-                        // DONE marker on this channel after every file, and
-                        // treating that as end-of-conversation ended the
-                        // session after the first file: every later file was
-                        // then left waiting for a receiver that had gone.
-                        MorselinkLog.d("rx: skipping control line: ${line.take(80)}")
-                        continue
+                    val payload = line.text
+                    if (payload.isBlank()) {
+                        MorselinkLog.d("rx: control channel closed")
+                        break
                     }
-                    for (meta in metadata.files) {
-                        try {
-                            receiveOne(meta, directory, controlOut, emit)
-                        } catch (error: Exception) {
-                            if (error is kotlinx.coroutines.CancellationException) throw error
-                            MorselinkLog.w(
-                                "rx: ${meta.name} failed: ${error.javaClass.simpleName}: ${error.message}",
-                            )
-                            emit(IncomingFileEvent.Failed(meta.id.ifBlank { meta.name }, error.describe()))
-                            // This used to rethrow, which ended the loop and
-                            // abandoned every file still queued behind this
-                            // one - one bad file cost the rest of the batch.
-                            // Files are framed independently on the control
-                            // channel, so carrying on is safe; the data stream
-                            // is the part that can be left misaligned, and the
-                            // next file's CRC check catches that.
-                            runCatching { engine.fail(meta.id.ifBlank { meta.name }, error.describe()) }
-                        }
-                    }
+                    handleControlLine(payload, directory, controlOut, emit)
                 }
             } catch (error: Throwable) {
                 if (error is kotlinx.coroutines.CancellationException) {
@@ -673,15 +670,58 @@ class LegacyWifiDirectTransport @Inject constructor(
                 MorselinkLog.w("rx: receive loop stopped: ${error.javaClass.simpleName}: ${error.message}")
             } finally {
                 MorselinkLog.d("rx: receiver loop ended")
-                // Only tear the session down when the loop is genuinely
-                // finishing. It is also cancelled to hand the channel over to a
-                // send, and closing the sockets then destroyed the session in
-                // the middle of the handover: the sender wrote its metadata
-                // into a connection that no longer existed, saw no resume
-                // reply, and failed on a read timeout thirty seconds later -
-                // while the other end logged "control channel closed" for the
-                // same instant. Every turnaround failure traces back here.
                 if (!handedOver) closeSockets()
+            }
+        }
+
+        /** One line, or null when the socket simply had nothing to say yet. */
+        private data class ControlLine(val text: String, val isClosedMarker: Boolean)
+
+        private fun readControlLine(control: Socket, controlIn: DataInputStream): ControlLine? {
+            control.soTimeout = CONTROL_POLL_MS
+            return try {
+                ControlLine(controlIn.readUtfLine(), false)
+            } catch (timeout: java.net.SocketTimeoutException) {
+                null
+            } catch (closed: java.net.SocketException) {
+                ControlLine("", true)
+            } catch (error: java.io.IOException) {
+                ControlLine("", true)
+            }
+        }
+
+        private suspend fun handleControlLine(
+            payload: String,
+            directory: File,
+            controlOut: DataOutputStream,
+            emit: (IncomingFileEvent) -> Unit,
+        ) {
+            val metadata = ChunkProtocol.parseMetadata(payload)
+            if (metadata == null) {
+                // Not metadata, so ignore it. The sender writes a DONE marker
+                // on this channel after every file, and treating that as
+                // end-of-conversation ended the session after the first file:
+                // every later file was then left waiting for a receiver that
+                // had gone.
+                MorselinkLog.d("rx: skipping control line: ${payload.take(80)}")
+                return
+            }
+            for (meta in metadata.files) {
+                try {
+                    receiveOne(meta, directory, controlOut, emit)
+                } catch (error: Exception) {
+                    if (error is kotlinx.coroutines.CancellationException) throw error
+                    MorselinkLog.w(
+                        "rx: ${meta.name} failed: ${error.javaClass.simpleName}: ${error.message}",
+                    )
+                    emit(IncomingFileEvent.Failed(meta.id.ifBlank { meta.name }, error.describe()))
+                    // This used to rethrow, which ended the loop and abandoned
+                    // every file still queued behind this one - one bad file
+                    // cost the rest of the batch. Files are framed
+                    // independently on the control channel, so carrying on is
+                    // safe.
+                    runCatching { engine.fail(meta.id.ifBlank { meta.name }, error.describe()) }
+                }
             }
         }
 
@@ -698,7 +738,12 @@ class LegacyWifiDirectTransport @Inject constructor(
             val part = File(directory, meta.name + ".part")
             val offset = if (part.exists() && part.length() < meta.size) part.length() else 0L
             MorselinkLog.d("rx: ${meta.name} metadata ok (${meta.size} B), resuming at $offset")
-            controlOut.writeUtfLine(ChunkProtocol.control(ChunkProtocol.ControlMessage.TYPE_RESUME, offset))
+            channelMutex.withLock {
+                controlOut.writeUtfLine(
+                    ChunkProtocol.control(ChunkProtocol.ControlMessage.TYPE_RESUME, offset)
+                )
+                controlOut.flush()
+            }
             MorselinkLog.d("rx: ${meta.name} resume sent")
 
             val transferId = engine.begin(
@@ -726,9 +771,15 @@ class LegacyWifiDirectTransport @Inject constructor(
             )
 
             if (!engine.hasSpaceFor(meta.size)) {
-                controlOut.writeUtfLine(
-                    ChunkProtocol.control(ChunkProtocol.ControlMessage.TYPE_REJECT, text = "Not enough storage")
-                )
+                channelMutex.withLock {
+                    controlOut.writeUtfLine(
+                        ChunkProtocol.control(
+                            ChunkProtocol.ControlMessage.TYPE_REJECT,
+                            text = "Not enough storage",
+                        )
+                    )
+                    controlOut.flush()
+                }
                 engine.fail(transferId, "Not enough storage on this device")
                 emit(IncomingFileEvent.Failed(transferId, "Not enough storage"))
                 return
@@ -808,7 +859,7 @@ class LegacyWifiDirectTransport @Inject constructor(
             }
         }
 
-        private fun readChunks(
+        private suspend fun readChunks(
             input: java.io.InputStream,
             output: FileOutputStream,
             controlOut: DataOutputStream,
@@ -855,12 +906,15 @@ class LegacyWifiDirectTransport @Inject constructor(
                         // out of order chunk: only accept the one we are missing
                         if (chunkOffset < written) continue
                         runCatching {
-                            controlOut.writeUtfLine(
-                                ChunkProtocol.control(
-                                    ChunkProtocol.ControlMessage.TYPE_RETRANSMIT,
-                                    (written / ChunkProtocol.CHUNK_SIZE),
+                            channelMutex.withLock {
+                                controlOut.writeUtfLine(
+                                    ChunkProtocol.control(
+                                        ChunkProtocol.ControlMessage.TYPE_RETRANSMIT,
+                                        (written / ChunkProtocol.CHUNK_SIZE),
+                                    )
                                 )
-                            )
+                                controlOut.flush()
+                            }
                         }
                         continue
                     }

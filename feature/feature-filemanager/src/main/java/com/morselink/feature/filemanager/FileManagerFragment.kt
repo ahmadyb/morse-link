@@ -10,7 +10,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.morselink.core.media.DirectoryState
 import com.morselink.core.media.FileItem
 import com.morselink.core.media.SmartCategory
@@ -96,9 +98,9 @@ class FileManagerFragment : Fragment(R.layout.fragment_file_manager) {
         // Rows throughout. The tabs across the top separate the libraries, and
         // a grid of thumbnails underneath them was a second, slower way to say
         // the same thing.
-        adapter.useGrid = false
+        adapter.useGrid = true
         adapter.libraryTiles = false
-        applyLayout(false)
+        applyLayout(true)
 
         // ------------------------------------------------------------ tabs
         FilesTab.values().forEach { tab ->
@@ -260,9 +262,18 @@ class FileManagerFragment : Fragment(R.layout.fragment_file_manager) {
      */
     private fun applyLayout(gallery: Boolean) {
         val binding = binding ?: return
-        if (binding.list.layoutManager !is LinearLayoutManager) {
-            binding.list.layoutManager = LinearLayoutManager(requireContext())
-        }
+        // Media is a grid; the date headings and the storage rows stay full
+        // width so the grid reads as sections rather than as a wall.
+        val span = 3
+        binding.list.layoutManager =
+            GridLayoutManager(requireContext(), span, RecyclerView.VERTICAL, false).apply {
+                spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+                    override fun getSpanSize(position: Int): Int {
+                        val row = adapter.currentList.getOrNull(position) ?: return span
+                        return adapter.spanSize(row, span)
+                    }
+                }
+            }
     }
 
     private fun updateEmptyState() {

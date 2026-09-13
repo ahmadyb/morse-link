@@ -57,6 +57,13 @@ class FileAdapter(
         is FileRow.Category -> false
     }
 
+    /** Columns a row occupies when the list is a grid. Headings span the lot. */
+    fun spanSize(row: FileRow, span: Int): Int = when (row) {
+        is FileRow.Entry -> if (useGrid) 1 else span
+        is FileRow.Library -> if (useGrid && libraryTiles) 1 else span
+        else -> span
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         return when (viewType) {

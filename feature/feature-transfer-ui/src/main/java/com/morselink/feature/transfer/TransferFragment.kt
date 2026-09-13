@@ -100,12 +100,13 @@ class TransferFragment : Fragment(R.layout.fragment_transfer) {
             viewModel.cancelAll()
         }
 
-        // Minimise goes somewhere specific: Send, so the user can pick more
-        // files. It has to be checked before the generic dismiss below, which
-        // fires for both Minimise and Cancel.
+        // Minimise has to land somewhere that is not this screen. "Send" used
+        // to mean the picker, so it worked; Send is the connect screen now, so
+        // minimising navigated straight back here and looked like a flicker.
+        // The file manager is where the files are, and it is the picker.
         viewModel.minimised.observe(viewLifecycleOwner) { minimised ->
             if (!minimised) return@observe
-            findNavController().navigate(Uri.parse("morselink://send"))
+            findNavController().navigate(Uri.parse("morselink://files"))
         }
 
         // Cancel used to stop the transfers but leave the user stranded on a
