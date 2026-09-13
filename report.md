@@ -243,9 +243,43 @@ either side, goes through a single `channelMutex`:
 - Non-metadata lines, the `DONE` marker, `REJECT`, `RETRANSMIT` and the resume
   write are all inside the lock.
 
-**Status: shipped, unconfirmed.** You have reported "failed" four times and I
-would rather say that plainly than claim it works. Attempt 5 is the first change
-that removes the race rather than narrowing it.
+**Status: shipped, unconfirmed.** You reported "failed" again.
+
+**Attempt 6 — the hand-over the log had been pointing at.** The new logs were
+decisive because of the timing:
+
+```
+20:56:36.976  rx: receiver loop ended
+20:56:36.977  tx: metadata sent, waiting for resume
+20:56:36.979  tx: FAILED SocketException: Socket closed
+```
+
+One millisecond between the loop ending and the send dying. The loop's `finally`
+closes the sockets unless it has been told the exit is a hand-over — and it was
+only ever told that on **cancellation**. Attempt 4's `sending` flag gave the loop
+a *second* way out, and every exit through that door looked like a genuine
+finish, so the session was destroyed in the instant before the send that needed
+it. This is the same class of fault as attempt 2, reintroduced by a new exit
+path.
+
+The loop now records *why* it left, at the moment it leaves, rather than
+inferring it afterwards from a flag the send may already have cleared.
+
+**A second fault, from the same logs.** A send that began while a file was still
+being received failed outright:
+
+```
+20:56:45.868  tx: FAILED BindException: bind failed: EADDRINUSE
+```
+
+`reuseAddress` was already set, so the port was genuinely held — the in-flight
+receive owned it. The send now lets a receive finish first, closing its data
+socket so a receiver parked in a read unwinds immediately instead of blocking for
+its full thirty-second timeout.
+
+**Status: shipped, unconfirmed.** Attempt 6 is the first fix that came from a log
+line naming the exact instant the session died, rather than from reasoning about
+what might be wrong.
 
 ### 2.4 UI — Send, Files, transfer screen
 
@@ -315,9 +349,23 @@ made Send connect-only):
   now goes to the Files tab.
 - **The QR code stopped appearing.** The screen decided whether to pair by asking
   "are there files queued?", and Send now arrives with nothing queued, so it
-  concluded it had been opened to receive and left the card blank. The deep link
-  now carries the reason: `morselink://send?asSender=true` shows the code;
+  concluded it had been opened to receive and left the card blank. It needed a
+  way to be told why it was opened.
+
+  The first attempt used a query parameter, `morselink://send?asSender=true`, and
+  **did not work** — deep-link query matching was not reliably delivering the
+  flag, so the screen still did not know it was here to send. Send now has its
+  own destination in the nav graph carrying `asSender = true` as a fixed default,
+  which needs no parsing: which URI opened the screen decides what it is for.
   `morselink://transfer` is unchanged.
+
+**The transfer screen footer could settle part-way down the screen**, with the
+Sending and Receiving lists hidden underneath it — on one handset only, and
+**rendering correctly for a moment during a transition**. That last detail is the
+tell: a constraint that resolves *late* rather than one that is simply wrong.
+Rather than keep hunting for it, the screen is now a vertical stack — header,
+card, list taking everything left over via `layout_weight="1"`, footer last. A
+stack has nothing to resolve.
 
 ### 2.5 WebShare
 
@@ -429,7 +477,9 @@ Built to match a reference screenshot you supplied:
 - **Search local files**
 - **Sort** — Date, Size, Name
 - **Today / Yesterday / Earlier** headings
-- **Media as a 3-wide grid**, with headings full width so it reads as sections
+- **Media as a 3-wide grid**, with headings full width so it reads as sections,
+  gutters between tiles, and selection shown as a wash over the thumbnail plus a
+  tick rather than a small mark in the corner
 - **Footer that says what you are about to send** — "Send 6 · 661.5KB"
 - Directory navigation with an interactive address bar: tap a segment to jump up,
   tap a caret for sibling folders, tap the empty tail to type a path
@@ -485,7 +535,7 @@ Send → receive → send back. Every change made so far is described in §2.3. 
 current fix gives the control channel a single owner. **Not yet confirmed by
 you**, and you have reported failure four times.
 
-### 4.2 The transfer screen layout on one handset — not reproducible yet
+### 4.2 The transfer screen layout on one handset — addressed, unconfirmed
 
 Measured from your screenshots:
 
@@ -497,16 +547,15 @@ Measured from your screenshots:
 In a1 the buttons sit about two-thirds down with roughly a third of the screen
 empty below them, and the Sending / Receiving headers are not there at all.
 
-The layout file already pins the footer to the bottom
-(`constraintBottom_toBottomOf="parent"`, with the list filling everything above
-it), and I could not find anything in it that would put the footer at 66%. Rather
-than change a layout I do not understand and ship it, I am asking:
+The layout file already pinned the footer to the bottom, and I could not find
+anything in it that would put the footer at 66%. **The detail that resolved it
+came from you: it renders correctly for a split second when Minimise is tapped.**
+That is the signature of a constraint that resolves late, not one that is wrong —
+so the fix is not to find the offending constraint but to remove the dependency on
+constraint resolution. The screen is now a vertical stack: header, card, list
+taking what is left, footer last. A stack has nothing to settle.
 
-> **What is in the empty space below the buttons in a1 — blank background, or
-> something there I have not seen?**
-
-That distinguishes "the footer is floating" from "the whole screen is being cut
-short", which have different fixes.
+**Shipped, unconfirmed.**
 
 ### 4.3 A missing reference image
 
@@ -568,6 +617,7 @@ onto the tip so the working tree is untouched, re-apply the change, drop
 | Multi-file batches | **Working, confirmed** |
 | Receiver initiating a send | **Working, confirmed** |
 | Minimise and keep browsing | **Working, confirmed** |
+| Minimise lands on the Files tab | **Working, confirmed** |
 | History, thumbnails, Sent entries | **Working, confirmed** |
 | Notification Stop | **Working, confirmed** |
 | Sound effects | **Working, confirmed** |
@@ -578,6 +628,7 @@ onto the tip so the working tree is untouched, re-apply the change, drop
 | WebShare folder grouping by real path | **Shipped, unconfirmed** |
 | WebShare address bar on empty folders | **Shipped, unconfirmed** |
 | Send tab as connect-only | **Shipped, unconfirmed** |
-| QR code on Send | **Shipped, unconfirmed** |
-| **Bidirectional turnaround** | **Shipped, five attempts, unconfirmed** |
-| **Transfer screen layout on the 576px handset** | **Open — needs one detail from you** |
+| QR code on Send | **Shipped, unconfirmed** (two attempts: query parameter failed, dedicated destination shipped) |
+| Gallery grid gutters and selection | **Shipped, unconfirmed** |
+| Transfer screen footer position | **Shipped, unconfirmed** |
+| **Bidirectional turnaround** | **Shipped, six attempts, unconfirmed** |
