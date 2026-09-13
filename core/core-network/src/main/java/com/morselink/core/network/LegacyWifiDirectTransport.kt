@@ -677,9 +677,6 @@ class LegacyWifiDirectTransport @Inject constructor(
             }
         }
 
-        /** One line, or null when the socket simply had nothing to say yet. */
-        private data class ControlLine(val text: String, val isClosedMarker: Boolean)
-
         private fun readControlLine(control: Socket, controlIn: DataInputStream): ControlLine? {
             control.soTimeout = CONTROL_POLL_MS
             return try {
