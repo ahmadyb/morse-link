@@ -511,7 +511,7 @@ class LegacyWifiDirectTransport @Inject constructor(
                             )
                             controlOut.flush()
                             MorselinkLog.d("tx: ${file.name} metadata sent, waiting for resume")
-                            val reply = ChunkProtocol.parseControl(controlIn.readUtfLine())
+                            val reply = readReply(controlIn)
                             val offset = if (reply?.type == ChunkProtocol.ControlMessage.TYPE_RESUME) {
                                 reply.value.coerceIn(0, file.sizeBytes)
                             } else 0L
@@ -674,6 +674,7 @@ class LegacyWifiDirectTransport @Inject constructor(
             // connection, opened and closed around it.
             var handedOver = false
             var claimedBySend = false
+            var lastTrafficAt = System.currentTimeMillis()
             try {
                 // Polled rather than blocked. Cancelling a coroutine does
                 // nothing to a thread parked in a socket read, so a loop that
@@ -694,7 +695,25 @@ class LegacyWifiDirectTransport @Inject constructor(
                     // completed read (writing the resume, receiving the file)
                     // happens outside it, so a send is never blocked for longer
                     // than one poll interval.
-                    val line = channelMutex.withLock { readControlLine(control, controlIn) } ?: continue
+                    val line = channelMutex.withLock { readControlLine(control, controlIn) }
+                    if (line == null) {
+                        // Nothing arrived. The channel is silent between
+                        // transfers, and a silent channel is what gets dropped:
+                        // every idle death in the log came after a stretch of
+                        // no traffic whatsoever. Say something before the link
+                        // has a chance to decide nobody is using it.
+                        val now = System.currentTimeMillis()
+                        if (now - lastTrafficAt >= KEEPALIVE_INTERVAL_MS) {
+                            val alive = channelMutex.withLock { writeKeepalive(controlOut) }
+                            if (!alive) {
+                                MorselinkLog.d("rx: control channel closed")
+                                break
+                            }
+                            lastTrafficAt = now
+                        }
+                        continue
+                    }
+                    lastTrafficAt = System.currentTimeMillis()
                     if (line.isClosedMarker) {
                         MorselinkLog.d("rx: control channel closed")
                         break
@@ -724,6 +743,35 @@ class LegacyWifiDirectTransport @Inject constructor(
             }
         }
 
+        /** Returns false when the channel is gone rather than merely quiet. */
+        private fun writeKeepalive(controlOut: DataOutputStream): Boolean = try {
+            controlOut.writeUtfLine(
+                ChunkProtocol.control(ChunkProtocol.ControlMessage.TYPE_KEEPALIVE)
+            )
+            true
+        } catch (error: java.io.IOException) {
+            false
+        }
+
+        /**
+         * Reads a reply, stepping over keepalives.
+         *
+         * The peer writes one whenever its side has been quiet, so a straight
+         * read can come back with a keepalive where a resume was expected. That
+         * would be read as "no resume" and start the file from zero, leaving the
+         * real reply in the buffer to be picked up as the answer to the next
+         * file's handshake.
+         */
+        private fun readReply(controlIn: DataInputStream): ChunkProtocol.ControlMessage? {
+            while (true) {
+                val line = controlIn.readUtfLine()
+                if (line.isBlank()) return null
+                val message = ChunkProtocol.parseControl(line) ?: return null
+                if (message.type == ChunkProtocol.ControlMessage.TYPE_KEEPALIVE) continue
+                return message
+            }
+        }
+
         private fun readControlLine(control: Socket, controlIn: DataInputStream): ControlLine? {
             control.soTimeout = CONTROL_POLL_MS
             return try {
@@ -743,6 +791,11 @@ class LegacyWifiDirectTransport @Inject constructor(
             controlOut: DataOutputStream,
             emit: (IncomingFileEvent) -> Unit,
         ) {
+            // The peer's heartbeat. Nothing to do with it, and not worth a log
+            // line every few seconds.
+            if (ChunkProtocol.parseControl(payload)?.type ==
+                ChunkProtocol.ControlMessage.TYPE_KEEPALIVE
+            ) return
             val metadata = ChunkProtocol.parseMetadata(payload)
             if (metadata == null) {
                 // Not metadata, so ignore it. The sender writes a DONE marker
@@ -1137,6 +1190,12 @@ class LegacyWifiDirectTransport @Inject constructor(
          * is near-instant, long enough that an idle wait costs almost nothing.
          */
         private const val CONTROL_POLL_MS = 1_000
+        // How long the control channel may stay completely silent before
+        // we write to it. Idle sessions in the log were dropped by the
+        // link after 15s and after 95s of no traffic at all, and the next
+        // send then failed with "The connection to <peer> was closed".
+        // Sitting well under the shorter of those keeps the session up.
+        private const val KEEPALIVE_INTERVAL_MS = 5_000L
         private const val GROUP_TIMEOUT_MS = 20_000L
 
         /** How long the sender holds the port open waiting for a scan. */

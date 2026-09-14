@@ -132,6 +132,9 @@ object ChunkProtocol {
             const val TYPE_PROGRESS = "progress"
             const val TYPE_DONE = "done"
             const val TYPE_BYE = "bye"
+            // Written when the control channel has been silent, purely so
+            // the link is never idle. Receivers ignore it.
+            const val TYPE_KEEPALIVE = "keepalive"
         }
     }
 }
