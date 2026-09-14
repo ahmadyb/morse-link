@@ -156,7 +156,7 @@ class SendFragment : Fragment(R.layout.fragment_send) {
             // next tap removed one from a batch that was already on its way.
             viewModel.clearSelection()
             refreshSelectionBar()
-            findNavController().navigate(Uri.parse("morselink://transfer"))
+            findNavController().navigate(Uri.parse("morselink://send"))
         }
 
         binding.sessionToggle.setOnClickListener {

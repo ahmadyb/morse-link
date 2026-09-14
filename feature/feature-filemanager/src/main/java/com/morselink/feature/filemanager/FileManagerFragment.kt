@@ -346,7 +346,7 @@ class FileManagerFragment : Fragment(R.layout.fragment_file_manager) {
             },
             Toast.LENGTH_SHORT,
         ).show()
-        findNavController().navigate(Uri.parse("morselink://transfer"))
+        findNavController().navigate(Uri.parse("morselink://send"))
     }
 
     private fun shareSelection() {

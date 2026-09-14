@@ -29,7 +29,7 @@
         xmlns:tools="http://schemas.android.com/tools">
         <action
             android:id="@+id/action_send_to_transfer"
-            app:destination="@id/nav_transfer" />
+            app:destination="@id/nav_transfer_send" />
     </fragment>
 
     <fragment

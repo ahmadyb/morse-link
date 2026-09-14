@@ -272,6 +272,8 @@ class TransferViewModel @Inject constructor(
     }
 
     private fun startSenderPairing() {
+        advertiseJob?.cancel()
+        sendJob?.cancel()
         isSender = true
         holder.isSender = true
         // A new send is a new session. Without this the screen opened on the
@@ -285,19 +287,12 @@ class TransferViewModel @Inject constructor(
                 .getOrDefault("Morselink")
                 .ifBlank { "Morselink" }
 
-            val address = withContext(Dispatchers.IO) {
+            val rawAddress = withContext(Dispatchers.IO) {
                 runCatching { network.localIpAddress() }.getOrNull()
             }
-            if (address.isNullOrBlank()) {
-                showPairing(
-                    PairingState(
-                        mode = PairingMode.QR,
-                        address = null,
-                        status = context.getString(R.string.transfer_pairing_no_network),
-                    )
-                )
-                return@launch
-            }
+            val address = rawAddress.takeIf { !it.isNullOrBlank() }
+                ?: network.hotspotGatewayIp()
+                ?: NetworkUtils.DEFAULT_GATEWAY
 
             val port = LegacyPorts.CONTROL_PORT
             val payload = PairingPayload(

@@ -172,7 +172,7 @@ class MainActivity : AppCompatActivity() {
                 uri = uri,
             )
         }
-        navController.navigate(android.net.Uri.parse("morselink://transfer"))
+        navController.navigate(android.net.Uri.parse("morselink://send"))
     }
 
     private fun requestBaselinePermissions() {
