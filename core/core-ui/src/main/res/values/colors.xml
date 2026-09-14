@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- §12.1 design tokens — light theme -->
+    <color name="primary">#FF1FA36B</color>
+    <color name="primaryDark">#FF167A50</color>
+    <color name="primaryTint">#261FA36B</color>
+
+    <color name="background">#FFFAFAFA</color>
+    <color name="surface">#FFFFFFFF</color>
+    <color name="surfaceHover">#FFF2F2F2</color>
+    <color name="textPrimary">#FF1A1A1A</color>
+    <color name="textSecondary">#FF6B6B6B</color>
+    <color name="divider">#FFE0E0E0</color>
+
+    <color name="success">#FF1FA36B</color>
+    <color name="sending">#FF2D9CDB</color>
+    <color name="error">#FFE5484D</color>
+    <color name="scrim">#B3000000</color>
+</resources>

@@ -1,0 +1,5 @@
+----- logcat -----
+--------- beginning of main
+--------- beginning of system
+09-09 13:20:02.345 E/ResourceType(14847): Style contains key with bad entry: 0x0101056c
+09-09 13:20:02.621 E/MultiWindowProxy(14847): getServiceInstance failed!

@@ -1,0 +1,275 @@
+----- in-app log -----
+09-09 20:30:36.815 D: webshare: server started on port 33455
+09-09 20:31:02.182 D: webshare: GET /
+09-09 20:31:02.467 D: webshare: GET /api/info
+09-09 20:31:03.522 D: webshare: GET /api/theme
+09-09 20:31:03.595 D: webshare: GET /api/info
+09-09 20:31:04.004 D: webshare: GET /api/theme
+09-09 20:31:18.058 D: webshare: POST /upload
+09-09 20:31:18.066 W: webshare: upload failed - Pushback buffer full
+09-09 20:31:18.088 D: webshare: POST /upload
+09-09 20:31:18.091 D: webshare: POST /upload
+09-09 20:31:18.093 W: webshare: upload failed - Pushback buffer full
+09-09 20:31:18.095 W: webshare: upload failed - Pushback buffer full
+09-09 20:31:18.105 D: webshare: POST /upload
+09-09 20:31:18.109 W: webshare: upload failed - Pushback buffer full
+09-09 20:31:26.944 D: webshare: GET /api/files
+09-09 20:31:27.153 D: webshare: GET /download
+09-09 20:31:27.154 D: webshare: download requested photos:64633
+09-09 20:31:27.623 D: webshare: GET /download
+09-09 20:31:27.624 D: webshare: download requested photos:64630
+09-09 20:31:27.634 D: webshare: GET /download
+09-09 20:31:27.635 D: webshare: download requested photos:64590
+09-09 20:31:27.637 D: webshare: GET /download
+09-09 20:31:27.638 D: webshare: download requested photos:64591
+09-09 20:31:27.640 D: webshare: GET /download
+09-09 20:31:27.641 D: webshare: download requested photos:64603
+09-09 20:31:27.643 D: webshare: GET /download
+09-09 20:31:27.644 D: webshare: download requested photos:64592
+09-09 20:31:27.646 D: webshare: GET /download
+09-09 20:31:27.646 D: webshare: download requested photos:64598
+09-09 20:31:27.680 D: webshare: GET /download
+09-09 20:31:27.681 D: webshare: download requested photos:64589
+09-09 20:31:27.741 D: webshare: GET /download
+09-09 20:31:27.741 D: webshare: GET /download
+09-09 20:31:27.742 D: webshare: download requested photos:64604
+09-09 20:31:27.742 D: webshare: download requested photos:64587
+09-09 20:31:27.763 D: webshare: GET /download
+09-09 20:31:27.764 D: webshare: download requested photos:64586
+09-09 20:31:27.770 D: webshare: GET /download
+09-09 20:31:27.771 D: webshare: GET /download
+09-09 20:31:27.774 D: webshare: download requested photos:64631
+09-09 20:31:27.775 D: webshare: download requested photos:64602
+09-09 20:31:27.822 D: webshare: GET /download
+09-09 20:31:27.823 D: webshare: download requested photos:64632
+09-09 20:31:27.833 D: webshare: GET /download
+09-09 20:31:27.834 D: webshare: download requested photos:64600
+09-09 20:31:27.850 D: webshare: GET /download
+09-09 20:31:27.851 D: webshare: download requested photos:64628
+09-09 20:31:27.883 D: webshare: GET /download
+09-09 20:31:27.884 D: webshare: download requested photos:64605
+09-09 20:31:27.884 D: webshare: GET /download
+09-09 20:31:27.885 D: webshare: download requested photos:64599
+09-09 20:31:27.902 D: webshare: GET /download
+09-09 20:31:27.903 D: webshare: download requested photos:64588
+09-09 20:31:27.929 D: webshare: GET /download
+09-09 20:31:27.930 D: webshare: download requested photos:64597
+09-09 20:31:27.958 D: webshare: GET /download
+09-09 20:31:27.959 D: webshare: download requested photos:64601
+09-09 20:31:27.970 D: webshare: GET /download
+09-09 20:31:27.970 D: webshare: GET /download
+09-09 20:31:27.971 D: webshare: download requested photos:64596
+09-09 20:31:27.971 D: webshare: download requested photos:64593
+09-09 20:31:28.008 D: webshare: GET /download
+09-09 20:31:28.009 D: webshare: download requested photos:64594
+09-09 20:31:28.020 D: webshare: GET /download
+09-09 20:31:28.021 D: webshare: download requested photos:64629
+09-09 20:31:28.030 D: webshare: GET /download
+09-09 20:31:28.031 D: webshare: download requested photos:64582
+09-09 20:31:28.037 D: webshare: GET /download
+09-09 20:31:28.038 D: webshare: download requested photos:64583
+09-09 20:31:28.040 D: webshare: GET /download
+09-09 20:31:28.042 D: webshare: download requested photos:64585
+09-09 20:31:28.062 D: webshare: GET /download
+09-09 20:31:28.063 D: webshare: download requested photos:64584
+09-09 20:31:28.113 D: webshare: GET /download
+09-09 20:31:28.113 D: webshare: download requested photos:64614
+09-09 20:31:28.120 D: webshare: GET /download
+09-09 20:31:28.121 D: webshare: download requested photos:64581
+09-09 20:31:28.124 D: webshare: GET /download
+09-09 20:31:28.125 D: webshare: download requested photos:64580
+09-09 20:31:28.133 D: webshare: GET /download
+09-09 20:31:28.134 D: webshare: download requested photos:64571
+09-09 20:31:28.160 D: webshare: GET /download
+09-09 20:31:28.161 D: webshare: download requested photos:64560
+09-09 20:31:28.167 D: webshare: GET /download
+09-09 20:31:28.167 D: webshare: download requested photos:64562
+09-09 20:31:28.200 D: webshare: GET /download
+09-09 20:31:28.201 D: webshare: download requested photos:64570
+09-09 20:31:28.234 D: webshare: GET /download
+09-09 20:31:28.235 D: webshare: download requested photos:64566
+09-09 20:31:28.237 D: webshare: GET /download
+09-09 20:31:28.237 D: webshare: download requested photos:64574
+09-09 20:31:28.238 D: webshare: GET /download
+09-09 20:31:28.238 D: webshare: GET /download
+09-09 20:31:28.240 D: webshare: download requested photos:64567
+09-09 20:31:28.239 D: webshare: download requested photos:64564
+09-09 20:31:28.249 D: webshare: GET /download
+09-09 20:31:28.249 D: webshare: download requested photos:64557
+09-09 20:31:28.312 D: webshare: GET /download
+09-09 20:31:28.313 D: webshare: download requested photos:64559
+09-09 20:31:28.314 D: webshare: GET /download
+09-09 20:31:28.315 D: webshare: download requested photos:64558
+09-09 20:31:28.318 D: webshare: GET /download
+09-09 20:31:28.319 D: webshare: download requested photos:64561
+09-09 20:31:28.320 D: webshare: GET /download
+09-09 20:31:28.325 D: webshare: download requested photos:64572
+09-09 20:31:28.327 D: webshare: GET /download
+09-09 20:31:28.328 D: webshare: GET /download
+09-09 20:31:28.328 D: webshare: download requested photos:64569
+09-09 20:31:28.330 D: webshare: download requested photos:64573
+09-09 20:31:28.387 D: webshare: GET /download
+09-09 20:31:28.387 D: webshare: GET /download
+09-09 20:31:28.388 D: webshare: download requested photos:64568
+09-09 20:31:28.388 D: webshare: download requested photos:64563
+09-09 20:31:28.903 D: webshare: GET /api/files
+09-09 20:31:29.032 D: webshare: GET /download
+09-09 20:31:29.032 D: webshare: GET /download
+09-09 20:31:29.032 D: webshare: GET /download
+09-09 20:31:29.032 D: webshare: GET /download
+09-09 20:31:29.032 D: webshare: download requested videos:64576
+09-09 20:31:29.032 D: webshare: download requested videos:64595
+09-09 20:31:29.033 D: webshare: download requested videos:64577
+09-09 20:31:29.033 D: webshare: GET /download
+09-09 20:31:29.033 D: webshare: GET /download
+09-09 20:31:29.034 D: webshare: download requested videos:64578
+09-09 20:31:29.033 D: webshare: download requested videos:64579
+09-09 20:31:29.035 D: webshare: download requested videos:64613
+09-09 20:31:29.065 D: webshare: GET /download
+09-09 20:31:29.066 D: webshare: download requested videos:64549
+09-09 20:31:29.076 D: webshare: GET /download
+09-09 20:31:29.080 D: webshare: GET /download
+09-09 20:31:29.078 D: webshare: download requested videos:60653
+09-09 20:31:29.081 D: webshare: download requested videos:64548
+09-09 20:31:29.113 D: webshare: GET /download
+09-09 20:31:29.114 D: webshare: download requested videos:60598
+09-09 20:31:29.117 D: webshare: GET /download
+09-09 20:31:29.119 D: webshare: download requested videos:60623
+09-09 20:31:29.141 D: webshare: GET /download
+09-09 20:31:29.142 D: webshare: download requested videos:60589
+09-09 20:31:29.150 D: webshare: GET /download
+09-09 20:31:29.151 D: webshare: GET /download
+09-09 20:31:29.151 D: webshare: download requested videos:56946
+09-09 20:31:29.152 D: webshare: download requested videos:56975
+09-09 20:31:29.160 D: webshare: GET /download
+09-09 20:31:29.161 D: webshare: download requested videos:60521
+09-09 20:31:29.165 D: webshare: GET /download
+09-09 20:31:29.165 D: webshare: GET /download
+09-09 20:31:29.170 D: webshare: download requested videos:56944
+09-09 20:31:29.167 D: webshare: download requested videos:54725
+09-09 20:31:29.185 D: webshare: GET /download
+09-09 20:31:29.186 D: webshare: download requested videos:53698
+09-09 20:31:29.224 D: webshare: GET /download
+09-09 20:31:29.226 D: webshare: download requested videos:50709
+09-09 20:31:29.227 D: webshare: GET /download
+09-09 20:31:29.227 D: webshare: GET /download
+09-09 20:31:29.228 D: webshare: download requested videos:46236
+09-09 20:31:29.228 D: webshare: download requested videos:49800
+09-09 20:31:29.231 D: webshare: GET /download
+09-09 20:31:29.233 D: webshare: download requested videos:46234
+09-09 20:31:29.235 D: webshare: GET /download
+09-09 20:31:29.236 D: webshare: download requested videos:46237
+09-09 20:31:29.238 D: webshare: GET /download
+09-09 20:31:29.243 D: webshare: download requested videos:46235
+09-09 20:31:29.278 D: webshare: GET /download
+09-09 20:31:29.278 D: webshare: download requested videos:45786
+09-09 20:31:29.286 D: webshare: GET /download
+09-09 20:31:29.287 D: webshare: download requested videos:38704
+09-09 20:31:29.291 D: webshare: GET /download
+09-09 20:31:29.287 D: webshare: GET /download
+09-09 20:31:29.291 D: webshare: GET /download
+09-09 20:31:29.296 D: webshare: download requested videos:38703
+09-09 20:31:29.296 D: webshare: download requested videos:38702
+09-09 20:31:29.294 D: webshare: download requested videos:29712
+09-09 20:31:29.304 D: webshare: GET /download
+09-09 20:31:29.305 D: webshare: download requested videos:37279
+09-09 20:31:29.314 D: webshare: GET /download
+09-09 20:31:29.315 D: webshare: download requested videos:29709
+09-09 20:31:29.349 D: webshare: GET /download
+09-09 20:31:29.350 D: webshare: GET /download
+09-09 20:31:29.350 D: webshare: download requested videos:29708
+09-09 20:31:29.351 D: webshare: download requested videos:29707
+09-09 20:31:29.365 D: webshare: GET /download
+09-09 20:31:29.367 D: webshare: download requested videos:37278
+09-09 20:31:29.373 D: webshare: GET /download
+09-09 20:31:29.371 D: webshare: GET /download
+09-09 20:31:29.375 D: webshare: download requested videos:29706
+09-09 20:31:29.374 D: webshare: download requested videos:29705
+09-09 20:31:29.405 D: webshare: GET /download
+09-09 20:31:29.406 D: webshare: download requested videos:29702
+09-09 20:31:29.411 D: webshare: GET /download
+09-09 20:31:29.413 D: webshare: download requested videos:29704
+09-09 20:31:29.414 D: webshare: GET /download
+09-09 20:31:29.414 D: webshare: GET /download
+09-09 20:31:29.415 D: webshare: download requested videos:29699
+09-09 20:31:29.417 D: webshare: download requested videos:29700
+09-09 20:31:29.454 D: webshare: GET /download
+09-09 20:31:29.455 D: webshare: GET /download
+09-09 20:31:29.455 D: webshare: download requested videos:37276
+09-09 20:31:29.456 D: webshare: GET /download
+09-09 20:31:29.457 D: webshare: download requested videos:29698
+09-09 20:31:29.459 D: webshare: GET /download
+09-09 20:31:29.461 D: webshare: download requested videos:37277
+09-09 20:31:29.461 D: webshare: download requested videos:29697
+09-09 20:31:29.504 D: webshare: GET /download
+09-09 20:31:29.502 D: webshare: GET /download
+09-09 20:31:29.506 D: webshare: download requested videos:37275
+09-09 20:31:29.505 D: webshare: download requested videos:29716
+09-09 20:31:29.508 D: webshare: GET /download
+09-09 20:31:29.508 D: webshare: download requested videos:29715
+09-09 20:31:29.518 D: webshare: GET /download
+09-09 20:31:29.519 D: webshare: download requested videos:54092
+09-09 20:31:29.525 D: webshare: GET /download
+09-09 20:31:29.527 D: webshare: GET /download
+09-09 20:31:29.529 D: webshare: download requested videos:29711
+09-09 20:31:29.526 D: webshare: download requested videos:29710
+09-09 20:31:29.533 D: webshare: GET /download
+09-09 20:31:29.534 D: webshare: download requested videos:29696
+09-09 20:31:29.537 D: webshare: GET /download
+09-09 20:31:29.538 D: webshare: download requested videos:29701
+09-09 20:31:29.555 D: webshare: GET /download
+09-09 20:31:29.556 D: webshare: download requested videos:37280
+09-09 20:31:29.558 D: webshare: GET /download
+09-09 20:31:29.558 D: webshare: download requested videos:29695
+09-09 20:31:29.571 D: webshare: GET /download
+09-09 20:31:29.572 D: webshare: download requested videos:29703
+09-09 20:31:29.578 D: webshare: GET /download
+09-09 20:31:29.578 D: webshare: download requested videos:29714
+09-09 20:31:31.697 D: webshare: GET /api/info
+09-09 20:31:32.378 D: webshare: GET /api/theme
+09-09 20:31:35.792 D: webshare: server stopped
+09-09 20:31:37.068 D: webshare: server stopped
+09-09 20:36:49.477 D: transport: connected to 192.168.43.173:54321
+09-09 20:36:49.490 D: transport: sender identified itself as Morselink Phone
+09-09 20:36:49.751 D: rx: receiver loop started
+09-09 20:36:49.765 D: rx: IMG-20260907-WA0000.jpg metadata ok (42597 B), resuming at 0
+09-09 20:36:49.767 D: rx: IMG-20260907-WA0000.jpg resume sent
+09-09 20:36:49.787 D: rx: IMG-20260907-WA0000.jpg data socket open, reading chunks
+09-09 20:36:50.777 D: rx: IMG_20260905_172338_261.jpg metadata ok (3258954 B), resuming at 0
+09-09 20:36:50.778 D: rx: IMG_20260905_172338_261.jpg resume sent
+09-09 20:36:50.781 D: rx: IMG_20260905_172338_261.jpg data socket open, reading chunks
+09-09 20:36:52.734 D: rx: IMG_20260905_172223_524.jpg metadata ok (3446890 B), resuming at 0
+09-09 20:36:52.735 D: rx: IMG_20260905_172223_524.jpg resume sent
+09-09 20:36:52.739 D: rx: IMG_20260905_172223_524.jpg data socket open, reading chunks
+09-09 20:36:55.007 D: rx: IMG_20260905_172233_505.jpg metadata ok (3582594 B), resuming at 0
+09-09 20:36:55.008 D: rx: IMG_20260905_172233_505.jpg resume sent
+09-09 20:36:55.011 D: rx: IMG_20260905_172233_505.jpg data socket open, reading chunks
+09-09 20:36:57.211 D: rx: IMG_20260905_172055_640.jpg metadata ok (3827218 B), resuming at 0
+09-09 20:36:57.212 D: rx: IMG_20260905_172055_640.jpg resume sent
+09-09 20:36:57.215 D: rx: IMG_20260905_172055_640.jpg data socket open, reading chunks
+09-09 20:36:59.429 D: rx: IMG_20260905_172014_457.jpg metadata ok (5583577 B), resuming at 0
+09-09 20:36:59.430 D: rx: IMG_20260905_172014_457.jpg resume sent
+09-09 20:36:59.433 D: rx: IMG_20260905_172014_457.jpg data socket open, reading chunks
+09-09 20:37:15.336 D: rx: control channel closed
+09-09 20:37:15.337 D: rx: receiver loop ended
+09-09 20:38:55.533 D: transport: listening on 54321
+09-09 20:39:01.031 D: transport: inbound connection accepted
+09-09 20:39:01.042 D: tx: VID-20260828-WA0005.mp4 size=5874774 from /storage/emulated/0/WhatsApp/Media/WhatsApp Video/VID-20260828-WA0005.mp4
+09-09 20:39:01.044 D: tx: VID-20260828-WA0005.mp4 metadata sent, waiting for resume
+09-09 20:39:01.085 D: tx: VID-20260828-WA0005.mp4 resume=0 (reply=resume)
+09-09 20:39:01.093 D: tx: data socket open, streaming VID-20260828-WA0005.mp4
+09-09 20:39:02.113 D: tx: VID-20260828-WA0005.mp4 sent to Mo Phone
+09-09 20:39:02.119 D: tx: 3ddae0baa28a3899272e9b126d48f93f_1787688748740.mp4 size=2308368 from /storage/emulated/0/DCIM/Camera/3ddae0baa28a3899272e9b126d48f93f_1787688748740.mp4
+09-09 20:39:02.120 D: tx: 3ddae0baa28a3899272e9b126d48f93f_1787688748740.mp4 metadata sent, waiting for resume
+09-09 20:39:02.703 D: tx: 3ddae0baa28a3899272e9b126d48f93f_1787688748740.mp4 resume=0 (reply=resume)
+09-09 20:39:02.704 D: tx: data socket open, streaming 3ddae0baa28a3899272e9b126d48f93f_1787688748740.mp4
+09-09 20:39:03.031 D: tx: 3ddae0baa28a3899272e9b126d48f93f_1787688748740.mp4 sent to Mo Phone
+09-09 20:39:03.035 D: tx: VID-20260824-WA0003.mp4 size=11701940 from /storage/emulated/0/WhatsApp/Media/WhatsApp Video/VID-20260824-WA0003.mp4
+09-09 20:39:03.036 D: tx: VID-20260824-WA0003.mp4 metadata sent, waiting for resume
+09-09 20:39:03.283 D: tx: VID-20260824-WA0003.mp4 resume=0 (reply=resume)
+09-09 20:39:03.284 D: tx: data socket open, streaming VID-20260824-WA0003.mp4
+09-09 20:39:05.194 D: tx: VID-20260824-WA0003.mp4 sent to Mo Phone
+
+----- logcat -----
+--------- beginning of system
+--------- beginning of main

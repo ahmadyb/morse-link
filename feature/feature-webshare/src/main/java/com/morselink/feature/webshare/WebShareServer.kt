@@ -1,0 +1,680 @@
+package com.morselink.feature.webshare
+
+import com.morselink.core.transfer.MorselinkLog
+
+import android.content.Context
+import com.morselink.core.media.AppItem
+import com.morselink.core.media.FileItem
+import com.morselink.core.media.FileOps
+import com.morselink.core.media.MediaItem
+import com.morselink.core.media.MediaRepository
+import com.morselink.core.media.SmartCategory
+import com.morselink.core.data.prefs.SettingsStore
+import com.morselink.core.data.prefs.ThemeMode
+import dagger.hilt.android.qualifiers.ApplicationContext
+import fi.iki.elonen.NanoHTTPD
+import kotlinx.coroutines.runBlocking
+import org.json.JSONArray
+import org.json.JSONObject
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.util.Locale
+import javax.inject.Inject
+import javax.inject.Singleton
+
+/**
+ * §4.5 — the WebShare HTTP server. Self-contained HTML with no CDN dependency,
+ * JSON listing API, Range-capable downloads and multipart uploads.
+ */
+@Singleton
+class WebShareServer @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val media: MediaRepository,
+    private val fileOps: FileOps,
+    private val settings: SettingsStore,
+) : NanoHTTPD(PORT) {
+
+    private val entries = LinkedHashMap<String, Entry>()
+
+    /** Decoded previews, keyed by entry id. Bounded so a long browse cannot
+     *  hold hundreds of bitmaps in memory. */
+    private val thumbCache = LinkedHashMap<String, ByteArray>()
+
+    /** Invoked when a browser asks the server to stop, so the view model can
+     *  also release the hotspot and the foreground service. */
+    var onStopRequest: (() -> Unit)? = null
+
+    data class Entry(val path: String, val name: String, val size: Long, val mime: String)
+
+    fun startServer(): Boolean = runCatching { start(SOCKET_READ_TIMEOUT, false); true }
+        .getOrDefault(false)
+        .also { up ->
+            MorselinkLog.d(
+                if (up) "webshare: server started on port $listeningPort"
+                else "webshare: server failed to start"
+            )
+        }
+
+    fun stopServer() = runCatching { stop() }.also {
+        MorselinkLog.d("webshare: server stopped")
+    }
+
+    fun index(): String = runCatching {
+        context.resources.openRawResource(R.raw.webshare).bufferedReader().use { it.readText() }
+    }.getOrDefault("<html><body><h1>Morselink</h1><p>Interface failed to load.</p></body></html>")
+
+    override fun serve(session: IHTTPSession): Response {
+        val uri = session.uri.trimEnd('/').ifEmpty { "/" }
+        // The web UI only fetches on a user action - nothing polls - so every
+        // request is worth a line.
+        MorselinkLog.d("webshare: ${session.method} $uri")
+        return when {
+            session.method == Method.OPTIONS -> cors(newFixedLengthResponse(Response.Status.OK, MIME_PLAINTEXT, ""))
+            session.method == Method.GET && (uri == "" || uri == "/") ->
+                // Never cacheable. The page is compiled into the APK, so a
+                // browser holding an old copy goes on showing the previous
+                // build's interface - features appear to be missing that are
+                // present in the installed app. That is exactly what happened
+                // with folder grouping: it shipped, and the phone kept
+                // rendering the page it had cached before it existed.
+                newFixedLengthResponse(Response.Status.OK, MIME_HTML, index()).apply {
+                    addHeader("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+                    addHeader("Pragma", "no-cache")
+                    addHeader("Expires", "0")
+                }
+            session.method == Method.GET && uri.startsWith("/api/files") -> json(filesResponse(session))
+            session.method == Method.GET && uri.startsWith("/api/info") -> json(infoResponse())
+            session.method == Method.GET && uri.startsWith("/api/theme") -> json(themeResponse())
+            session.method == Method.GET && uri.startsWith("/api/rename") -> json(renameFile(session))
+            session.method == Method.GET && uri.startsWith("/api/delete") -> json(deleteFile(session))
+            session.method == Method.GET && uri.startsWith("/api/stop") -> json(stopSession())
+            session.method == Method.GET && uri.startsWith("/api/zip") -> zipResponse(session)
+            session.method == Method.GET && uri.startsWith("/api/thumb") -> thumbResponse(session)
+            session.method == Method.GET && uri.startsWith("/download") -> download(session)
+            session.method == Method.POST && uri.startsWith("/upload") -> upload(session)
+            else -> newFixedLengthResponse(Response.Status.NOT_FOUND, MIME_PLAINTEXT, "Not found")
+        }
+    }
+
+    // ------------------------------------------------------------------ listings
+
+    private fun filesResponse(session: IHTTPSession): String {
+        val category = session.parms["category"] ?: "photos"
+        val path = session.parms["path"]
+        val array = JSONArray()
+        when (category) {
+            "photos", "videos", "music" -> {
+                val items: List<MediaItem> = runBlocking {
+                    when (category) {
+                        "videos" -> media.videos()
+                        "music" -> media.music()
+                        else -> media.photos()
+                    }
+                }
+                items.forEach { item ->
+                    val id = "${category}:${item.id}"
+                    entries[id] = Entry(
+                        path = item.path ?: "",
+                        name = item.displayName,
+                        size = item.sizeBytes,
+                        mime = item.mimeType ?: "application/octet-stream",
+                    )
+                    array.put(jsonFor(id, item.displayName, item.sizeBytes, item.mimeType ?: "",
+                        extra = JSONObject().apply {
+                            put("uri", item.uri.toString())
+                            put("date", item.dateModified)
+                            // The real directory, so the browser can group by
+                            // folder. Without this it has to fall back to the
+                            // MediaStore uri, which is content://media/external/
+                            // images/media for every photo on the device - one
+                            // key for everything, so all photos land in a
+                            // single "folder".
+                            item.path?.let { put("path", it) }
+                            item.bucketName?.let { put("bucket", it) }
+                            if (item.durationMs > 0) put("duration", item.durationMs)
+                            item.artist?.let { put("artist", it) }
+                        }))
+                }
+            }
+            "apps" -> {
+                val apps: List<AppItem> = runBlocking { media.apps() }
+                apps.forEach { app ->
+                    val id = "apps:${app.packageName}"
+                    entries[id] = Entry(app.apkPath, "${app.label}.apk", app.sizeBytes, APK_MIME)
+                    array.put(jsonFor(id, "${app.label}.apk", app.sizeBytes, APK_MIME,
+                        extra = JSONObject().apply { put("package", app.packageName) }))
+                }
+            }
+            else -> {
+                val files: List<FileItem> = runBlocking {
+                    if (path.isNullOrBlank()) media.category(SmartCategory.DOCUMENTS)
+                    else media.listDirectory(path).items
+                }
+                files.forEach { file ->
+                    val id = "file:${file.path}"
+                    entries[id] = Entry(file.path, file.name, file.sizeBytes, file.mimeType ?: "")
+                    array.put(jsonFor(id, file.name, file.sizeBytes, file.mimeType ?: "",
+                        extra = JSONObject().apply {
+                            put("isDirectory", file.isDirectory)
+                            put("modified", file.lastModified)
+                            put("path", file.path)
+                        }))
+                }
+            }
+        }
+        return JSONObject().apply {
+            put("category", category)
+            put("path", path ?: "")
+            put("files", array)
+        }.toString()
+    }
+
+    private fun jsonFor(
+        id: String,
+        name: String,
+        size: Long,
+        mime: String,
+        extra: JSONObject? = null,
+    ): JSONObject = JSONObject().apply {
+        put("id", id)
+        put("name", name)
+        put("size", size)
+        put("mime", mime)
+        if (extra != null) {
+            for (key in extra.keys()) put(key, extra.get(key))
+        }
+    }
+
+    private fun infoResponse(): String {
+        val totals = runBlocking { media.categoryTotals() }
+        val storage = runBlocking { media.storageInfo() }
+        val theme = runBlocking { settings.current() }
+        return JSONObject().apply {
+            put("device", theme.deviceName)
+            put("android", "Android ${android.os.Build.VERSION.RELEASE}")
+            put("version", "1.0.0")
+            put("counts", JSONObject().apply {
+                totals.forEach { (key, value) -> put(key, value) }
+            })
+            put("storage", JSONObject().apply {
+                put("used", storage.usedBytes)
+                put("total", storage.totalBytes)
+            })
+        }.toString()
+    }
+
+    private fun themeResponse(): String {
+        val mode = runBlocking { settings.current().themeMode }
+        return JSONObject().apply {
+            put("theme", when (mode) {
+                ThemeMode.LIGHT -> "light"
+                ThemeMode.DARK -> "dark"
+                ThemeMode.SYSTEM -> if (isSystemDark()) "dark" else "light"
+            })
+        }.toString()
+    }
+
+    private fun isSystemDark(): Boolean =
+        (context.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
+            android.content.res.Configuration.UI_MODE_NIGHT_YES
+
+    // ------------------------------------------------------------- file actions
+
+    private fun errorJson(message: String): String =
+        JSONObject().apply {
+            put("ok", false)
+            put("error", message)
+        }.toString()
+
+    private fun renameFile(session: IHTTPSession): String {
+        MorselinkLog.d("webshare: rename ${session.parms["path"] ?: "?"} -> ${session.parms["name"] ?: "?"}")
+        val path = session.parms["path"] ?: return errorJson("Missing path")
+        val name = session.parms["name"]?.trim().orEmpty()
+        if (name.isEmpty()) return errorJson("Missing new name")
+        val file = File(path)
+        if (!file.exists()) return errorJson("That file no longer exists")
+        return runBlocking {
+            runCatching { fileOps.rename(file, name) }.fold(
+                onSuccess = { renamed ->
+                    JSONObject().apply {
+                        put("ok", true)
+                        put("name", renamed.name)
+                        put("path", renamed.absolutePath)
+                    }.toString()
+                },
+                onFailure = { errorJson(it.message ?: "Rename failed") },
+            )
+        }
+    }
+
+    private fun deleteFile(session: IHTTPSession): String {
+        MorselinkLog.d("webshare: delete ${session.parms["path"] ?: "?"}")
+        val path = session.parms["path"] ?: return errorJson("Missing path")
+        val file = File(path)
+        if (!file.exists()) return errorJson("That file no longer exists")
+        val item = FileItem(
+            path = file.absolutePath,
+            name = file.name,
+            isDirectory = file.isDirectory,
+            sizeBytes = file.length(),
+            lastModified = file.lastModified(),
+            mimeType = null,
+            childCount = 0,
+        )
+        return runBlocking {
+            runCatching { fileOps.delete(item) }.fold(
+                onSuccess = { JSONObject().apply { put("ok", true) }.toString() },
+                onFailure = { errorJson(it.message ?: "Delete failed") },
+            )
+        }
+    }
+
+    /**
+     * Answers first, then tears the server down: stopping inside [serve] would
+     * kill the socket before the response is flushed. [onStopRequest] lets the
+     * view model drop the hotspot and the foreground service too.
+     */
+    private fun stopSession(): String {
+        Thread {
+            runCatching { Thread.sleep(250) }
+            runCatching { stopServer() }
+            runCatching { onStopRequest?.invoke() }
+        }.apply { isDaemon = true }.start()
+        return JSONObject().apply { put("ok", true) }.toString()
+    }
+
+    // ------------------------------------------------------------------ download
+
+    private fun download(session: IHTTPSession): Response {
+        MorselinkLog.d("webshare: download requested ${session.parms["id"] ?: session.parms["path"] ?: "?"}")
+        val id = session.parms["id"] ?: return newFixedLengthResponse(Response.Status.BAD_REQUEST, MIME_PLAINTEXT, "Missing id")
+        val entry = entries[id]
+            ?: return newFixedLengthResponse(Response.Status.NOT_FOUND, MIME_PLAINTEXT, "Unknown file")
+        val file = File(entry.path)
+        if (!file.exists()) {
+            return newFixedLengthResponse(Response.Status.NOT_FOUND, MIME_PLAINTEXT, "File unavailable")
+        }
+        val rangeHeader = session.headers["range"] ?: session.headers["Range"]
+        var start = 0L
+        var end = file.length() - 1
+        var status = Response.Status.OK
+        if (!rangeHeader.isNullOrBlank()) {
+            val match = Regex("bytes=(\\d*)-(\\d*)").find(rangeHeader)
+            if (match != null) {
+                val from = match.groupValues[1].toLongOrNull()
+                val to = match.groupValues[2].toLongOrNull()
+                start = from ?: (file.length() - (to ?: 0))
+                end = to ?: (file.length() - 1)
+                status = Response.Status.PARTIAL_CONTENT
+            }
+        }
+        val length = (end - start + 1).coerceAtLeast(0)
+        val stream = FileInputStream(file).apply { skip(start) }
+        val response = newFixedLengthResponse(status, entry.mime.ifBlank { "application/octet-stream" }, stream, length)
+        response.addHeader("Accept-Ranges", "bytes")
+        response.addHeader("Content-Length", length.toString())
+        if (status == Response.Status.PARTIAL_CONTENT) {
+            response.addHeader("Content-Range", "bytes $start-$end/${file.length()}")
+        }
+        response.addHeader("Content-Disposition", "attachment; filename=\"${entry.name}\"")
+        return cors(response)
+    }
+
+
+
+    /**
+     * A small JPEG preview for one entry.
+     *
+     * The grid used the download URL as an <img> source, so every video card
+     * pointed a browser image decoder at a full-length video file and rendered
+     * nothing at all - the videos had no thumbnails. Photos were served the
+     * same way, which pulled whole multi-megapixel originals just to draw a
+     * tile.
+     */
+    private fun thumbResponse(session: IHTTPSession): Response {
+        val id = session.parms["id"]
+            ?: return newFixedLengthResponse(Response.Status.BAD_REQUEST, MIME_PLAINTEXT, "Missing id")
+        thumbCache[id]?.let { bytes -> return cors(jpeg(bytes)) }
+        val entry = entries[id]
+            ?: return newFixedLengthResponse(Response.Status.NOT_FOUND, MIME_PLAINTEXT, "Unknown file")
+        val bytes = runCatching { makeThumbnail(entry) }.getOrNull()
+            ?: return newFixedLengthResponse(Response.Status.NOT_FOUND, MIME_PLAINTEXT, "No preview")
+        if (thumbCache.size > THUMB_CACHE_MAX) thumbCache.clear()
+        thumbCache[id] = bytes
+        return cors(jpeg(bytes))
+    }
+
+    private fun jpeg(bytes: ByteArray): Response =
+        newFixedLengthResponse(
+            Response.Status.OK, "image/jpeg",
+            java.io.ByteArrayInputStream(bytes), bytes.size.toLong(),
+        )
+
+    private fun makeThumbnail(entry: Entry): ByteArray? {
+        val file = File(entry.path)
+        if (!file.exists()) return null
+        val bitmap = when {
+            entry.path.endsWith(".apk", ignoreCase = true) -> appIcon(entry.path)
+            entry.mime.startsWith("video/") -> videoFrame(file)
+            entry.mime.startsWith("image/") -> scaledImage(file)
+            else -> null
+        } ?: return null
+        return runCatching {
+            val stream = java.io.ByteArrayOutputStream()
+            bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, THUMB_QUALITY, stream)
+            if (!bitmap.isRecycled) bitmap.recycle()
+            stream.toByteArray()
+        }.getOrNull()
+    }
+
+    private fun videoFrame(file: File): android.graphics.Bitmap? =
+        runCatching {
+            android.media.ThumbnailUtils.createVideoThumbnail(
+                file.absolutePath, android.provider.MediaStore.Images.Thumbnails.MINI_KIND,
+            )
+        }.getOrNull()
+
+    /**
+     * Decodes at a fraction of the resolution rather than loading the original:
+     * a full-size photo is several megabytes of bitmap per tile, which is
+     * enough to exhaust the heap when a folder of them is on screen.
+     */
+    private fun scaledImage(file: File): android.graphics.Bitmap? = runCatching {
+        val bounds = android.graphics.BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        android.graphics.BitmapFactory.decodeFile(file.absolutePath, bounds)
+        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) return null
+        var sample = 1
+        while (maxOf(bounds.outWidth, bounds.outHeight) / sample > THUMB_SIZE * 2) sample *= 2
+        android.graphics.BitmapFactory.decodeFile(
+            file.absolutePath,
+            android.graphics.BitmapFactory.Options().apply { inSampleSize = sample },
+        )
+    }.getOrNull()
+
+    private fun appIcon(path: String): android.graphics.Bitmap? = runCatching {
+        val info = context.packageManager.getPackageArchiveInfo(path, 0)
+        val app = info?.applicationInfo
+        if (app != null) {
+            app.sourceDir = path
+            app.publicSourceDir = path
+        }
+        val drawable = app?.loadIcon(context.packageManager)
+        if (drawable == null) null
+        else {
+            val bitmap = android.graphics.Bitmap.createBitmap(
+                THUMB_SIZE, THUMB_SIZE, android.graphics.Bitmap.Config.ARGB_8888,
+            )
+            val canvas = android.graphics.Canvas(bitmap)
+            drawable.setBounds(0, 0, THUMB_SIZE, THUMB_SIZE)
+            drawable.draw(canvas)
+            bitmap
+        }
+    }.getOrNull()
+
+    /**
+     * Bundles a selection - or a whole folder - into one zip, so the browser can
+     * take it in a single request instead of the page firing off dozens of
+     * downloads at once, which browsers throttle and often drop.
+     *
+     * The archive is named for when it was made. Every download used to land as
+     * "download" or the last file's name, so a folder of a dozen documents
+     * arrived as a dozen files with no way to tell which pull was which.
+     */
+    private fun zipResponse(session: IHTTPSession): Response {
+        val ids = (session.parms["ids"] ?: "")
+            .split(',').map { it.trim() }.filter { it.isNotBlank() }
+        val folder = session.parms["path"]
+
+        val picked = LinkedHashMap<String, File>()
+        if (!folder.isNullOrBlank()) {
+            val dir = File(folder)
+            if (!dir.isDirectory) return json(errorJson("That is not a folder"))
+            dir.walkTopDown().filter { it.isFile }.forEach { file ->
+                picked[zipName(picked, dir, file)] = file
+            }
+        } else {
+            for (id in ids) {
+                val entry = entries[id] ?: continue
+                val file = File(entry.path)
+                if (file.isFile) picked[zipName(picked, null, file)] = file
+            }
+        }
+        if (picked.isEmpty()) return json(errorJson("Nothing to download"))
+
+        val stamp = java.text.SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(java.util.Date())
+        val name = "$ZIP_PREFIX$stamp.zip"
+        MorselinkLog.d("webshare: zipping ${picked.size} file(s) as $name")
+
+        // Streamed rather than written to a cache file first. Building the
+        // whole archive before answering meant a large folder kept the browser
+        // waiting with nothing at all - no progress, no dialog, just a click
+        // that appeared to do nothing for as long as the zip took to build.
+        // A pipe lets the first entries reach the browser while the rest are
+        // still being added.
+        val pipeIn = java.io.PipedInputStream(ZIP_PIPE_BUFFER)
+        val pipeOut = java.io.PipedOutputStream(pipeIn)
+        val producer = java.lang.Thread({
+            runCatching {
+                java.util.zip.ZipOutputStream(
+                    java.io.BufferedOutputStream(pipeOut, ZIP_PIPE_BUFFER),
+                ).use { zip ->
+                    for ((entry, file) in picked) {
+                        zip.putNextEntry(java.util.zip.ZipEntry(entry))
+                        java.io.FileInputStream(file).use { it.copyTo(zip) }
+                        zip.closeEntry()
+                    }
+                }
+            }.onFailure { error ->
+                // Almost always the browser walking away mid-download, which
+                // closes the pipe under the writer. Not worth reporting.
+                MorselinkLog.d("webshare: zip stream ended - ${error.javaClass.simpleName}")
+                runCatching { pipeIn.close() }
+            }
+        }, "morselink-zip").apply { isDaemon = true; start() }
+
+        val response = newChunkedResponse(Response.Status.OK, "application/zip", pipeIn)
+        response.addHeader("Content-Disposition", "attachment; filename=\"$name\"")
+        return cors(response).also { producer.name = "$name-producer" }
+    }
+
+    /**
+     * A path relative to the folder being zipped, de-duplicated: two files with
+     * the same name in different subfolders would otherwise collide, and a zip
+     * entry that is overwritten silently loses one of them.
+     */
+    private fun zipName(soFar: Map<String, File>, root: File?, file: File): String {
+        val relative = if (root != null) {
+            file.absolutePath.removePrefix(root.absolutePath).trimStart('/')
+        } else file.name
+        if (!soFar.containsKey(relative)) return relative
+        var n = 1
+        while (soFar.containsKey(withSuffix(relative, n))) n++
+        return withSuffix(relative, n)
+    }
+
+    private fun withSuffix(name: String, n: Int): String {
+        val dot = name.lastIndexOf('.')
+        return if (dot <= 0) "$name ($n)" else "${name.substring(0, dot)} ($n)${name.substring(dot)}"
+    }
+
+    // -------------------------------------------------------------------- upload
+
+    /**
+     * Streaming multipart upload: the body is scanned for the boundary and each
+     * part is streamed straight to disk, so a 2 GB upload never sits in RAM.
+     */
+    private fun upload(session: IHTTPSession): Response {
+        val contentType = session.headers["content-type"]
+            ?: session.headers["Content-Type"]
+            ?: return json(errorJson("Expected multipart/form-data"))
+        val boundary = Regex("""boundary=([^;\s]+)""").find(contentType)
+            ?.groupValues?.get(1)?.trim('"')
+            ?: return json(errorJson("Missing multipart boundary"))
+
+        val marker = "--$boundary".toByteArray(Charsets.UTF_8)
+        val results = JSONArray()
+        val directory = fileOps.defaultDownloadDirectory()
+
+        runCatching {
+            // The pushback buffer has to hold whatever readUntilBoundary hands
+            // back, and that is up to BUFFER_SIZE. At 8192 it overflowed on
+            // any part whose tail did not fit, which is why larger uploads
+            // reached 100% in the browser and then never appeared:
+            // "webshare: upload failed - Pushback buffer full".
+            val pushback = java.io.PushbackInputStream(
+                session.inputStream,
+                BUFFER_SIZE + 1024,
+            )
+            readUntilBoundary(pushback, marker)   // skip the preamble
+            while (true) {
+                val partHeaders = readHeaders(pushback) ?: break
+                val name = Regex("""filename\*?="([^"]*)""").find(partHeaders)
+                    ?.groupValues?.get(1)
+                    ?: Regex("""filename\*?=([^;\r\n]+)""").find(partHeaders)
+                        ?.groupValues?.get(1)?.trim()?.trim('"')
+                val target = if (name.isNullOrBlank()) null else File(directory, sanitize(name))
+                if (target != null) MorselinkLog.d("webshare: receiving upload ${target.name}")
+                if (target == null) {
+                    if (!readUntilBoundary(pushback, marker)) break
+                    continue
+                }
+                FileOutputStream(target).use { out ->
+                    if (!readUntilBoundary(pushback, marker, out)) return@use
+                }
+                val mime = android.webkit.MimeTypeMap.getSingleton()
+                    .getMimeTypeFromExtension(target.extension.lowercase(Locale.US))
+                runBlocking { fileOps.publishToMediaStore(target, mime) }
+                val written = target.length()
+                // An empty file "exists", so reporting exists() alone claimed
+                // success for an upload that actually streamed nothing. The
+                // browser reaching 100% while this said zero is what made
+                // uploads look like they completed and then vanished.
+                MorselinkLog.d(
+                    if (written > 0) "webshare: saved ${target.name} ($written bytes)"
+                    else "webshare: ${target.name} arrived EMPTY - nothing written"
+                )
+                results.put(JSONObject().apply {
+                    put("name", target.name)
+                    put("size", written)
+                    put("saved", written > 0)
+                    put("path", target.absolutePath)
+                })
+                if (isFinalBoundary(pushback)) break
+            }
+        }.onFailure { error ->
+            MorselinkLog.w("webshare: upload failed - ${error.message ?: error.javaClass.simpleName}")
+            return json(errorJson(error.message ?: "Upload failed"))
+        }
+
+        return json(JSONObject().apply {
+            put("uploaded", results.length())
+            put("files", results)
+        }.toString())
+    }
+
+    /** Copies bytes to [sink] until the boundary is seen; returns false on EOF. */
+    private fun readUntilBoundary(
+        input: java.io.PushbackInputStream,
+        marker: ByteArray,
+        sink: java.io.OutputStream? = null,
+    ): Boolean {
+        val buffer = ByteArray(BUFFER_SIZE)
+        var pending = 0
+        while (true) {
+            if (pending == buffer.size) {
+                val keep = marker.size - 1
+                sink?.write(buffer, 0, pending - keep)
+                System.arraycopy(buffer, pending - keep, buffer, 0, keep)
+                pending = keep
+            }
+            val read = input.read(buffer, pending, buffer.size - pending)
+            if (read < 0) {
+                sink?.write(buffer, 0, pending)
+                return false
+            }
+            pending += read
+            val index = indexOf(buffer, pending, marker)
+            if (index >= 0) {
+                sink?.write(buffer, 0, index)
+                val consumed = index + marker.size
+                val leftover = pending - consumed
+                if (leftover > 0) input.unread(buffer, consumed, leftover)
+                return true
+            }
+            val safe = pending - (marker.size - 1)
+            if (safe > 0) {
+                sink?.write(buffer, 0, safe)
+                System.arraycopy(buffer, safe, buffer, 0, pending - safe)
+                pending -= safe
+            }
+        }
+    }
+
+    private fun readHeaders(input: java.io.PushbackInputStream): String? {
+        val builder = StringBuilder()
+        while (true) {
+            val byte = input.read()
+            if (byte < 0) return null
+            builder.append(byte.toChar())
+            if (builder.length >= HEADER_END.length &&
+                builder.substring(builder.length - HEADER_END.length) == HEADER_END
+            ) {
+                return builder.toString()
+            }
+        }
+    }
+
+    /** True when the last boundary was the closing "--boundary--". */
+    private fun isFinalBoundary(input: java.io.PushbackInputStream): Boolean {
+        val first = input.read()
+        val second = input.read()
+        if (second >= 0) input.unread(second)
+        if (first >= 0) input.unread(first)
+        return first == '-'.code && second == '-'.code
+    }
+
+    private fun indexOf(buffer: ByteArray, length: Int, pattern: ByteArray): Int {
+        if (pattern.isEmpty() || length < pattern.size) return -1
+        val last = length - pattern.size
+        for (i in 0..last) {
+            if (buffer[i] != pattern[0]) continue
+            var matched = true
+            for (j in 1 until pattern.size) {
+                if (buffer[i + j] != pattern[j]) {
+                    matched = false
+                    break
+                }
+            }
+            if (matched) return i
+        }
+        return -1
+    }
+
+    private fun sanitize(name: String): String =
+        name.replace(Regex("[\\\\/:*?\"<>|]"), "_").ifBlank { "upload.bin" }
+
+    // --------------------------------------------------------------------- utils
+
+    private fun json(body: String): Response =
+        cors(newFixedLengthResponse(Response.Status.OK, "application/json", body))
+
+    private fun cors(response: Response): Response = response.apply {
+        addHeader("Access-Control-Allow-Origin", "*")
+        addHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        addHeader("Access-Control-Allow-Headers", "Content-Type")
+    }
+
+    companion object {
+        const val PORT = 33455
+        private const val SOCKET_READ_TIMEOUT = 20_000
+        private const val APK_MIME = "application/vnd.android.package-archive"
+        private const val ZIP_PREFIX = "morselink-"
+        private const val ZIP_PIPE_BUFFER = 64 * 1024
+        private const val THUMB_SIZE = 320
+        private const val THUMB_QUALITY = 80
+        private const val THUMB_CACHE_MAX = 400
+        private const val HEADER_END = "\r\n\r\n"
+        private const val BUFFER_SIZE = 64 * 1024
+    }
+}

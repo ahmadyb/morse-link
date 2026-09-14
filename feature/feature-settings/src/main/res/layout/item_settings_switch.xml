@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingStart="@dimen/screen_padding"
+    android:paddingTop="@dimen/list_item_padding_v"
+    android:paddingEnd="@dimen/screen_padding"
+    android:paddingBottom="@dimen/list_item_padding_v">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/textPrimary"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/subtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/textSecondary"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <!--
+      This must NOT be com.google.android.material.materialswitch.MaterialSwitch.
+      That is the Material 3 widget and resolves its default style through
+      R.attr.materialSwitchStyle, which only Material 3 themes define. The app
+      theme is MaterialComponents (MDC-2), so the attribute resolves to nothing,
+      the thumb and track drawables end up null, and the switch measures zero
+      pixels wide: invisible and impossible to tap. SwitchMaterial reads
+      R.attr.switchStyle, which MDC-2 themes do define. The explicit style is
+      belt and braces so it can never depend on theme resolution again.
+    -->
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/toggle"
+        style="@style/Widget.Morselink.Switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+</LinearLayout>

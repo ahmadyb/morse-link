@@ -1,0 +1,47 @@
+----- in-app log -----
+09-13 20:54:21.548 D: sender: advertising 192.168.25.136:54321, waiting for a receiver
+09-13 20:54:21.562 D: transport: listening on 54321
+09-13 20:54:25.124 D: transport: inbound connection accepted
+09-13 20:54:25.155 D: sender: receiver connected from Mo Phone
+09-13 20:54:25.163 D: tx: queueing 1 file(s) for Mo Phone
+09-13 20:54:25.173 D: tx: Morselink size=8844292 from /data/app/com.morselink.app-1/base.apk
+09-13 20:54:25.180 D: tx: Morselink metadata sent, waiting for resume
+09-13 20:54:25.235 D: tx: Morselink resume=0 (reply=resume)
+09-13 20:54:25.239 D: tx: data socket open, streaming Morselink
+09-13 20:54:26.719 D: tx: Morselink sent to Mo Phone
+09-13 20:54:26.721 D: tx: batch of 1 finished
+09-13 20:54:26.735 D: rx: receiver loop started
+09-13 20:54:41.521 D: rx: control channel closed
+09-13 20:54:41.523 D: rx: receiver loop ended
+09-13 20:56:06.447 D: sender: advertising 192.168.25.136:54321, waiting for a receiver
+09-13 20:56:06.451 D: transport: listening on 54321
+09-13 20:56:10.198 D: transport: inbound connection accepted
+09-13 20:56:10.213 D: sender: receiver connected from Mo Phone
+09-13 20:56:10.216 D: tx: queueing 1 file(s) for Mo Phone
+09-13 20:56:10.222 D: tx: VID-20260913-WA0005.mp4 size=1751655 from /storage/emulated/0/WhatsApp/Media/WhatsApp Video/VID-20260913-WA0005.mp4
+09-13 20:56:10.225 D: tx: VID-20260913-WA0005.mp4 metadata sent, waiting for resume
+09-13 20:56:10.274 D: tx: VID-20260913-WA0005.mp4 resume=0 (reply=resume)
+09-13 20:56:10.282 D: tx: data socket open, streaming VID-20260913-WA0005.mp4
+09-13 20:56:10.577 D: tx: VID-20260913-WA0005.mp4 sent to Mo Phone
+09-13 20:56:10.579 D: tx: batch of 1 finished
+09-13 20:56:10.605 D: rx: receiver loop started
+09-13 20:56:37.678 D: rx: Screenshot_20260911-075743.png metadata ok (123223 B), resuming at 0
+09-13 20:56:37.679 D: rx: Screenshot_20260911-075743.png resume sent
+09-13 20:56:45.863 D: tx: queueing 1 file(s) for Mo Phone
+09-13 20:56:45.865 D: tx: IMG-20260911-WA0056.jpg size=592144 from /storage/emulated/0/WhatsApp/Media/WhatsApp Images/IMG-20260911-WA0056.jpg
+09-13 20:56:45.868 D: tx: IMG-20260911-WA0056.jpg FAILED BindException: bind failed: EADDRINUSE (Address already in use)
+09-13 20:56:45.873 D: tx: batch of 1 finished
+09-13 20:56:45.896 D: rx: receiver loop started
+09-13 20:56:45.897 D: rx: control channel closed
+09-13 20:56:45.898 D: rx: receiver loop ended
+09-13 20:57:07.682 W: rx: Screenshot_20260911-075743.png failed: SocketTimeoutException: null
+09-13 20:57:07.695 D: rx: receiver loop ended
+09-13 20:57:34.471 D: tx: queueing 1 file(s) for Mo Phone
+09-13 20:57:34.473 D: tx: Screenshot_2026-09-11-23-13-45.png size=83579 from /storage/emulated/0/Pictures/Screenshots/Screenshot_2026-09-11-23-13-45.png
+09-13 20:57:34.474 D: tx: Screenshot_2026-09-11-23-13-45.png FAILED IOException: The connection to Mo Phone was closed
+09-13 20:57:34.479 D: tx: batch of 1 finished
+09-13 20:57:34.503 W: rx: cannot start receiving - The connection to Mo Phone was closed
+
+----- logcat -----
+09-13 20:58:30.191 W/Morselink(25665): rx: receive loop ended: StandaloneCoroutine was cancelled
+09-13 20:58:30.191 D/Morselink(25665): rx: receive loop finished
