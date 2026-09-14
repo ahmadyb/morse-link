@@ -67,7 +67,7 @@ class ModernHotspotController(
                     ?: com.morselink.core.network.NetworkUtils.DEFAULT_GATEWAY
                 onResult(
                     HotspotResult.Ready(
-                        ssid = config?.SSID ?: "Morselink hotspot",
+                        ssid = config?.SSID ?: "Morse Code hotspot",
                         password = config?.preSharedKey,
                         gatewayIp = gateway,
                     )

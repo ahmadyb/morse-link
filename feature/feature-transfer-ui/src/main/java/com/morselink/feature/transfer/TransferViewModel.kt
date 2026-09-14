@@ -284,8 +284,8 @@ class TransferViewModel @Inject constructor(
         pushStatus()
         advertiseJob = viewModelScope.launch {
             val name = runCatching { settings.current().deviceName }
-                .getOrDefault("Morselink")
-                .ifBlank { "Morselink" }
+                .getOrDefault("Morse Code")
+                .ifBlank { "Morse Code" }
 
             val rawAddress = withContext(Dispatchers.IO) {
                 runCatching { network.localIpAddress() }.getOrNull()

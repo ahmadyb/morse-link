@@ -29,7 +29,7 @@ data class PairingPayload(
             val address = json.optString("ip")
             if (address.isBlank()) return@runCatching null
             PairingPayload(
-                name = json.optString("name").ifBlank { "Morselink" },
+                name = json.optString("name").ifBlank { "Morse Code" },
                 address = address,
                 port = json.optInt("port", DEFAULT_PORT),
                 transport = json.optString("transport").ifBlank { "LEGACY_WIFI_DIRECT" },

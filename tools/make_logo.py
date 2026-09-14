@@ -106,7 +106,7 @@ def banner():
 
     bold = font(78, bold=True)
     regular = font(28)
-    draw.text((360, 150), "Morselink", font=bold, fill=(255, 255, 255, 255))
+    draw.text((360, 150), "Morse Code", font=bold, fill=(255, 255, 255, 255))
     draw.text((364, 246), "Fast, offline file sharing", font=regular, fill=(31, 163, 107, 255))
     draw.text((364, 292), "Photos · Videos · Music · Apps · Files", font=font(20),
               fill=(160, 160, 160, 255))

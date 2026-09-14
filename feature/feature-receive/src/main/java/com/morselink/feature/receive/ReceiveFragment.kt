@@ -96,7 +96,7 @@ class ReceiveFragment : Fragment(R.layout.fragment_receive) {
             Dialogs.permissionRationale(
                 requireContext(),
                 getString(R.string.receive_camera_needed),
-                "Morselink only uses the camera to read a pairing QR code. Nothing is stored or uploaded.",
+                "Morse Code only uses the camera to read a pairing QR code. Nothing is stored or uploaded.",
             )
         }
     }

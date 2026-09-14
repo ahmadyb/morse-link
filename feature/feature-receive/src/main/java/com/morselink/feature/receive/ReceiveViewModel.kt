@@ -45,7 +45,7 @@ class ReceiveViewModel @Inject constructor(
     fun onQrScanned(payload: String) {
         val parsed = PairingPayload.parse(payload)
         if (parsed == null) {
-            _status.value = "That code is not a Morselink pairing code"
+            _status.value = "That code is not a Morse Code pairing code"
             return
         }
         connectManually(parsed.address, parsed.port)
@@ -59,8 +59,8 @@ class ReceiveViewModel @Inject constructor(
         _status.value = "Connecting to $ip…"
         connectJob = viewModelScope.launch {
             val name = runCatching { settings.current().deviceName }
-                .getOrDefault("Morselink")
-                .ifBlank { "Morselink" }
+                .getOrDefault("Morse Code")
+                .ifBlank { "Morse Code" }
             Log.d("Morselink", "receiver: joining $ip:$port as $name")
             val session = selector.joinDirect(ip, port, name)
             if (session == null) {

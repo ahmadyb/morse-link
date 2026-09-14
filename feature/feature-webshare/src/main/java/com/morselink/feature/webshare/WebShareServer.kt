@@ -62,7 +62,7 @@ class WebShareServer @Inject constructor(
 
     fun index(): String = runCatching {
         context.resources.openRawResource(R.raw.webshare).bufferedReader().use { it.readText() }
-    }.getOrDefault("<html><body><h1>Morselink</h1><p>Interface failed to load.</p></body></html>")
+    }.getOrDefault("<html><body><h1>Morse Code</h1><p>Interface failed to load.</p></body></html>")
 
     override fun serve(session: IHTTPSession): Response {
         val uri = session.uri.trimEnd('/').ifEmpty { "/" }

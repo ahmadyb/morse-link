@@ -220,7 +220,7 @@ class FileManagerFragment : Fragment(R.layout.fragment_file_manager) {
         Dialogs.permissionRationale(
             requireContext(),
             getString(R.string.files_storage_needed),
-            "Morselink reads files locally to send or manage them. Nothing is uploaded, and file access never leaves this device.",
+            "Morse Code reads files locally to send or manage them. Nothing is uploaded, and file access never leaves this device.",
         )
         if (android.os.Build.VERSION.SDK_INT >= 30 && !permissions.hasAllFilesAccess()) {
             permissions.requestAllFilesAccess(requireActivity())

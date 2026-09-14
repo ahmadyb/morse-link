@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Morselink</string>
+    <string name="app_name">Morse Code</string>
 
     <string name="tab_connect">Connect</string>
     <string name="tab_files">Files</string>

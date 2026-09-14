@@ -33,5 +33,5 @@
     <string name="history_received">Received</string>
     <string name="history_sent">Sent</string>
     <string name="history_privacy_title">Privacy</string>
-    <string name="history_privacy_body">Morselink works entirely offline. Files only ever travel to a device you explicitly pair with, and no analytics, telemetry or file metadata leaves your phone.</string>
+    <string name="history_privacy_body">Morse Code works entirely offline. Files only ever travel to a device you explicitly pair with, and no analytics, telemetry or file metadata leaves your phone.</string>
 </resources>

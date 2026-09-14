@@ -14,6 +14,6 @@ data class UserSettings(
     val maxReconnectAttempts: Int = 3,
 ) {
     companion object {
-        const val DEFAULT_DEVICE_NAME = "Morselink Phone"
+        const val DEFAULT_DEVICE_NAME = "Morse Code Phone"
     }
 }

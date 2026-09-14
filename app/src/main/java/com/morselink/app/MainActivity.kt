@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity() {
                 permissions.explain(
                     this,
                     "Permissions needed",
-                    "Morselink needs these to find nearby devices and read the files you pick. " +
+                    "Morse Code needs these to find nearby devices and read the files you pick. " +
                         "Local discovery never tracks your location.",
                 )
             }
@@ -111,7 +111,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         MaterialAlertDialogBuilder(this)
-            .setTitle("Morselink crashed")
+            .setTitle("Morse Code crashed")
             .setMessage(
                 "The crash below was recorded on the last run. Screenshot it or " +
                     "tap Copy, then send it over so it can be fixed."
@@ -187,7 +187,7 @@ class MainActivity : AppCompatActivity() {
 
     fun withPermissions(
         wanted: List<String>,
-        rationale: String = "Morselink needs these permissions to continue.",
+        rationale: String = "Morse Code needs these permissions to continue.",
         onResult: (Boolean) -> Unit,
     ) {
         val missing = permissions.missing(wanted)
