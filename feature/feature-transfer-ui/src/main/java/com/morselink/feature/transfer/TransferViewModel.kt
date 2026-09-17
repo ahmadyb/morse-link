@@ -272,6 +272,11 @@ class TransferViewModel @Inject constructor(
     }
 
     private fun startSenderPairing() {
+        // Already advertising on this screen. The arrival path and an explicit
+        // "opened to send" both reach here, and running it twice restarted the
+        // service and orphaned the first advertise job, leaving two waiters on
+        // the same port.
+        if (advertiseJob?.isActive == true) return
         isSender = true
         holder.isSender = true
         // A new send is a new session. Without this the screen opened on the
