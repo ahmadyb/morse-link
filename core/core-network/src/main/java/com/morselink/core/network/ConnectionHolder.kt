@@ -65,6 +65,23 @@ class ConnectionHolder @Inject constructor() {
         _alive.value = true
     }
 
+    /**
+     * Lets go of a session that has gone of its own accord.
+     *
+     * [close] only runs when this app ends the session. When the link drops it,
+     * or the other phone simply walks away, nothing ever cleared these fields:
+     * [session] stayed set and [alive] stayed true, so the app went on claiming
+     * to be connected with no connection behind it. Send then refused to show
+     * its pairing QR because it believed it was already connected, and the next
+     * send went into a socket that had been dead for minutes.
+     */
+    fun detach() {
+        session = null
+        peer = null
+        isSender = false
+        _alive.value = false
+    }
+
     suspend fun close() {
         runCatching { session?.close() }
         session = null

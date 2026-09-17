@@ -70,6 +70,7 @@ private data class ControlLine(val text: String, val isClosedMarker: Boolean)
 class LegacyWifiDirectTransport @Inject constructor(
     @ApplicationContext private val context: Context,
     private val engine: TransferEngine,
+    private val holder: ConnectionHolder,
 ) : TransportProvider {
 
     override val id: TransportType = TransportType.LEGACY_WIFI_DIRECT
@@ -661,6 +662,11 @@ class LegacyWifiDirectTransport @Inject constructor(
                 openControlSocket()
             } catch (error: Exception) {
                 MorselinkLog.w("rx: cannot start receiving - ${error.message ?: error.javaClass.simpleName}")
+                // There is no session to receive on, and nothing else clears it:
+                // the app would go on advertising a connection that had already
+                // gone, and Send would refuse to show its QR because it thought
+                // it was still connected.
+                holder.detach()
                 return@withContext
             }
             val controlOut = DataOutputStream(control.getOutputStream())
@@ -733,13 +739,31 @@ class LegacyWifiDirectTransport @Inject constructor(
                 MorselinkLog.w("rx: receive loop stopped: ${error.javaClass.simpleName}: ${error.message}")
             } finally {
                 MorselinkLog.d("rx: receiver loop ended")
-                // Two ways to leave that are not a finish: cancelled to hand
-                // the channel over, and leaving because a send already took
-                // it. Both must leave the session standing - closing the
-                // sockets here destroyed it a millisecond before the send
-                // started, which is every turnaround failure in the log.
-                if (claimedBySend) handedOver = true
-                if (!handedOver) closeSockets()
+                // Leaving is only a finish if the channel went away by itself.
+                // Two other ways out have to leave the session standing: a
+                // cancellation because a send is taking the channel over, and
+                // the loop noticing a send had already taken it.
+                //
+                // Any cancellation counts, rather than only the
+                // CancellationException caught above. The loop has an isActive
+                // check of its own that breaks without setting a flag, and an
+                // exception raised anywhere but the read is not a
+                // CancellationException either, so leaving through either of
+                // those closed the sockets a millisecond before the send that
+                // needed them. Cancellation is permanent, so asking the context
+                // here catches every one of those ways out.
+                if (claimedBySend || !kotlinx.coroutines.currentCoroutineContext().isActive) {
+                    handedOver = true
+                }
+                if (!handedOver) {
+                    closeSockets()
+                    // The channel went away on its own, so the session has too.
+                    // [handedOver] is the whole distinction: leaving through it
+                    // means a send is taking the channel over and the session
+                    // must survive, and clearing it there would kill the
+                    // session in the instant the send started using it.
+                    holder.detach()
+                }
             }
         }
 
