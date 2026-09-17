@@ -186,11 +186,11 @@ appeared.
 **Empty uploads reported success.** The response now carries the real byte count
 and the saved path.
 
-### 2.3 The turnaround — five attempts, and what each one actually fixed
+### 2.3 The turnaround — eight attempts, and what each one actually fixed
 
 This is the single hardest defect in the project and it deserves its own
-section, because four of the five attempts fixed something real and the symptom
-did not go away.
+section, because almost every attempt fixed something real and the symptom did
+not go away.
 
 **Attempt 1 — idleness.** The loop treated a thirty-second socket timeout as the
 peer hanging up and closed the session. Real fault, fixed. Still failed.
@@ -277,9 +277,51 @@ receive owned it. The send now lets a receive finish first, closing its data
 socket so a receiver parked in a read unwinds immediately instead of blocking for
 its full thirty-second timeout.
 
-**Status: shipped, unconfirmed.** Attempt 6 is the first fix that came from a log
-line naming the exact instant the session died, rather than from reasoning about
-what might be wrong.
+**Attempt 7 — sessions that died while nothing was happening.** Reading the two
+logs end to end turned up a failure mode none of the six attempts addressed:
+sessions ending on their own, with no transfer in flight.
+
+```
+20:54:26.737  rx: Morselink done
+20:54:41.258  rx: control channel closed (SocketException)   ← 14.5 s later
+```
+```
+19:03:47.515  rx: done
+19:05:21.969  rx: control channel closed (SocketException)   ← 94.5 s later
+```
+
+Between transfers the control channel carries **nothing at all**, and the link
+drops it — after fifteen seconds in one case, ninety-five in another. After that
+every send fails with *"The connection to <peer> was closed"* no matter how
+carefully the hand-over is done. That is very likely the "transfer failed again"
+report, and it is invisible to any fix that only looks at the moment of the
+hand-over.
+
+The receive loop now writes a keepalive whenever the channel has been silent for
+**five seconds** — well under the shortest idle death observed. Two things make it
+safe: senders step over keepalives when reading a resume (otherwise a heartbeat
+arriving mid-handshake would read as "no resume", start the file from zero, and
+leave the real reply in the buffer to be picked up as the answer to the *next*
+file's handshake), and receivers ignore them rather than logging them as junk
+every five seconds. A peer on an older build simply sees a line it does not
+recognise and skips it, so old and new builds interoperate.
+
+**Attempt 8 — the session that outlived its connection.** This one turned out to
+be the cause of the missing QR code as well, and it is in §2.4. Its effect on the
+turnaround is direct: with a dead session still recorded, every later send was
+aimed at a socket that had been gone for minutes.
+
+**A third exit that lied about itself.** Attempts 2, 4 and 6 each closed one way
+out of the receive loop that pretended to be a finish. There was one more: the
+loop's own `isActive` check, which breaks without setting any flag. A cancel
+observed there left `handedOver` false, so the loop closed the sockets exactly as
+if the peer had hung up. Counting on `CancellationException` alone was never
+enough, because the loop can also simply *notice* it has been cancelled. The
+`finally` block now asks the coroutine context directly, and any cancellation —
+however it was observed — counts as a hand-over. Cancellation is permanent, so
+one question covers every path.
+
+**Status: shipped, unconfirmed.**
 
 ### 2.4 UI — Send, Files, transfer screen
 
@@ -358,6 +400,37 @@ made Send connect-only):
   own destination in the nav graph carrying `asSender = true` as a fixed default,
   which needs no parsing: which URI opened the screen decides what it is for.
   `morselink://transfer` is unchanged.
+
+- **Why it *still* did not appear — a session that never died.** Neither of those
+  was the whole story. `ConnectionHolder.session` was only ever cleared by
+  `close()`, and `close()` only runs when *this app* ends the session. When the
+  link dropped it, or the other phone simply walked away, nothing cleared those
+  fields: `session` stayed set and `alive` stayed **true**, so the app went on
+  claiming to be connected with no connection behind it.
+
+  That alone explains the report "*even if i select files the qr code is not
+  showing*", because there are two independent refusals:
+
+  - `openAsSender()` returns early while `hasSession()` is true — it assumes the
+    connected card is more useful than a code nobody needs to scan.
+  - The arrival path only falls back to pairing when `session == null`. With a
+    stale session it took the "already connected" branch instead and pushed the
+    selection straight into a dead socket.
+
+  So once a session had existed **even once**, no QR could ever appear again, and
+  every later send was aimed at a socket that had been gone for minutes. The
+  first attempts looked like navigation problems because that is what they
+  presented as.
+
+  The receive loop now releases the session when the channel has genuinely gone.
+  It is the only place that can tell, because it is the only place that knows
+  *why it stopped*: leaving through a hand-over — cancelled for a send, or
+  because a send already took the channel — must leave the session standing.
+  `ConnectionHolder.detach()` drops the session, the peer and the role, and
+  publishes `alive = false`, so the UI stops offering to send into it.
+
+  That the two symptoms shared one cause is worth stating plainly: this was
+  reported as a QR bug, and it was a session bookkeeping bug.
 
 **The transfer screen footer could settle part-way down the screen**, with the
 Sending and Receiving lists hidden underneath it — on one handset only, and
@@ -529,11 +602,22 @@ area of the app that is closed out.
 
 ## 4. Open issues
 
-### 4.1 The turnaround — five attempts, still unconfirmed
+### 4.1 The turnaround — eight attempts, still unconfirmed
 
-Send → receive → send back. Every change made so far is described in §2.3. The
-current fix gives the control channel a single owner. **Not yet confirmed by
-you**, and you have reported failure four times.
+Send → receive → send back. Every change made so far is described in §2.3. **Not
+yet confirmed by you**, and you have reported failure six times.
+
+Two distinct causes are now known, which is why fixes to one kept appearing to do
+nothing:
+
+1. **The hand-over** (attempts 1–6, 8) — the receive loop destroying the session
+   in the instant before the send that needed it.
+2. **Idle sessions dying on their own** (attempt 7) — after 15 s to 95 s of
+   silence the link drops the connection, and the next send fails with
+   *"The connection to <peer> was closed"* regardless of the hand-over.
+
+The second was invisible to every earlier attempt, all of which examined the
+moment of the hand-over only.
 
 ### 4.2 The transfer screen layout on one handset — addressed, unconfirmed
 
@@ -628,7 +712,9 @@ onto the tip so the working tree is untouched, re-apply the change, drop
 | WebShare folder grouping by real path | **Shipped, unconfirmed** |
 | WebShare address bar on empty folders | **Shipped, unconfirmed** |
 | Send tab as connect-only | **Shipped, unconfirmed** |
-| QR code on Send | **Shipped, unconfirmed** (two attempts: query parameter failed, dedicated destination shipped) |
+| QR code on Send | **Shipped, unconfirmed** (three attempts: query parameter failed; dedicated destination shipped; the real cause, a session never released, now fixed) |
 | Gallery grid gutters and selection | **Shipped, unconfirmed** |
 | Transfer screen footer position | **Shipped, unconfirmed** |
-| **Bidirectional turnaround** | **Shipped, six attempts, unconfirmed** |
+| Session released when the link drops | **Shipped, unconfirmed** |
+| Control-channel keepalive | **Shipped, unconfirmed** |
+| **Bidirectional turnaround** | **Shipped, eight attempts, unconfirmed** |
