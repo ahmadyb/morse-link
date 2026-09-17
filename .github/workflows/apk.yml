@@ -30,6 +30,11 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
+        # The hosted runners already carry an Android SDK at
+        # /usr/local/lib/android/sdk, so when this action fails on its own the
+        # build can still go ahead with that one. Left non-fatal rather than
+        # pinned, so a working action is still used whenever it behaves.
+        continue-on-error: true
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
