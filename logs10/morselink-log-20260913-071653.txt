@@ -1,0 +1,37 @@
+----- in-app log -----
+09-13 07:08:30.624 D: transport: connected to 192.168.43.1:54321
+09-13 07:08:30.638 D: transport: sender identified itself as Alien Phone
+09-13 07:08:30.843 D: rx: receiver loop started
+09-13 07:08:30.851 D: rx: Screenshot_2026-09-11-23-13-45.png metadata ok (83579 B), resuming at 0
+09-13 07:08:30.853 D: rx: Screenshot_2026-09-11-23-13-45.png resume sent
+09-13 07:08:30.861 D: rx: Screenshot_2026-09-11-23-13-45.png data socket open, reading chunks
+09-13 07:08:31.371 D: rx: Screenshot_2026-09-11-23-13-45.png done (83579/83579 B)
+09-13 07:09:11.356 D: tx: queueing 1 file(s) for Alien Phone
+09-13 07:09:11.360 D: tx: Screenshot_20260911-174112.png size=96863 from /storage/emulated/0/Pictures/Screenshots/Screenshot_20260911-174112.png
+09-13 07:09:11.362 D: tx: Screenshot_20260911-174112.png metadata sent, waiting for resume
+09-13 07:09:41.397 D: rx: receiver loop ended
+09-13 07:09:41.399 D: tx: Screenshot_20260911-174112.png FAILED SocketException: Socket closed
+09-13 07:09:41.405 D: tx: batch of 1 finished
+09-13 07:09:41.440 W: rx: cannot start receiving - The connection to Alien Phone was closed
+09-13 07:15:01.798 D: sender: advertising 192.168.43.173:54321, waiting for a receiver
+09-13 07:15:01.802 D: transport: listening on 54321
+09-13 07:15:13.607 D: transport: inbound connection accepted
+09-13 07:15:13.701 D: sender: receiver connected from Alien Phone
+09-13 07:15:13.706 D: tx: queueing 2 file(s) for Alien Phone
+09-13 07:15:13.711 D: tx: Screenshot_2026-09-11-23-13-45 (2).png size=83579 from /storage/emulated/0/Download/Morselink/Screenshot_2026-09-11-23-13-45 (2).png
+09-13 07:15:13.714 D: tx: Screenshot_2026-09-11-23-13-45 (2).png metadata sent, waiting for resume
+09-13 07:15:14.164 D: tx: Screenshot_2026-09-11-23-13-45 (2).png resume=0 (reply=resume)
+09-13 07:15:14.173 D: tx: data socket open, streaming Screenshot_2026-09-11-23-13-45 (2).png
+09-13 07:15:14.191 D: tx: Screenshot_2026-09-11-23-13-45 (2).png sent to Alien Phone
+09-13 07:15:14.194 D: tx: Screenshot_2026-09-11-08-10-24 (1).png size=74571 from /storage/emulated/0/Download/Morselink/Screenshot_2026-09-11-08-10-24 (1).png
+09-13 07:15:14.196 D: tx: Screenshot_2026-09-11-08-10-24 (1).png metadata sent, waiting for resume
+09-13 07:15:15.135 D: tx: Screenshot_2026-09-11-08-10-24 (1).png resume=0 (reply=resume)
+09-13 07:15:15.140 D: tx: data socket open, streaming Screenshot_2026-09-11-08-10-24 (1).png
+09-13 07:15:15.157 D: tx: Screenshot_2026-09-11-08-10-24 (1).png sent to Alien Phone
+09-13 07:15:15.159 D: tx: batch of 2 finished
+09-13 07:15:15.204 D: rx: receiver loop started
+09-13 07:15:40.250 D: rx: control channel closed
+09-13 07:15:40.251 D: rx: receiver loop ended
+
+----- logcat -----
+(empty)

@@ -1,0 +1,34 @@
+----- in-app log -----
+09-10 08:43:45.640 D: transport: listening on 54321
+09-10 08:43:46.917 D: transport: inbound connection accepted
+09-10 08:43:46.927 D: tx: IMG-20260910-WA0001.jpg size=122604 from /storage/emulated/0/WhatsApp/Media/WhatsApp Images/IMG-20260910-WA0001.jpg
+09-10 08:43:46.928 D: tx: IMG-20260910-WA0001.jpg metadata sent, waiting for resume
+09-10 08:43:46.994 D: tx: IMG-20260910-WA0001.jpg resume=0 (reply=resume)
+09-10 08:43:47.005 D: tx: data socket open, streaming IMG-20260910-WA0001.jpg
+09-10 08:43:47.014 D: tx: IMG-20260910-WA0001.jpg sent to Mo Phone
+09-10 09:04:12.988 D: webshare: server started on port 33455
+09-10 09:05:57.828 D: webshare: GET /
+09-10 09:06:01.307 D: webshare: GET /api/info
+09-10 09:06:01.323 D: webshare: GET /favicon.ico
+09-10 09:06:04.032 D: webshare: GET /api/theme
+09-10 09:06:04.164 D: webshare: GET /api/info
+09-10 09:06:04.574 D: webshare: GET /api/theme
+09-10 09:07:25.122 D: webshare: POST /upload
+09-10 09:07:25.139 D: webshare: receiving upload Quantum.Leap.S01E04.(NKIRI.COM).mkv
+09-10 09:07:44.021 D: webshare: saved Quantum.Leap.S01E04.(NKIRI.COM).mkv (109995335 bytes)
+09-10 09:07:50.285 D: webshare: GET /
+09-10 09:07:51.211 D: webshare: GET /api/info
+09-10 09:07:52.282 D: webshare: GET /api/theme
+09-10 09:07:52.416 D: webshare: GET /api/info
+09-10 09:07:54.053 D: webshare: GET /api/theme
+09-10 09:07:55.285 D: webshare: server stopped
+09-10 09:07:57.587 D: webshare: server stopped
+
+----- logcat -----
+09-10 09:07:51.211 D/Morselink(30153): webshare: GET /api/info
+09-10 09:07:52.282 D/Morselink(30153): webshare: GET /api/theme
+09-10 09:07:52.416 D/Morselink(30153): webshare: GET /api/info
+--------- beginning of system
+09-10 09:07:54.053 D/Morselink(30153): webshare: GET /api/theme
+09-10 09:07:55.284 D/Morselink(30153): webshare: server stopped
+09-10 09:07:57.587 D/Morselink(30153): webshare: server stopped

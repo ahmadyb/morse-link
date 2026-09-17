@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dashboard_searching">Searching for nearby devices</string>
+    <plurals name="dashboard_peers_found">
+        <item quantity="one">%1$d device nearby</item>
+        <item quantity="other">%1$d devices nearby</item>
+    </plurals>
+</resources>

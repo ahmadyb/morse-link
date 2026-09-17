@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/nav_connect">
+
+    <fragment
+        android:id="@+id/nav_connect"
+        android:name="com.morselink.feature.dashboard.DashboardFragment"
+        android:label="@string/tab_connect"
+        tools:layout="@layout/fragment_dashboard"
+        xmlns:tools="http://schemas.android.com/tools">
+        <action
+            android:id="@+id/action_dashboard_to_send"
+            app:destination="@id/nav_send" />
+        <action
+            android:id="@+id/action_dashboard_to_receive"
+            app:destination="@id/nav_receive" />
+        <action
+            android:id="@+id/action_dashboard_to_webshare"
+            app:destination="@id/nav_webshare" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_send"
+        android:name="com.morselink.feature.send.SendFragment"
+        android:label="Send"
+        tools:layout="@layout/fragment_send"
+        xmlns:tools="http://schemas.android.com/tools">
+        <action
+            android:id="@+id/action_send_to_transfer"
+            app:destination="@id/nav_transfer" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_receive"
+        android:name="com.morselink.feature.receive.ReceiveFragment"
+        android:label="Receive"
+        tools:layout="@layout/fragment_receive"
+        xmlns:tools="http://schemas.android.com/tools">
+        <deepLink app:uri="morselink://receive" />
+        <action
+            android:id="@+id/action_receive_to_transfer"
+            app:destination="@id/nav_transfer" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_transfer"
+        android:name="com.morselink.feature.transfer.TransferFragment"
+        android:label="Transfer"
+        tools:layout="@layout/fragment_transfer"
+        xmlns:tools="http://schemas.android.com/tools">
+        <!-- Whether this screen was opened in order to send. Send arrives
+             before anything has been picked, and without it the screen had no
+             way to tell "I am here to pair" from "I am here to receive" - so
+             it fell into the receiver branch and showed no QR code at all. -->
+        <argument
+            android:name="asSender"
+            app:argType="boolean"
+            android:defaultValue="false" />
+        <deepLink app:uri="morselink://transfer" />
+    </fragment>
+
+    <!--
+      The same screen, reached from Send.
+
+      A query parameter (morselink://send?asSender=true) was the first attempt
+      and it does not survive deep-link matching reliably, so the screen never
+      learned it was here to send and showed no QR. Two destinations carrying
+      fixed defaults need no parsing at all: which URI opened the screen decides
+      what it is for.
+    -->
+    <fragment
+        android:id="@+id/nav_transfer_send"
+        android:name="com.morselink.feature.transfer.TransferFragment"
+        android:label="Send"
+        tools:layout="@layout/fragment_transfer"
+        xmlns:tools="http://schemas.android.com/tools">
+        <argument
+            android:name="asSender"
+            app:argType="boolean"
+            android:defaultValue="true" />
+        <deepLink app:uri="morselink://send" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_files"
+        android:name="com.morselink.feature.filemanager.FileManagerFragment"
+        android:label="@string/tab_files"
+        tools:layout="@layout/fragment_file_manager"
+        xmlns:tools="http://schemas.android.com/tools">
+        <deepLink app:uri="morselink://files" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_history"
+        android:name="com.morselink.feature.settings.HistoryFragment"
+        android:label="@string/tab_history"
+        tools:layout="@layout/fragment_history"
+        xmlns:tools="http://schemas.android.com/tools" />
+
+    <fragment
+        android:id="@+id/nav_settings"
+        android:name="com.morselink.feature.settings.SettingsFragment"
+        android:label="@string/tab_settings"
+        tools:layout="@layout/fragment_settings"
+        xmlns:tools="http://schemas.android.com/tools">
+        <action
+            android:id="@+id/action_settings_to_webshare"
+            app:destination="@id/nav_webshare" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_webshare"
+        android:name="com.morselink.feature.webshare.WebShareFragment"
+        android:label="WebShare"
+        tools:layout="@layout/fragment_webshare"
+        xmlns:tools="http://schemas.android.com/tools">
+        <deepLink app:uri="morselink://webshare" />
+    </fragment>
+</navigation>

@@ -1,0 +1,88 @@
+----- in-app log -----
+09-10 08:43:45.640 D: transport: listening on 54321
+09-10 08:43:46.917 D: transport: inbound connection accepted
+09-10 08:43:46.927 D: tx: IMG-20260910-WA0001.jpg size=122604 from /storage/emulated/0/WhatsApp/Media/WhatsApp Images/IMG-20260910-WA0001.jpg
+09-10 08:43:46.928 D: tx: IMG-20260910-WA0001.jpg metadata sent, waiting for resume
+09-10 08:43:46.994 D: tx: IMG-20260910-WA0001.jpg resume=0 (reply=resume)
+09-10 08:43:47.005 D: tx: data socket open, streaming IMG-20260910-WA0001.jpg
+09-10 08:43:47.014 D: tx: IMG-20260910-WA0001.jpg sent to Mo Phone
+09-10 09:04:12.988 D: webshare: server started on port 33455
+09-10 09:05:57.828 D: webshare: GET /
+09-10 09:06:01.307 D: webshare: GET /api/info
+09-10 09:06:01.323 D: webshare: GET /favicon.ico
+09-10 09:06:04.032 D: webshare: GET /api/theme
+09-10 09:06:04.164 D: webshare: GET /api/info
+09-10 09:06:04.574 D: webshare: GET /api/theme
+09-10 09:07:25.122 D: webshare: POST /upload
+09-10 09:07:25.139 D: webshare: receiving upload Quantum.Leap.S01E04.(NKIRI.COM).mkv
+09-10 09:07:44.021 D: webshare: saved Quantum.Leap.S01E04.(NKIRI.COM).mkv (109995335 bytes)
+09-10 09:07:50.285 D: webshare: GET /
+09-10 09:07:51.211 D: webshare: GET /api/info
+09-10 09:07:52.282 D: webshare: GET /api/theme
+09-10 09:07:52.416 D: webshare: GET /api/info
+09-10 09:07:54.053 D: webshare: GET /api/theme
+09-10 09:07:55.285 D: webshare: server stopped
+09-10 09:07:57.587 D: webshare: server stopped
+09-10 09:08:55.966 D: webshare: server started on port 33455
+09-10 09:09:04.511 D: webshare: GET /
+09-10 09:09:04.763 D: webshare: GET /api/info
+09-10 09:09:06.162 D: webshare: GET /api/theme
+09-10 09:09:06.255 D: webshare: GET /api/info
+09-10 09:09:06.728 D: webshare: GET /api/theme
+09-10 09:09:14.961 D: webshare: POST /upload
+09-10 09:09:14.965 D: webshare: receiving upload Rich Dad s Guide to ... by Robert T. Kiyosaki  ... (z-lib.or.pdf
+09-10 09:09:15.806 D: webshare: saved Rich Dad s Guide to ... by Robert T. Kiyosaki  ... (z-lib.or.pdf (5084539 bytes)
+09-10 09:09:53.330 D: webshare: POST /upload
+09-10 09:09:53.331 D: webshare: POST /upload
+09-10 09:09:53.336 D: webshare: POST /upload
+09-10 09:09:53.345 D: webshare: POST /upload
+09-10 09:09:54.139 D: webshare: receiving upload A Thousand Splendid by Khaled Hosseini (z-lib.org).pdf
+09-10 09:09:54.139 D: webshare: receiving upload Alhaji Abdurrazaq Yahya Bello.pdf
+09-10 09:09:54.140 D: webshare: receiving upload Alhaji Abdurrazaq Yahya Bello (1) (1).pdf
+09-10 09:09:54.141 D: webshare: receiving upload Alhaji Abdurrazaq Yahya Bello (1).pdf
+09-10 09:09:54.831 D: webshare: saved A Thousand Splendid by Khaled Hosseini (z-lib.org).pdf (1460480 bytes)
+09-10 09:10:01.803 D: webshare: POST /upload
+09-10 09:10:01.977 D: webshare: receiving upload 1.png
+09-10 09:10:05.539 D: webshare: saved 1.png (294239 bytes)
+09-10 09:11:05.116 W: webshare: upload failed - SocketTimeoutException
+09-10 09:11:05.116 W: webshare: upload failed - SocketTimeoutException
+09-10 09:11:05.117 W: webshare: upload failed - SocketTimeoutException
+09-10 09:11:05.116 W: webshare: upload failed - SocketTimeoutException
+09-10 09:11:05.117 W: webshare: upload failed - SocketTimeoutException
+09-10 09:11:05.117 W: webshare: upload failed - SocketTimeoutException
+09-10 09:11:05.289 D: webshare: POST /upload
+09-10 09:11:05.326 D: webshare: receiving upload Jawabin_Akan_Alqur'aani_Maigirma_27_12_1444_15_07_2023_A_Ummul_Quraa.mp3
+09-10 09:11:05.402 D: webshare: GET /api/info
+09-10 09:11:05.578 D: webshare: GET /api/info
+09-10 09:11:05.578 D: webshare: GET /api/info
+09-10 09:11:05.579 D: webshare: GET /api/info
+09-10 09:11:05.579 D: webshare: GET /api/info
+09-10 09:11:05.867 D: webshare: saved Jawabin_Akan_Alqur'aani_Maigirma_27_12_1444_15_07_2023_A_Ummul_Quraa.mp3 (2563139 bytes)
+09-10 09:11:09.759 D: webshare: GET /api/info
+09-10 09:11:09.843 D: webshare: GET /api/theme
+09-10 09:11:09.903 D: webshare: GET /api/theme
+09-10 09:11:09.981 D: webshare: GET /api/theme
+09-10 09:11:10.010 D: webshare: GET /api/theme
+09-10 09:11:10.010 D: webshare: GET /api/theme
+09-10 09:11:10.229 D: webshare: GET /api/theme
+09-10 09:12:00.017 D: webshare: POST /upload
+09-10 09:12:00.026 D: webshare: receiving upload AUD-20230725-WA0002 (1).mp3
+09-10 09:12:02.464 D: webshare: saved AUD-20230725-WA0002 (1).mp3 (15267695 bytes)
+09-10 09:12:20.006 W: webshare: upload failed - SocketTimeoutException
+09-10 09:12:20.293 D: webshare: GET /api/info
+09-10 09:12:21.321 D: webshare: GET /api/theme
+09-10 09:12:22.466 W: webshare: upload failed - SocketTimeoutException
+09-10 09:12:22.771 D: webshare: GET /api/info
+09-10 09:12:23.263 D: webshare: GET /api/theme
+09-10 09:12:28.496 D: webshare: server stopped
+09-10 09:12:31.044 D: webshare: server stopped
+
+----- logcat -----
+09-10 09:12:20.006 W/Morselink(30153): webshare: upload failed - SocketTimeoutException
+09-10 09:12:20.293 D/Morselink(30153): webshare: GET /api/info
+09-10 09:12:21.321 D/Morselink(30153): webshare: GET /api/theme
+09-10 09:12:22.465 W/Morselink(30153): webshare: upload failed - SocketTimeoutException
+09-10 09:12:22.770 D/Morselink(30153): webshare: GET /api/info
+09-10 09:12:23.263 D/Morselink(30153): webshare: GET /api/theme
+09-10 09:12:28.496 D/Morselink(30153): webshare: server stopped
+09-10 09:12:31.044 D/Morselink(30153): webshare: server stopped

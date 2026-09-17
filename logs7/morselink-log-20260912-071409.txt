@@ -1,0 +1,537 @@
+----- in-app log -----
+09-12 06:40:37.935 D: webshare: server started on port 33455
+09-12 06:40:49.857 D: webshare: GET /
+09-12 06:40:49.988 D: webshare: GET /api/info
+09-12 06:40:54.220 D: webshare: GET /api/theme
+09-12 06:40:54.299 D: webshare: GET /api/info
+09-12 06:40:57.292 D: webshare: GET /api/files
+09-12 06:40:57.495 D: webshare: GET /api/thumb
+09-12 06:40:57.606 D: webshare: GET /api/thumb
+09-12 06:40:57.617 D: webshare: GET /api/thumb
+09-12 06:40:57.622 D: webshare: GET /api/thumb
+09-12 06:40:57.625 D: webshare: GET /api/thumb
+09-12 06:40:57.629 D: webshare: GET /api/thumb
+09-12 06:40:57.786 D: webshare: GET /api/thumb
+09-12 06:40:57.809 D: webshare: GET /api/thumb
+09-12 06:40:57.810 D: webshare: GET /api/thumb
+09-12 06:40:57.872 D: webshare: GET /api/thumb
+09-12 06:40:57.891 D: webshare: GET /api/thumb
+09-12 06:40:57.893 D: webshare: GET /api/thumb
+09-12 06:40:57.947 D: webshare: GET /api/thumb
+09-12 06:40:57.954 D: webshare: GET /api/thumb
+09-12 06:40:58.178 D: webshare: GET /api/thumb
+09-12 06:40:58.488 D: webshare: GET /api/thumb
+09-12 06:40:58.524 D: webshare: GET /api/thumb
+09-12 06:40:58.635 D: webshare: GET /api/thumb
+09-12 06:40:58.806 D: webshare: GET /api/thumb
+09-12 06:40:58.875 D: webshare: GET /api/thumb
+09-12 06:40:58.879 D: webshare: GET /api/thumb
+09-12 06:40:59.006 D: webshare: GET /api/thumb
+09-12 06:40:59.063 D: webshare: GET /api/thumb
+09-12 06:40:59.117 D: webshare: GET /api/thumb
+09-12 06:40:59.150 D: webshare: GET /api/thumb
+09-12 06:40:59.169 D: webshare: GET /api/thumb
+09-12 06:40:59.193 D: webshare: GET /api/thumb
+09-12 06:40:59.206 D: webshare: GET /api/thumb
+09-12 06:40:59.228 D: webshare: GET /api/theme
+09-12 06:40:59.230 D: webshare: GET /api/thumb
+09-12 06:40:59.302 D: webshare: GET /api/thumb
+09-12 06:40:59.364 D: webshare: GET /api/thumb
+09-12 06:40:59.390 D: webshare: GET /api/thumb
+09-12 06:40:59.463 D: webshare: GET /api/thumb
+09-12 06:40:59.523 D: webshare: GET /api/thumb
+09-12 06:40:59.582 D: webshare: GET /api/thumb
+09-12 06:40:59.646 D: webshare: GET /api/thumb
+09-12 06:40:59.707 D: webshare: GET /api/thumb
+09-12 06:40:59.829 D: webshare: GET /api/thumb
+09-12 06:40:59.834 D: webshare: GET /api/thumb
+09-12 06:40:59.835 D: webshare: GET /api/thumb
+09-12 06:40:59.841 D: webshare: GET /api/thumb
+09-12 06:40:59.896 D: webshare: GET /api/thumb
+09-12 06:40:59.908 D: webshare: GET /api/thumb
+09-12 06:40:59.925 D: webshare: GET /api/thumb
+09-12 06:40:59.925 D: webshare: GET /api/thumb
+09-12 06:40:59.927 D: webshare: GET /api/thumb
+09-12 06:40:59.941 D: webshare: GET /api/thumb
+09-12 06:40:59.960 D: webshare: GET /api/thumb
+09-12 06:40:59.989 D: webshare: GET /api/thumb
+09-12 06:40:59.989 D: webshare: GET /api/thumb
+09-12 06:40:59.989 D: webshare: GET /api/thumb
+09-12 06:40:59.990 D: webshare: GET /api/thumb
+09-12 06:41:00.004 D: webshare: GET /api/thumb
+09-12 06:41:00.019 D: webshare: GET /api/thumb
+09-12 06:41:00.053 D: webshare: GET /api/thumb
+09-12 06:41:00.055 D: webshare: GET /api/thumb
+09-12 06:41:00.220 D: webshare: GET /api/thumb
+09-12 06:41:00.223 D: webshare: GET /api/thumb
+09-12 06:41:00.223 D: webshare: GET /api/thumb
+09-12 06:41:00.248 D: webshare: GET /api/thumb
+09-12 06:41:00.297 D: webshare: GET /api/thumb
+09-12 06:41:00.465 D: webshare: GET /api/thumb
+09-12 06:41:00.466 D: webshare: GET /api/thumb
+09-12 06:41:00.475 D: webshare: GET /api/thumb
+09-12 06:41:00.477 D: webshare: GET /api/thumb
+09-12 06:41:00.483 D: webshare: GET /api/thumb
+09-12 06:41:00.550 D: webshare: GET /api/thumb
+09-12 06:41:00.568 D: webshare: GET /api/thumb
+09-12 06:41:00.635 D: webshare: GET /api/thumb
+09-12 06:41:00.676 D: webshare: GET /api/thumb
+09-12 06:41:00.679 D: webshare: GET /api/thumb
+09-12 06:41:00.681 D: webshare: GET /api/thumb
+09-12 06:41:00.682 D: webshare: GET /api/thumb
+09-12 06:41:00.686 D: webshare: GET /api/thumb
+09-12 06:41:00.755 D: webshare: GET /api/thumb
+09-12 06:41:00.808 D: webshare: GET /api/thumb
+09-12 06:41:00.814 D: webshare: GET /api/thumb
+09-12 06:41:01.274 D: webshare: GET /api/files
+09-12 06:41:01.734 D: webshare: GET /api/thumb
+09-12 06:41:01.735 D: webshare: GET /api/thumb
+09-12 06:41:01.738 D: webshare: GET /api/thumb
+09-12 06:41:01.738 D: webshare: GET /api/thumb
+09-12 06:41:01.739 D: webshare: GET /api/thumb
+09-12 06:41:01.738 D: webshare: GET /api/thumb
+09-12 06:41:01.799 D: webshare: GET /api/thumb
+09-12 06:41:01.801 D: webshare: GET /api/thumb
+09-12 06:41:01.801 D: webshare: GET /api/thumb
+09-12 06:41:01.801 D: webshare: GET /api/thumb
+09-12 06:41:01.801 D: webshare: GET /api/thumb
+09-12 06:41:01.808 D: webshare: GET /api/thumb
+09-12 06:41:01.871 D: webshare: GET /api/thumb
+09-12 06:41:01.872 D: webshare: GET /api/thumb
+09-12 06:41:01.872 D: webshare: GET /api/thumb
+09-12 06:41:01.872 D: webshare: GET /api/thumb
+09-12 06:41:01.873 D: webshare: GET /api/thumb
+09-12 06:41:01.874 D: webshare: GET /api/thumb
+09-12 06:41:01.931 D: webshare: GET /api/thumb
+09-12 06:41:01.933 D: webshare: GET /api/thumb
+09-12 06:41:01.933 D: webshare: GET /api/thumb
+09-12 06:41:01.933 D: webshare: GET /api/thumb
+09-12 06:41:01.933 D: webshare: GET /api/thumb
+09-12 06:41:01.933 D: webshare: GET /api/thumb
+09-12 06:41:01.996 D: webshare: GET /api/thumb
+09-12 06:41:01.996 D: webshare: GET /api/thumb
+09-12 06:41:01.999 D: webshare: GET /api/thumb
+09-12 06:41:02.004 D: webshare: GET /api/thumb
+09-12 06:41:02.019 D: webshare: GET /api/files
+09-12 06:41:02.529 D: webshare: GET /api/thumb
+09-12 06:41:02.529 D: webshare: GET /api/thumb
+09-12 06:41:02.530 D: webshare: GET /api/thumb
+09-12 06:41:02.531 D: webshare: GET /api/thumb
+09-12 06:41:02.535 D: webshare: GET /api/thumb
+09-12 06:41:02.536 D: webshare: GET /api/thumb
+09-12 06:41:02.578 D: webshare: GET /api/thumb
+09-12 06:41:02.586 D: webshare: GET /api/thumb
+09-12 06:41:02.588 D: webshare: GET /api/thumb
+09-12 06:41:02.590 D: webshare: GET /api/thumb
+09-12 06:41:02.591 D: webshare: GET /api/thumb
+09-12 06:41:02.603 D: webshare: GET /api/thumb
+09-12 06:41:02.629 D: webshare: GET /api/thumb
+09-12 06:41:02.638 D: webshare: GET /api/thumb
+09-12 06:41:02.638 D: webshare: GET /api/thumb
+09-12 06:41:02.653 D: webshare: GET /api/thumb
+09-12 06:41:02.653 D: webshare: GET /api/thumb
+09-12 06:41:02.653 D: webshare: GET /api/thumb
+09-12 06:41:02.681 D: webshare: GET /api/thumb
+09-12 06:41:02.694 D: webshare: GET /api/thumb
+09-12 06:41:02.694 D: webshare: GET /api/thumb
+09-12 06:41:02.702 D: webshare: GET /api/thumb
+09-12 06:41:02.780 D: webshare: GET /api/thumb
+09-12 06:41:02.782 D: webshare: GET /api/thumb
+09-12 06:41:02.782 D: webshare: GET /api/thumb
+09-12 06:41:02.784 D: webshare: GET /api/thumb
+09-12 06:41:02.784 D: webshare: GET /api/thumb
+09-12 06:41:02.784 D: webshare: GET /api/thumb
+09-12 06:41:06.467 D: webshare: GET /api/thumb
+09-12 06:41:06.467 D: webshare: GET /api/thumb
+09-12 06:41:06.467 D: webshare: GET /api/thumb
+09-12 06:41:06.468 D: webshare: GET /api/thumb
+09-12 06:41:06.469 D: webshare: GET /api/thumb
+09-12 06:41:06.470 D: webshare: GET /api/thumb
+09-12 06:41:06.633 D: webshare: GET /api/thumb
+09-12 06:41:06.642 D: webshare: GET /api/thumb
+09-12 06:41:06.683 D: webshare: GET /api/thumb
+09-12 06:41:06.701 D: webshare: GET /api/thumb
+09-12 06:41:06.704 D: webshare: GET /api/thumb
+09-12 06:41:06.726 D: webshare: GET /api/thumb
+09-12 06:41:06.736 D: webshare: GET /api/thumb
+09-12 06:41:06.744 D: webshare: GET /api/thumb
+09-12 06:41:07.376 D: webshare: GET /api/thumb
+09-12 06:41:07.384 D: webshare: GET /api/thumb
+09-12 06:41:07.385 D: webshare: GET /api/thumb
+09-12 06:41:07.385 D: webshare: GET /api/thumb
+09-12 06:41:07.386 D: webshare: GET /api/thumb
+09-12 06:41:07.386 D: webshare: GET /api/thumb
+09-12 06:41:07.631 D: webshare: GET /api/thumb
+09-12 06:41:07.659 D: webshare: GET /api/thumb
+09-12 06:41:07.684 D: webshare: GET /api/thumb
+09-12 06:41:07.708 D: webshare: GET /api/thumb
+09-12 06:41:07.803 D: webshare: GET /api/thumb
+09-12 06:41:07.826 D: webshare: GET /api/thumb
+09-12 06:41:07.865 D: webshare: GET /api/thumb
+09-12 06:41:07.929 D: webshare: GET /api/thumb
+09-12 06:41:07.930 D: webshare: GET /api/thumb
+09-12 06:41:07.932 D: webshare: GET /api/thumb
+09-12 06:41:08.396 D: webshare: GET /api/thumb
+09-12 06:41:08.398 D: webshare: GET /api/thumb
+09-12 06:41:08.398 D: webshare: GET /api/thumb
+09-12 06:41:08.399 D: webshare: GET /api/thumb
+09-12 06:41:08.409 D: webshare: GET /api/thumb
+09-12 06:41:08.401 D: webshare: GET /api/thumb
+09-12 06:41:08.542 D: webshare: GET /api/thumb
+09-12 06:41:08.683 D: webshare: GET /api/thumb
+09-12 06:41:08.713 D: webshare: GET /api/thumb
+09-12 06:41:08.714 D: webshare: GET /api/thumb
+09-12 06:41:08.733 D: webshare: GET /api/thumb
+09-12 06:41:08.736 D: webshare: GET /api/thumb
+09-12 06:41:08.834 D: webshare: GET /api/thumb
+09-12 06:41:08.875 D: webshare: GET /api/thumb
+09-12 06:41:09.260 D: webshare: GET /api/thumb
+09-12 06:41:09.327 D: webshare: GET /api/thumb
+09-12 06:41:09.331 D: webshare: GET /api/thumb
+09-12 06:41:09.342 D: webshare: GET /api/thumb
+09-12 06:41:09.352 D: webshare: GET /api/thumb
+09-12 06:41:09.378 D: webshare: GET /api/thumb
+09-12 06:41:09.535 D: webshare: GET /api/thumb
+09-12 06:41:09.700 D: webshare: GET /api/thumb
+09-12 06:41:09.739 D: webshare: GET /api/thumb
+09-12 06:41:09.755 D: webshare: GET /api/thumb
+09-12 06:41:09.816 D: webshare: GET /api/thumb
+09-12 06:41:09.817 D: webshare: GET /api/thumb
+09-12 06:41:09.819 D: webshare: GET /api/thumb
+09-12 06:41:09.875 D: webshare: GET /api/thumb
+09-12 06:41:09.947 D: webshare: GET /api/thumb
+09-12 06:41:09.981 D: webshare: GET /api/thumb
+09-12 06:41:09.992 D: webshare: GET /api/thumb
+09-12 06:41:09.993 D: webshare: GET /api/thumb
+09-12 06:41:10.075 D: webshare: GET /api/thumb
+09-12 06:41:10.102 D: webshare: GET /api/thumb
+09-12 06:41:10.232 D: webshare: GET /api/thumb
+09-12 06:41:10.271 D: webshare: GET /api/thumb
+09-12 06:41:10.331 D: webshare: GET /api/thumb
+09-12 06:41:10.347 D: webshare: GET /api/thumb
+09-12 06:41:10.375 D: webshare: GET /api/thumb
+09-12 06:41:10.381 D: webshare: GET /api/thumb
+09-12 06:41:10.494 D: webshare: GET /api/thumb
+09-12 06:41:10.550 D: webshare: GET /api/thumb
+09-12 06:41:10.594 D: webshare: GET /api/thumb
+09-12 06:41:10.606 D: webshare: GET /api/thumb
+09-12 06:41:10.639 D: webshare: GET /api/thumb
+09-12 06:41:10.647 D: webshare: GET /api/thumb
+09-12 06:41:10.674 D: webshare: GET /api/thumb
+09-12 06:41:10.732 D: webshare: GET /api/thumb
+09-12 06:41:10.733 D: webshare: GET /api/thumb
+09-12 06:41:10.736 D: webshare: GET /api/thumb
+09-12 06:41:10.760 D: webshare: GET /api/thumb
+09-12 06:41:10.797 D: webshare: GET /api/thumb
+09-12 06:41:10.798 D: webshare: GET /api/thumb
+09-12 06:41:10.811 D: webshare: GET /api/thumb
+09-12 06:41:14.879 D: webshare: GET /api/files
+09-12 06:41:14.957 D: webshare: GET /api/thumb
+09-12 06:41:14.972 D: webshare: GET /api/thumb
+09-12 06:41:14.973 D: webshare: GET /api/thumb
+09-12 06:41:14.982 D: webshare: GET /api/thumb
+09-12 06:41:14.983 D: webshare: GET /api/thumb
+09-12 06:41:14.985 D: webshare: GET /api/thumb
+09-12 06:41:15.936 D: webshare: GET /api/thumb
+09-12 06:41:16.073 D: webshare: GET /api/thumb
+09-12 06:41:16.246 D: webshare: GET /api/thumb
+09-12 06:41:16.505 D: webshare: GET /api/thumb
+09-12 06:41:16.605 D: webshare: GET /api/thumb
+09-12 06:41:16.858 D: webshare: GET /api/thumb
+09-12 06:41:17.024 D: webshare: GET /api/thumb
+09-12 06:41:17.261 D: webshare: GET /api/thumb
+09-12 06:41:17.470 D: webshare: GET /api/thumb
+09-12 06:41:17.498 D: webshare: GET /api/thumb
+09-12 06:41:17.669 D: webshare: GET /api/thumb
+09-12 06:41:17.918 D: webshare: GET /api/thumb
+09-12 06:41:18.140 D: webshare: GET /api/thumb
+09-12 06:41:18.341 D: webshare: GET /api/thumb
+09-12 06:41:18.475 D: webshare: GET /api/thumb
+09-12 06:41:18.679 D: webshare: GET /api/thumb
+09-12 06:41:18.745 D: webshare: GET /api/thumb
+09-12 06:41:18.881 D: webshare: GET /api/thumb
+09-12 06:41:19.062 D: webshare: GET /api/thumb
+09-12 06:41:19.221 D: webshare: GET /api/thumb
+09-12 06:41:19.398 D: webshare: GET /api/thumb
+09-12 06:41:19.566 D: webshare: GET /api/thumb
+09-12 06:41:19.746 D: webshare: GET /api/thumb
+09-12 06:41:19.939 D: webshare: GET /api/thumb
+09-12 06:41:20.132 D: webshare: GET /api/thumb
+09-12 06:41:20.314 D: webshare: GET /api/thumb
+09-12 06:41:20.482 D: webshare: GET /api/thumb
+09-12 06:41:20.606 D: webshare: GET /api/thumb
+09-12 06:41:20.751 D: webshare: GET /api/thumb
+09-12 06:41:20.878 D: webshare: GET /api/thumb
+09-12 06:41:21.034 D: webshare: GET /api/thumb
+09-12 06:41:21.166 D: webshare: GET /api/thumb
+09-12 06:41:21.389 D: webshare: GET /api/thumb
+09-12 06:41:21.495 D: webshare: GET /api/thumb
+09-12 06:41:21.621 D: webshare: GET /api/thumb
+09-12 06:41:21.733 D: webshare: GET /api/thumb
+09-12 06:41:21.840 D: webshare: GET /api/thumb
+09-12 06:41:22.122 D: webshare: GET /api/thumb
+09-12 06:41:22.339 D: webshare: GET /api/thumb
+09-12 06:41:22.391 D: webshare: GET /api/thumb
+09-12 06:41:22.553 D: webshare: GET /api/thumb
+09-12 06:41:22.687 D: webshare: GET /api/thumb
+09-12 06:41:22.843 D: webshare: GET /api/thumb
+09-12 06:41:22.927 D: webshare: GET /api/thumb
+09-12 06:41:23.067 D: webshare: GET /api/thumb
+09-12 06:41:23.209 D: webshare: GET /api/thumb
+09-12 06:41:23.493 D: webshare: GET /api/thumb
+09-12 06:41:23.691 D: webshare: GET /api/thumb
+09-12 06:41:23.927 D: webshare: GET /api/thumb
+09-12 06:41:24.170 D: webshare: GET /api/thumb
+09-12 06:41:24.388 D: webshare: GET /api/thumb
+09-12 06:41:24.537 D: webshare: GET /api/thumb
+09-12 06:41:24.714 D: webshare: GET /api/thumb
+09-12 06:41:25.045 D: webshare: GET /api/thumb
+09-12 06:41:25.045 D: webshare: GET /api/thumb
+09-12 06:41:25.168 D: webshare: GET /api/thumb
+09-12 06:41:25.303 D: webshare: GET /api/thumb
+09-12 06:41:25.441 D: webshare: GET /api/thumb
+09-12 06:41:25.573 D: webshare: GET /api/thumb
+09-12 06:41:25.703 D: webshare: GET /api/thumb
+09-12 06:41:25.883 D: webshare: GET /api/thumb
+09-12 06:41:26.049 D: webshare: GET /api/thumb
+09-12 06:41:26.141 D: webshare: GET /api/thumb
+09-12 06:41:26.282 D: webshare: GET /api/thumb
+09-12 06:41:26.460 D: webshare: GET /api/thumb
+09-12 06:41:26.584 D: webshare: GET /api/thumb
+09-12 06:41:26.709 D: webshare: GET /api/thumb
+09-12 06:41:26.912 D: webshare: GET /api/thumb
+09-12 06:41:27.724 D: webshare: GET /api/thumb
+09-12 06:41:27.745 D: webshare: GET /api/thumb
+09-12 06:41:27.956 D: webshare: GET /api/thumb
+09-12 06:41:34.387 D: webshare: GET /api/thumb
+09-12 06:41:34.389 D: webshare: GET /api/thumb
+09-12 06:42:10.670 D: webshare: GET /api/files
+09-12 06:42:11.975 D: webshare: GET /api/files
+09-12 06:42:14.280 D: webshare: GET /api/files
+09-12 06:42:14.291 D: webshare: GET /api/thumb
+09-12 06:42:14.312 D: webshare: GET /api/thumb
+09-12 06:42:14.315 D: webshare: GET /api/thumb
+09-12 06:42:14.346 D: webshare: GET /api/thumb
+09-12 06:42:14.346 D: webshare: GET /api/thumb
+09-12 06:42:14.347 D: webshare: GET /api/thumb
+09-12 06:42:14.442 D: webshare: GET /api/thumb
+09-12 06:42:14.442 D: webshare: GET /api/thumb
+09-12 06:42:14.443 D: webshare: GET /api/thumb
+09-12 06:42:14.444 D: webshare: GET /api/thumb
+09-12 06:42:14.447 D: webshare: GET /api/thumb
+09-12 06:42:14.447 D: webshare: GET /api/thumb
+09-12 06:42:14.502 D: webshare: GET /api/thumb
+09-12 06:42:14.504 D: webshare: GET /api/thumb
+09-12 06:42:14.506 D: webshare: GET /api/thumb
+09-12 06:42:14.507 D: webshare: GET /api/thumb
+09-12 06:42:14.508 D: webshare: GET /api/thumb
+09-12 06:42:14.508 D: webshare: GET /api/thumb
+09-12 06:42:14.566 D: webshare: GET /api/thumb
+09-12 06:42:14.568 D: webshare: GET /api/thumb
+09-12 06:42:14.569 D: webshare: GET /api/thumb
+09-12 06:42:14.570 D: webshare: GET /api/thumb
+09-12 06:42:14.572 D: webshare: GET /api/thumb
+09-12 06:42:14.577 D: webshare: GET /api/thumb
+09-12 06:42:14.630 D: webshare: GET /api/thumb
+09-12 06:42:14.669 D: webshare: GET /api/thumb
+09-12 06:42:14.670 D: webshare: GET /api/thumb
+09-12 06:42:14.670 D: webshare: GET /api/thumb
+09-12 06:42:14.671 D: webshare: GET /api/thumb
+09-12 06:42:14.673 D: webshare: GET /api/thumb
+09-12 06:42:14.697 D: webshare: GET /api/thumb
+09-12 06:42:14.727 D: webshare: GET /api/thumb
+09-12 06:42:14.728 D: webshare: GET /api/thumb
+09-12 06:42:14.728 D: webshare: GET /api/thumb
+09-12 06:42:14.730 D: webshare: GET /api/thumb
+09-12 06:42:14.741 D: webshare: GET /api/thumb
+09-12 06:42:14.753 D: webshare: GET /api/thumb
+09-12 06:42:14.814 D: webshare: GET /api/thumb
+09-12 06:42:14.814 D: webshare: GET /api/thumb
+09-12 06:42:14.816 D: webshare: GET /api/thumb
+09-12 06:42:14.820 D: webshare: GET /api/thumb
+09-12 06:42:14.820 D: webshare: GET /api/thumb
+09-12 06:42:14.824 D: webshare: GET /api/thumb
+09-12 06:42:14.880 D: webshare: GET /api/thumb
+09-12 06:42:14.882 D: webshare: GET /api/thumb
+09-12 06:42:14.882 D: webshare: GET /api/thumb
+09-12 06:42:14.883 D: webshare: GET /api/thumb
+09-12 06:42:14.885 D: webshare: GET /api/thumb
+09-12 06:42:14.890 D: webshare: GET /api/thumb
+09-12 06:42:14.944 D: webshare: GET /api/thumb
+09-12 06:42:14.944 D: webshare: GET /api/thumb
+09-12 06:42:14.944 D: webshare: GET /api/thumb
+09-12 06:42:14.949 D: webshare: GET /api/thumb
+09-12 06:42:14.963 D: webshare: GET /api/thumb
+09-12 06:42:14.963 D: webshare: GET /api/thumb
+09-12 06:42:15.005 D: webshare: GET /api/thumb
+09-12 06:42:15.006 D: webshare: GET /api/thumb
+09-12 06:42:15.009 D: webshare: GET /api/thumb
+09-12 06:42:15.015 D: webshare: GET /api/thumb
+09-12 06:42:15.023 D: webshare: GET /api/thumb
+09-12 06:42:15.028 D: webshare: GET /api/thumb
+09-12 06:42:15.067 D: webshare: GET /api/thumb
+09-12 06:42:15.067 D: webshare: GET /api/thumb
+09-12 06:42:15.070 D: webshare: GET /api/thumb
+09-12 06:42:15.076 D: webshare: GET /api/thumb
+09-12 06:42:15.081 D: webshare: GET /api/thumb
+09-12 06:42:15.090 D: webshare: GET /api/thumb
+09-12 06:42:15.118 D: webshare: GET /api/thumb
+09-12 06:42:15.144 D: webshare: GET /api/thumb
+09-12 06:42:15.150 D: webshare: GET /api/thumb
+09-12 06:42:21.743 D: webshare: GET /download
+09-12 06:42:21.780 D: webshare: download requested videos:29688
+09-12 06:42:22.579 D: webshare: GET /favicon.ico
+09-12 06:43:52.576 D: webshare: GET /api/files
+09-12 06:43:54.935 D: webshare: GET /download
+09-12 06:43:54.938 D: webshare: download requested music:64668
+09-12 06:44:29.952 D: webshare: GET /download
+09-12 06:44:29.954 D: webshare: download requested music:60626
+09-12 06:48:08.610 D: webshare: GET /api/files
+09-12 06:48:08.867 D: webshare: GET /api/thumb
+09-12 06:48:08.996 D: webshare: GET /api/thumb
+09-12 06:48:09.004 D: webshare: GET /api/thumb
+09-12 06:48:09.005 D: webshare: GET /api/thumb
+09-12 06:48:09.009 D: webshare: GET /api/thumb
+09-12 06:48:09.014 D: webshare: GET /api/thumb
+09-12 06:48:09.020 D: webshare: GET /api/thumb
+09-12 06:48:09.038 D: webshare: GET /api/thumb
+09-12 06:48:09.044 D: webshare: GET /api/thumb
+09-12 06:48:09.047 D: webshare: GET /api/thumb
+09-12 06:48:09.045 D: webshare: GET /api/thumb
+09-12 06:48:09.052 D: webshare: GET /api/thumb
+09-12 06:48:09.053 D: webshare: GET /api/thumb
+09-12 06:48:09.088 D: webshare: GET /api/thumb
+09-12 06:48:09.114 D: webshare: GET /api/thumb
+09-12 06:48:09.114 D: webshare: GET /api/thumb
+09-12 06:48:09.118 D: webshare: GET /api/thumb
+09-12 06:48:09.139 D: webshare: GET /api/thumb
+09-12 06:48:09.158 D: webshare: GET /api/thumb
+09-12 06:48:09.158 D: webshare: GET /api/thumb
+09-12 06:48:09.161 D: webshare: GET /api/thumb
+09-12 06:48:09.162 D: webshare: GET /api/thumb
+09-12 06:48:09.170 D: webshare: GET /api/thumb
+09-12 06:48:09.186 D: webshare: GET /api/thumb
+09-12 06:48:09.186 D: webshare: GET /api/thumb
+09-12 06:48:09.187 D: webshare: GET /api/thumb
+09-12 06:48:09.203 D: webshare: GET /api/thumb
+09-12 06:48:09.217 D: webshare: GET /api/thumb
+09-12 06:48:09.246 D: webshare: GET /api/thumb
+09-12 06:48:09.247 D: webshare: GET /api/thumb
+09-12 06:48:09.247 D: webshare: GET /api/thumb
+09-12 06:48:09.246 D: webshare: GET /api/thumb
+09-12 06:48:09.248 D: webshare: GET /api/thumb
+09-12 06:48:09.297 D: webshare: GET /api/thumb
+09-12 06:48:09.297 D: webshare: GET /api/thumb
+09-12 06:48:09.298 D: webshare: GET /api/thumb
+09-12 06:48:09.304 D: webshare: GET /api/thumb
+09-12 06:48:09.328 D: webshare: GET /api/thumb
+09-12 06:48:09.329 D: webshare: GET /api/thumb
+09-12 06:48:09.358 D: webshare: GET /api/thumb
+09-12 06:48:09.358 D: webshare: GET /api/thumb
+09-12 06:48:09.358 D: webshare: GET /api/thumb
+09-12 06:48:09.360 D: webshare: GET /api/thumb
+09-12 06:48:09.380 D: webshare: GET /api/thumb
+09-12 06:48:09.382 D: webshare: GET /api/thumb
+09-12 06:48:09.413 D: webshare: GET /api/thumb
+09-12 06:48:09.415 D: webshare: GET /api/thumb
+09-12 06:48:09.449 D: webshare: GET /api/thumb
+09-12 06:48:09.451 D: webshare: GET /api/thumb
+09-12 06:48:09.454 D: webshare: GET /api/thumb
+09-12 06:48:09.456 D: webshare: GET /api/thumb
+09-12 06:48:09.472 D: webshare: GET /api/thumb
+09-12 06:48:09.486 D: webshare: GET /api/thumb
+09-12 06:48:09.487 D: webshare: GET /api/thumb
+09-12 06:48:09.490 D: webshare: GET /api/thumb
+09-12 06:48:09.539 D: webshare: GET /api/thumb
+09-12 06:48:09.539 D: webshare: GET /api/thumb
+09-12 06:48:09.539 D: webshare: GET /api/thumb
+09-12 06:48:09.541 D: webshare: GET /api/thumb
+09-12 06:48:09.543 D: webshare: GET /api/thumb
+09-12 06:48:09.545 D: webshare: GET /api/thumb
+09-12 06:48:09.574 D: webshare: GET /api/thumb
+09-12 06:48:09.579 D: webshare: GET /api/thumb
+09-12 06:48:09.579 D: webshare: GET /api/thumb
+09-12 06:48:09.581 D: webshare: GET /api/thumb
+09-12 06:48:09.579 D: webshare: GET /api/thumb
+09-12 06:48:09.585 D: webshare: GET /api/thumb
+09-12 06:48:09.589 D: webshare: GET /api/thumb
+09-12 06:48:09.606 D: webshare: GET /api/thumb
+09-12 06:48:09.616 D: webshare: GET /api/thumb
+09-12 06:48:09.617 D: webshare: GET /api/thumb
+09-12 06:48:09.618 D: webshare: GET /api/thumb
+09-12 06:48:09.621 D: webshare: GET /api/thumb
+09-12 06:48:09.623 D: webshare: GET /api/thumb
+09-12 06:48:09.633 D: webshare: GET /api/thumb
+09-12 06:48:09.650 D: webshare: GET /api/thumb
+09-12 06:48:09.650 D: webshare: GET /api/thumb
+09-12 06:48:09.916 D: webshare: GET /download
+09-12 06:48:09.917 D: webshare: download requested photos:64776
+09-12 06:48:18.009 D: webshare: GET /download
+09-12 06:48:18.013 D: webshare: download requested photos:64775
+09-12 06:48:19.474 D: webshare: GET /download
+09-12 06:48:19.476 D: webshare: download requested photos:64774
+09-12 06:49:48.255 D: webshare: server stopped
+09-12 06:49:49.740 D: webshare: server stopped
+09-12 07:07:01.553 D: sender: advertising 192.168.43.1:54321, waiting for a receiver
+09-12 07:07:01.557 D: transport: listening on 54321
+09-12 07:07:08.887 D: transport: inbound connection accepted
+09-12 07:07:08.890 D: sender: receiver connected from Mo Phone
+09-12 07:07:08.893 D: tx: queueing 3 file(s) for Mo Phone
+09-12 07:07:08.896 D: tx: Screenshot_2026-09-11-23-13-45.png size=83579 from /storage/emulated/0/Pictures/Screenshots/Screenshot_2026-09-11-23-13-45.png
+09-12 07:07:08.898 D: tx: Screenshot_2026-09-11-23-13-45.png metadata sent, waiting for resume
+09-12 07:07:08.968 D: tx: Screenshot_2026-09-11-23-13-45.png resume=0 (reply=resume)
+09-12 07:07:08.976 D: tx: data socket open, streaming Screenshot_2026-09-11-23-13-45.png
+09-12 07:07:09.026 D: tx: Screenshot_2026-09-11-23-13-45.png sent to Mo Phone
+09-12 07:07:09.028 D: tx: Screenshot_2026-09-11-23-13-41.png size=82794 from /storage/emulated/0/Pictures/Screenshots/Screenshot_2026-09-11-23-13-41.png
+09-12 07:07:09.030 D: tx: Screenshot_2026-09-11-23-13-41.png metadata sent, waiting for resume
+09-12 07:07:09.137 D: tx: Screenshot_2026-09-11-23-13-41.png resume=0 (reply=resume)
+09-12 07:07:09.144 D: tx: data socket open, streaming Screenshot_2026-09-11-23-13-41.png
+09-12 07:07:09.151 D: tx: Screenshot_2026-09-11-23-13-41.png sent to Mo Phone
+09-12 07:07:09.153 D: tx: Screenshot_2026-09-11-23-12-52.png size=76309 from /storage/emulated/0/Pictures/Screenshots/Screenshot_2026-09-11-23-12-52.png
+09-12 07:07:09.155 D: tx: Screenshot_2026-09-11-23-12-52.png metadata sent, waiting for resume
+09-12 07:07:09.355 D: tx: Screenshot_2026-09-11-23-12-52.png resume=0 (reply=resume)
+09-12 07:07:09.362 D: tx: data socket open, streaming Screenshot_2026-09-11-23-12-52.png
+09-12 07:07:09.376 D: tx: Screenshot_2026-09-11-23-12-52.png sent to Mo Phone
+09-12 07:07:09.383 D: tx: batch of 3 finished
+09-12 07:07:09.401 D: rx: receiver loop started
+09-12 07:07:49.015 D: rx: Screenshot_20260912-063043.png metadata ok (668183 B), resuming at 0
+09-12 07:07:49.018 D: rx: Screenshot_20260912-063043.png resume sent
+09-12 07:08:19.391 W: rx: Screenshot_20260912-063043.png failed: SocketTimeoutException: null
+09-12 07:08:19.442 D: rx: Screenshot_20260904-201322.png metadata ok (551548 B), resuming at 0
+09-12 07:08:19.443 D: rx: Screenshot_20260904-201322.png resume sent
+09-12 07:08:49.440 W: rx: Screenshot_20260904-201322.png failed: SocketTimeoutException: null
+09-12 07:08:49.522 D: rx: control channel closed
+09-12 07:08:49.523 D: rx: receiver loop ended
+09-12 07:10:41.263 D: tx: queueing 1 file(s) for Mo Phone
+09-12 07:10:41.265 D: tx: IMG-20260911-WA0055.jpg size=1222204 from /storage/emulated/0/WhatsApp/Media/WhatsApp Images/IMG-20260911-WA0055.jpg
+09-12 07:10:41.293 D: tx: IMG-20260911-WA0055.jpg FAILED IOException: The connection to Mo Phone was closed
+09-12 07:10:41.299 D: tx: batch of 1 finished
+09-12 07:10:41.301 W: rx: cannot start receiving - The connection to Mo Phone was closed
+09-12 07:11:52.570 D: sender: advertising 192.168.43.1:54321, waiting for a receiver
+09-12 07:11:52.572 D: transport: listening on 54321
+09-12 07:11:55.369 D: transport: inbound connection accepted
+09-12 07:11:55.371 D: sender: receiver connected from Mo Phone
+09-12 07:11:55.373 D: tx: queueing 1 file(s) for Mo Phone
+09-12 07:11:55.375 D: tx: 4_5843432611141131500.mp4 size=62584910 from /storage/emulated/0/Telegram/Telegram Video/4_5843432611141131500.mp4
+09-12 07:11:55.376 D: tx: 4_5843432611141131500.mp4 metadata sent, waiting for resume
+09-12 07:11:55.453 D: tx: 4_5843432611141131500.mp4 resume=0 (reply=resume)
+09-12 07:11:55.460 D: tx: data socket open, streaming 4_5843432611141131500.mp4
+09-12 07:12:07.356 D: tx: 4_5843432611141131500.mp4 sent to Mo Phone
+09-12 07:12:07.358 D: tx: batch of 1 finished
+09-12 07:12:07.370 D: rx: receiver loop started
+09-12 07:12:08.330 D: rx: control channel closed
+09-12 07:12:08.331 D: rx: receiver loop ended
+09-12 07:12:52.918 D: sender: advertising 192.168.43.1:54321, waiting for a receiver
+09-12 07:12:52.920 D: transport: listening on 54321
+09-12 07:12:55.502 D: transport: inbound connection accepted
+09-12 07:12:55.505 D: sender: receiver connected from Mo Phone
+09-12 07:12:55.507 D: tx: queueing 1 file(s) for Mo Phone
+09-12 07:12:55.510 D: tx: 4_5816753236371053975.mp4 size=312052832 from /storage/emulated/0/Telegram/Telegram Video/4_5816753236371053975.mp4
+09-12 07:12:55.512 D: tx: 4_5816753236371053975.mp4 metadata sent, waiting for resume
+09-12 07:12:55.582 D: tx: 4_5816753236371053975.mp4 resume=0 (reply=resume)
+09-12 07:12:55.588 D: tx: data socket open, streaming 4_5816753236371053975.mp4
+09-12 07:13:02.031 D: tx: 4_5816753236371053975.mp4 FAILED SocketException: sendto failed: EBADF (Bad file descriptor)
+09-12 07:13:02.048 D: tx: batch of 1 finished
+
+----- logcat -----
+(empty)

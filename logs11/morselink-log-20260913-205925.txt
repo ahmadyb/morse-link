@@ -1,0 +1,86 @@
+----- in-app log -----
+09-13 07:08:30.624 D: transport: connected to 192.168.43.1:54321
+09-13 07:08:30.638 D: transport: sender identified itself as Alien Phone
+09-13 07:08:30.843 D: rx: receiver loop started
+09-13 07:08:30.851 D: rx: Screenshot_2026-09-11-23-13-45.png metadata ok (83579 B), resuming at 0
+09-13 07:08:30.853 D: rx: Screenshot_2026-09-11-23-13-45.png resume sent
+09-13 07:08:30.861 D: rx: Screenshot_2026-09-11-23-13-45.png data socket open, reading chunks
+09-13 07:08:31.371 D: rx: Screenshot_2026-09-11-23-13-45.png done (83579/83579 B)
+09-13 07:09:11.356 D: tx: queueing 1 file(s) for Alien Phone
+09-13 07:09:11.360 D: tx: Screenshot_20260911-174112.png size=96863 from /storage/emulated/0/Pictures/Screenshots/Screenshot_20260911-174112.png
+09-13 07:09:11.362 D: tx: Screenshot_20260911-174112.png metadata sent, waiting for resume
+09-13 07:09:41.397 D: rx: receiver loop ended
+09-13 07:09:41.399 D: tx: Screenshot_20260911-174112.png FAILED SocketException: Socket closed
+09-13 07:09:41.405 D: tx: batch of 1 finished
+09-13 07:09:41.440 W: rx: cannot start receiving - The connection to Alien Phone was closed
+09-13 07:15:01.798 D: sender: advertising 192.168.43.173:54321, waiting for a receiver
+09-13 07:15:01.802 D: transport: listening on 54321
+09-13 07:15:13.607 D: transport: inbound connection accepted
+09-13 07:15:13.701 D: sender: receiver connected from Alien Phone
+09-13 07:15:13.706 D: tx: queueing 2 file(s) for Alien Phone
+09-13 07:15:13.711 D: tx: Screenshot_2026-09-11-23-13-45 (2).png size=83579 from /storage/emulated/0/Download/Morselink/Screenshot_2026-09-11-23-13-45 (2).png
+09-13 07:15:13.714 D: tx: Screenshot_2026-09-11-23-13-45 (2).png metadata sent, waiting for resume
+09-13 07:15:14.164 D: tx: Screenshot_2026-09-11-23-13-45 (2).png resume=0 (reply=resume)
+09-13 07:15:14.173 D: tx: data socket open, streaming Screenshot_2026-09-11-23-13-45 (2).png
+09-13 07:15:14.191 D: tx: Screenshot_2026-09-11-23-13-45 (2).png sent to Alien Phone
+09-13 07:15:14.194 D: tx: Screenshot_2026-09-11-08-10-24 (1).png size=74571 from /storage/emulated/0/Download/Morselink/Screenshot_2026-09-11-08-10-24 (1).png
+09-13 07:15:14.196 D: tx: Screenshot_2026-09-11-08-10-24 (1).png metadata sent, waiting for resume
+09-13 07:15:15.135 D: tx: Screenshot_2026-09-11-08-10-24 (1).png resume=0 (reply=resume)
+09-13 07:15:15.140 D: tx: data socket open, streaming Screenshot_2026-09-11-08-10-24 (1).png
+09-13 07:15:15.157 D: tx: Screenshot_2026-09-11-08-10-24 (1).png sent to Alien Phone
+09-13 07:15:15.159 D: tx: batch of 2 finished
+09-13 07:15:15.204 D: rx: receiver loop started
+09-13 07:15:40.250 D: rx: control channel closed
+09-13 07:15:40.251 D: rx: receiver loop ended
+09-13 19:03:46.528 D: transport: connected to 192.168.43.1:54321
+09-13 19:03:46.537 D: transport: sender identified itself as Alien Phone
+09-13 19:03:46.601 D: rx: receiver loop started
+09-13 19:03:46.607 D: rx: IMG-20260913-WA0008.jpg metadata ok (23468 B), resuming at 0
+09-13 19:03:46.608 D: rx: IMG-20260913-WA0008.jpg resume sent
+09-13 19:03:46.617 D: rx: IMG-20260913-WA0008.jpg data socket open, reading chunks
+09-13 19:03:46.934 D: rx: IMG-20260913-WA0008.jpg done (23468/23468 B)
+09-13 19:03:46.940 D: rx: Screenshot_2026-09-11-23-13-45.png metadata ok (83579 B), resuming at 0
+09-13 19:03:46.942 D: rx: Screenshot_2026-09-11-23-13-45.png resume sent
+09-13 19:03:46.954 D: rx: Screenshot_2026-09-11-23-13-45.png data socket open, reading chunks
+09-13 19:03:47.152 D: rx: Screenshot_2026-09-11-23-13-45.png done (83579/83579 B)
+09-13 19:03:47.158 D: rx: Screenshot_2026-09-11-20-24-13.png metadata ok (72797 B), resuming at 0
+09-13 19:03:47.160 D: rx: Screenshot_2026-09-11-20-24-13.png resume sent
+09-13 19:03:47.168 D: rx: Screenshot_2026-09-11-20-24-13.png data socket open, reading chunks
+09-13 19:03:47.319 D: rx: Screenshot_2026-09-11-20-24-13.png done (72797/72797 B)
+09-13 19:03:47.330 D: rx: Screenshot_2026-09-11-20-18-02.png metadata ok (78368 B), resuming at 0
+09-13 19:03:47.331 D: rx: Screenshot_2026-09-11-20-18-02.png resume sent
+09-13 19:03:47.341 D: rx: Screenshot_2026-09-11-20-18-02.png data socket open, reading chunks
+09-13 19:03:47.515 D: rx: Screenshot_2026-09-11-20-18-02.png done (78368/78368 B)
+09-13 19:05:21.969 D: rx: control channel closed (SocketException)
+09-13 19:05:21.972 D: rx: receiver loop ended
+09-13 20:54:24.881 D: transport: connected to 192.168.25.136:54321
+09-13 20:54:24.887 D: transport: sender identified itself as Alien Phone
+09-13 20:54:24.944 D: rx: receiver loop started
+09-13 20:54:24.950 D: rx: Morselink metadata ok (8844292 B), resuming at 0
+09-13 20:54:24.952 D: rx: Morselink resume sent
+09-13 20:54:24.960 D: rx: Morselink data socket open, reading chunks
+09-13 20:54:26.737 D: rx: Morselink done (8844292/8844292 B)
+09-13 20:54:41.258 D: rx: control channel closed (SocketException)
+09-13 20:54:41.259 D: rx: receiver loop ended
+09-13 20:56:09.596 D: transport: connected to 192.168.25.136:54321
+09-13 20:56:09.603 D: transport: sender identified itself as Alien Phone
+09-13 20:56:09.660 D: rx: receiver loop started
+09-13 20:56:09.666 D: rx: VID-20260913-WA0005.mp4 metadata ok (1751655 B), resuming at 0
+09-13 20:56:09.667 D: rx: VID-20260913-WA0005.mp4 resume sent
+09-13 20:56:09.676 D: rx: VID-20260913-WA0005.mp4 data socket open, reading chunks
+09-13 20:56:10.932 D: rx: VID-20260913-WA0005.mp4 done (1751655/1751655 B)
+09-13 20:56:36.183 D: tx: queueing 1 file(s) for Alien Phone
+09-13 20:56:36.195 D: tx: Screenshot_20260911-075743.png size=123223 from /storage/emulated/0/Pictures/Screenshots/Screenshot_20260911-075743.png
+09-13 20:56:36.976 D: rx: receiver loop ended
+09-13 20:56:36.977 D: tx: Screenshot_20260911-075743.png metadata sent, waiting for resume
+09-13 20:56:36.979 D: tx: Screenshot_20260911-075743.png FAILED SocketException: Socket closed
+09-13 20:56:37.001 D: tx: batch of 1 finished
+09-13 20:56:37.023 W: rx: cannot start receiving - The connection to Alien Phone was closed
+09-13 20:57:42.265 D: tx: queueing 1 file(s) for Alien Phone
+09-13 20:57:42.270 D: tx: 20260905_174254.aac size=285973 from /storage/emulated/0/Music/PhoneRecord/08032707138/20260905_174254.aac
+09-13 20:57:42.272 D: tx: 20260905_174254.aac FAILED IOException: The connection to Alien Phone was closed
+09-13 20:57:42.284 D: tx: batch of 1 finished
+09-13 20:57:42.322 W: rx: cannot start receiving - The connection to Alien Phone was closed
+
+----- logcat -----
+(empty)

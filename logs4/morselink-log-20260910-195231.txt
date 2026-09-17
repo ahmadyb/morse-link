@@ -1,0 +1,151 @@
+----- in-app log -----
+09-10 08:43:46.778 D: transport: connected to 192.168.43.1:54321
+09-10 08:43:46.787 D: transport: sender identified itself as Alien Phone
+09-10 08:43:46.847 D: rx: receiver loop started
+09-10 08:43:46.853 D: rx: IMG-20260910-WA0001.jpg metadata ok (122604 B), resuming at 0
+09-10 08:43:46.854 D: rx: IMG-20260910-WA0001.jpg resume sent
+09-10 08:43:46.865 D: rx: IMG-20260910-WA0001.jpg data socket open, reading chunks
+09-10 08:43:53.074 D: rx: control channel closed
+09-10 08:43:53.075 D: rx: receiver loop ended
+09-10 08:45:28.822 D: webshare: server stopped
+09-10 13:38:03.550 D: transport: listening on 54321
+09-10 13:38:10.217 D: transport: inbound connection accepted
+09-10 13:38:10.276 D: tx: IMG-20260910-WA0007.jpeg size=823371 from /storage/emulated/0/Android/media/com.whatsapp/WhatsApp/Media/WhatsApp Images/IMG-20260910-WA0007.jpeg
+09-10 13:38:10.279 D: tx: IMG-20260910-WA0007.jpeg metadata sent, waiting for resume
+09-10 13:38:11.554 D: tx: IMG-20260910-WA0007.jpeg resume=0 (reply=resume)
+09-10 13:38:11.574 D: tx: data socket open, streaming IMG-20260910-WA0007.jpeg
+09-10 13:38:11.626 D: tx: IMG-20260910-WA0007.jpeg sent to Alien Phone
+09-10 13:38:43.012 D: transport: connected to 192.168.25.136:54321
+09-10 13:38:43.016 D: transport: sender identified itself as Alien Phone
+09-10 13:38:43.086 D: rx: receiver loop started
+09-10 13:38:43.092 D: rx: IMG-20260910-WA0004.jpg metadata ok (99340 B), resuming at 0
+09-10 13:38:43.094 D: rx: IMG-20260910-WA0004.jpg resume sent
+09-10 13:38:43.102 D: rx: IMG-20260910-WA0004.jpg data socket open, reading chunks
+09-10 13:38:43.303 D: rx: Screenshot_2026-09-10-09-39-14.png metadata ok (303715 B), resuming at 0
+09-10 13:38:43.304 D: rx: Screenshot_2026-09-10-09-39-14.png resume sent
+09-10 13:38:43.308 D: rx: Screenshot_2026-09-10-09-39-14.png data socket open, reading chunks
+09-10 13:39:04.018 D: rx: control channel closed
+09-10 13:39:04.020 D: rx: receiver loop ended
+09-10 13:41:41.346 D: transport: connected to 192.168.25.136:54321
+09-10 13:41:41.351 D: transport: sender identified itself as Alien Phone
+09-10 13:41:41.400 D: rx: receiver loop started
+09-10 13:41:41.405 D: rx: IMG-20260910-WA0004.jpg metadata ok (99340 B), resuming at 0
+09-10 13:41:41.406 D: rx: IMG-20260910-WA0004.jpg resume sent
+09-10 13:41:41.416 D: rx: IMG-20260910-WA0004.jpg data socket open, reading chunks
+09-10 13:41:41.591 D: rx: Screenshot_2026-09-10-09-39-14.png metadata ok (303715 B), resuming at 0
+09-10 13:41:41.592 D: rx: Screenshot_2026-09-10-09-39-14.png resume sent
+09-10 13:41:41.595 D: rx: Screenshot_2026-09-10-09-39-14.png data socket open, reading chunks
+09-10 13:41:41.781 D: rx: VID-20260818-WA0027.mp4 metadata ok (3519708 B), resuming at 0
+09-10 13:41:41.781 D: rx: VID-20260818-WA0027.mp4 resume sent
+09-10 13:41:41.784 D: rx: VID-20260818-WA0027.mp4 data socket open, reading chunks
+09-10 13:41:42.911 D: rx: ASALIN MAULIDI.mp3 metadata ok (8020639 B), resuming at 0
+09-10 13:41:42.912 D: rx: ASALIN MAULIDI.mp3 resume sent
+09-10 13:41:42.916 D: rx: ASALIN MAULIDI.mp3 data socket open, reading chunks
+09-10 13:41:49.245 D: rx: control channel closed
+09-10 13:41:49.246 D: rx: receiver loop ended
+09-10 19:27:05.863 D: transport: connected to 192.168.43.1:54321
+09-10 19:27:05.880 D: transport: sender identified itself as Alien Phone
+09-10 19:27:05.948 D: rx: receiver loop started
+09-10 19:27:05.953 D: rx: Morselink metadata ok (8785996 B), resuming at 0
+09-10 19:27:05.955 D: rx: Morselink resume sent
+09-10 19:27:05.963 D: rx: Morselink data socket open, reading chunks
+09-10 19:27:10.540 D: rx: control channel closed
+09-10 19:27:10.541 D: rx: receiver loop ended
+09-10 19:29:38.204 D: sender: advertising 192.168.43.173:54321, waiting for a receiver
+09-10 19:29:38.209 D: transport: listening on 54321
+09-10 19:29:54.106 D: transport: inbound connection accepted
+09-10 19:29:54.130 D: sender: receiver connected from Alien Phone
+09-10 19:29:54.132 D: tx: queueing 1 file(s) for Alien Phone
+09-10 19:29:54.147 D: tx: IMG_20260910_175527_744.jpg size=2890227 from /storage/emulated/0/DCIM/Camera/IMG_20260910_175527_744.jpg
+09-10 19:29:54.150 D: tx: IMG_20260910_175527_744.jpg metadata sent, waiting for resume
+09-10 19:29:54.207 D: tx: IMG_20260910_175527_744.jpg resume=0 (reply=resume)
+09-10 19:29:54.220 D: tx: data socket open, streaming IMG_20260910_175527_744.jpg
+09-10 19:29:54.692 D: tx: IMG_20260910_175527_744.jpg sent to Alien Phone
+09-10 19:30:22.014 D: rx: receiver loop started
+09-10 19:30:24.919 D: rx: control channel closed
+09-10 19:30:24.921 D: rx: receiver loop ended
+09-10 19:32:02.811 D: sender: advertising 192.168.43.173:54321, waiting for a receiver
+09-10 19:32:02.817 D: transport: listening on 54321
+09-10 19:32:32.211 D: transport: inbound connection accepted
+09-10 19:32:32.214 D: sender: receiver connected from Alien Phone
+09-10 19:32:32.216 D: tx: queueing 2 file(s) for Alien Phone
+09-10 19:32:32.220 D: tx: Screenshot_20260910-193007.png size=498307 from /storage/emulated/0/Pictures/Screenshots/Screenshot_20260910-193007.png
+09-10 19:32:32.222 D: tx: Screenshot_20260910-193007.png metadata sent, waiting for resume
+09-10 19:32:32.340 D: tx: Screenshot_20260910-193007.png resume=0 (reply=resume)
+09-10 19:32:32.351 D: tx: data socket open, streaming Screenshot_20260910-193007.png
+09-10 19:32:32.381 D: tx: Screenshot_20260910-193007.png sent to Alien Phone
+09-10 19:32:32.385 D: tx: Screenshot_20260910-193126.png size=78705 from /storage/emulated/0/Pictures/Screenshots/Screenshot_20260910-193126.png
+09-10 19:32:32.386 D: tx: Screenshot_20260910-193126.png metadata sent, waiting for resume
+09-10 19:32:32.553 D: tx: Screenshot_20260910-193126.png resume=0 (reply=resume)
+09-10 19:32:32.554 D: tx: data socket open, streaming Screenshot_20260910-193126.png
+09-10 19:32:32.578 D: tx: Screenshot_20260910-193126.png sent to Alien Phone
+09-10 19:33:55.201 D: rx: receiver loop started
+09-10 19:33:55.212 D: rx: IMG_20260908_223759_601.mp4 metadata ok (78877776 B), resuming at 0
+09-10 19:33:55.214 D: rx: IMG_20260908_223759_601.mp4 resume sent
+09-10 19:33:55.220 D: rx: IMG_20260908_223759_601.mp4 data socket open, reading chunks
+09-10 19:33:55.297 D: rx: control channel closed
+09-10 19:33:55.298 D: rx: receiver loop ended
+09-10 19:35:42.256 D: transport: connected to 192.168.43.1:54321
+09-10 19:35:42.262 D: transport: sender identified itself as Alien Phone
+09-10 19:35:42.306 D: rx: receiver loop started
+09-10 19:35:42.312 D: rx: baccd158ab6e43dea16a36a3271d19ce.mp4 metadata ok (6026078 B), resuming at 0
+09-10 19:35:42.313 D: rx: baccd158ab6e43dea16a36a3271d19ce.mp4 resume sent
+09-10 19:35:42.320 D: rx: baccd158ab6e43dea16a36a3271d19ce.mp4 data socket open, reading chunks
+09-10 19:35:54.919 D: tx: queueing 1 file(s) for Alien Phone
+09-10 19:35:54.923 D: tx: IMG_20260910_175519_868.jpg size=3004870 from /storage/emulated/0/DCIM/Camera/IMG_20260910_175519_868.jpg
+09-10 19:35:54.925 D: tx: IMG_20260910_175519_868.jpg metadata sent, waiting for resume
+09-10 19:36:13.755 D: rx: control channel closed
+09-10 19:36:13.756 D: rx: receiver loop ended
+09-10 19:36:13.758 D: tx: IMG_20260910_175519_868.jpg FAILED SocketException: Socket closed
+09-10 19:37:11.393 D: transport: connected to 192.168.43.1:54321
+09-10 19:37:11.401 D: transport: sender identified itself as Alien Phone
+09-10 19:37:11.443 D: rx: receiver loop started
+09-10 19:37:11.448 D: rx: baccd158ab6e43dea16a36a3271d19ce.mp4 metadata ok (6026078 B), resuming at 0
+09-10 19:37:11.450 D: rx: baccd158ab6e43dea16a36a3271d19ce.mp4 resume sent
+09-10 19:37:11.457 D: rx: baccd158ab6e43dea16a36a3271d19ce.mp4 data socket open, reading chunks
+09-10 19:37:12.808 D: rx: Screenshot_2026-09-10-15-41-22.png metadata ok (127216 B), resuming at 0
+09-10 19:37:12.809 D: rx: Screenshot_2026-09-10-15-41-22.png resume sent
+09-10 19:37:12.814 D: rx: Screenshot_2026-09-10-15-41-22.png data socket open, reading chunks
+09-10 19:37:21.181 D: rx: baccd158ab6e43dea16a36a3271d19ce.mp4 metadata ok (6026078 B), resuming at 0
+09-10 19:37:21.183 D: rx: baccd158ab6e43dea16a36a3271d19ce.mp4 resume sent
+09-10 19:37:21.188 D: rx: baccd158ab6e43dea16a36a3271d19ce.mp4 data socket open, reading chunks
+09-10 19:37:22.468 D: rx: Screenshot_2026-09-10-15-41-12.png metadata ok (266496 B), resuming at 0
+09-10 19:37:22.469 D: rx: Screenshot_2026-09-10-15-41-12.png resume sent
+09-10 19:37:22.472 D: rx: Screenshot_2026-09-10-15-41-12.png data socket open, reading chunks
+09-10 19:37:28.144 D: rx: baccd158ab6e43dea16a36a3271d19ce.mp4 metadata ok (6026078 B), resuming at 0
+09-10 19:37:28.146 D: rx: baccd158ab6e43dea16a36a3271d19ce.mp4 resume sent
+09-10 19:37:28.151 D: rx: baccd158ab6e43dea16a36a3271d19ce.mp4 data socket open, reading chunks
+09-10 19:37:29.453 D: rx: Screenshot_2026-09-10-13-46-58.png metadata ok (102605 B), resuming at 0
+09-10 19:37:29.453 D: rx: Screenshot_2026-09-10-13-46-58.png resume sent
+09-10 19:37:29.456 D: rx: Screenshot_2026-09-10-13-46-58.png data socket open, reading chunks
+09-10 19:37:43.356 D: rx: control channel closed
+09-10 19:37:43.358 D: rx: receiver loop ended
+09-10 19:48:50.884 D: transport: connected to 192.168.43.1:54321
+09-10 19:48:50.890 D: transport: sender identified itself as Alien Phone
+09-10 19:48:50.963 D: rx: receiver loop started
+09-10 19:49:04.313 D: rx: control channel closed
+09-10 19:49:04.314 D: rx: receiver loop ended
+09-10 19:49:44.269 D: transport: connected to 192.168.43.1:54321
+09-10 19:49:44.286 D: transport: sender identified itself as Alien Phone
+09-10 19:49:44.334 D: rx: receiver loop started
+09-10 19:49:44.404 D: rx: IMG_20260908_212927_050.mp4 metadata ok (51623106 B), resuming at 0
+09-10 19:49:44.407 D: rx: IMG_20260908_212927_050.mp4 resume sent
+09-10 19:49:44.418 D: rx: IMG_20260908_212927_050.mp4 data socket open, reading chunks
+09-10 19:49:54.309 D: rx: IMG_20260908_211124_079.mp4 metadata ok (312052832 B), resuming at 0
+09-10 19:49:54.309 D: rx: IMG_20260908_211124_079.mp4 resume sent
+09-10 19:49:54.313 D: rx: IMG_20260908_211124_079.mp4 data socket open, reading chunks
+09-10 19:50:25.528 D: rx: control channel closed
+09-10 19:50:25.530 D: rx: receiver loop ended
+09-10 19:50:52.181 D: sender: advertising 192.168.43.173:54321, waiting for a receiver
+09-10 19:50:52.186 D: transport: listening on 54321
+09-10 19:51:08.061 D: transport: inbound connection accepted
+09-10 19:51:08.066 D: sender: receiver connected from Alien Phone
+09-10 19:51:08.068 D: tx: queueing 1 file(s) for Alien Phone
+09-10 19:51:08.073 D: tx: Screenshot_2026-09-10-13-46-58 (1).png size=102605 from /storage/emulated/0/Download/Morselink/Screenshot_2026-09-10-13-46-58 (1).png
+09-10 19:51:08.076 D: tx: Screenshot_2026-09-10-13-46-58 (1).png metadata sent, waiting for resume
+09-10 19:51:08.151 D: tx: Screenshot_2026-09-10-13-46-58 (1).png resume=0 (reply=resume)
+09-10 19:51:08.164 D: tx: data socket open, streaming Screenshot_2026-09-10-13-46-58 (1).png
+09-10 19:51:08.192 D: tx: Screenshot_2026-09-10-13-46-58 (1).png sent to Alien Phone
+
+----- logcat -----
+(empty)
